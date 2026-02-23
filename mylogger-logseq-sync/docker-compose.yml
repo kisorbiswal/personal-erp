@@ -1,0 +1,21 @@
+services:
+  sync-worker:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - ${LOGSEQ_VAULT_PATH}:/vault
+    env_file:
+      - .env
+    command: ["python", "/app/src/sync_worker.py", "--once"]
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    profiles: ["search"]
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+volumes:
+  qdrant_data:

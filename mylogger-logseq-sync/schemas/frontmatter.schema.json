@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kisorbiswal.com/schemas/mylogger-logseq-frontmatter.json",
+  "title": "MyLogger Logseq Frontmatter",
+  "type": "object",
+  "required": ["mylogger_id", "mylogger_user", "source", "sync_version"],
+  "properties": {
+    "mylogger_id": { "type": ["integer", "string"] },
+    "mylogger_user": { "type": "string" },
+    "mylogger_created_at": { "type": "string", "format": "date-time" },
+    "mylogger_updated_at": { "type": "string", "format": "date-time" },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "source": { "type": "string", "enum": ["mylogger", "logseq"] },
+    "sync_version": { "type": "integer", "minimum": 1 }
+  },
+  "additionalProperties": true
+}
