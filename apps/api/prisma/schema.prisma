@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum WorkspaceRole {
+  OWNER
+  MEMBER
+}
+
+enum EventVisibility {
+  PRIVATE
+  WORKSPACE
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships WorkspaceMember[]
+  events      Event[] @relation("EventCreatedBy")
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members WorkspaceMember[]
+  tags    Tag[]
+  events  Event[]
+}
+
+model WorkspaceMember {
+  id          String        @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole @default(MEMBER)
+  createdAt   DateTime      @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+}
+
+model Tag {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  createdAt   DateTime  @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  eventTags EventTag[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId, name])
+}
+
+model Event {
+  id           String          @id @default(cuid())
+  workspaceId  String
+  createdById  String
+
+  occurredAt   DateTime
+  ingestedAt   DateTime        @default(now())
+
+  content      String
+  visibility   EventVisibility @default(PRIVATE)
+
+  source       String?         // e.g. mylogger, telegram
+  sourceRef    String?         // e.g. mylogger:info_list:123
+
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy User @relation("EventCreatedBy", fields: [createdById], references: [id])
+  tags      EventTag[]
+
+  @@index([workspaceId, occurredAt])
+  @@index([workspaceId, source, sourceRef])
+}
+
+model EventTag {
+  id      String @id @default(cuid())
+  eventId String
+  tagId   String
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, tagId])
+  @@index([tagId])
+}
