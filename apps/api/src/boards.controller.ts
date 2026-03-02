@@ -5,6 +5,9 @@ type BoardSectionQuery = {
   tagsAny?: string[];
   q?: string;
   limit?: number;
+  sort?: 'occurredAtDesc' | 'occurredAtAsc';
+  staleDays?: number; // filter items older than N days (based on occurredAt)
+  pinnedOnly?: boolean;
 };
 
 type BoardConfigV1 = {
@@ -74,6 +77,13 @@ export class BoardsController {
     const config = board.config as BoardConfigV1;
     const sections = config.sections ?? [];
 
+    // Fetch pinned events once (so sections can reuse)
+    const pins = await this.prisma.boardPin.findMany({
+      where: { boardId: board.id },
+      select: { eventId: true },
+    });
+    const pinnedEventIds = new Set(pins.map((p) => p.eventId));
+
     const results = [] as any[];
 
     for (const section of sections) {
@@ -87,6 +97,15 @@ export class BoardsController {
         where.content = { contains: section.query.q, mode: 'insensitive' };
       }
 
+      if (section.query?.staleDays && section.query.staleDays > 0) {
+        const cutoff = new Date(Date.now() - section.query.staleDays * 24 * 60 * 60 * 1000);
+        where.occurredAt = { lt: cutoff };
+      }
+
+      if (section.query?.pinnedOnly) {
+        where.id = { in: [...pinnedEventIds] };
+      }
+
       if (section.query?.tagsAny?.length) {
         where.tags = {
           some: {
@@ -98,9 +117,14 @@ export class BoardsController {
         };
       }
 
+      const orderBy: any =
+        section.query?.sort === 'occurredAtAsc'
+          ? [{ occurredAt: 'asc' }, { id: 'asc' }]
+          : [{ occurredAt: 'desc' }, { id: 'desc' }];
+
       const items = await this.prisma.event.findMany({
         where,
-        orderBy: [{ occurredAt: 'desc' }, { id: 'desc' }],
+        orderBy,
         take: limit,
         include: {
           tags: { include: { tag: true } },
@@ -116,6 +140,7 @@ export class BoardsController {
           occurredAt: e.occurredAt,
           content: e.content,
           tags: (e.tags as any[]).map((t: any) => t.tag.name),
+          pinned: pinnedEventIds.has(e.id),
         })),
       });
     }
@@ -124,5 +149,25 @@ export class BoardsController {
       board: { id: board.id, name: board.name },
       sections: results,
     };
+  }
+
+  @Post('/:id/pins')
+  async pin(@Param('id') boardId: string, @Body() body: { eventId: string }) {
+    const board = await this.prisma.board.findUnique({ where: { id: boardId } });
+    if (!board) return { error: 'not_found' };
+
+    const pin = await this.prisma.boardPin.upsert({
+      where: { boardId_eventId: { boardId, eventId: body.eventId } },
+      update: {},
+      create: { boardId, eventId: body.eventId },
+    });
+
+    return { ok: true, pin };
+  }
+
+  @Post('/:id/unpins')
+  async unpin(@Param('id') boardId: string, @Body() body: { eventId: string }) {
+    await this.prisma.boardPin.deleteMany({ where: { boardId, eventId: body.eventId } });
+    return { ok: true };
   }
 }
