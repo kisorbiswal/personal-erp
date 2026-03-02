@@ -1,7 +1,9 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { SessionAuthGuard } from './auth.guard';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 
 @Controller('/events')
+@UseGuards(SessionAuthGuard)
 export class EventsController {
   constructor(private readonly prisma: PrismaService) {}
 

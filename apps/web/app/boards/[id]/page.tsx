@@ -1,19 +1,30 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-async function runBoard(id: string) {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
-  const res = await fetch(`${base}/boards/${id}/run`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: '{}',
-    cache: 'no-store',
-  });
-  if (!res.ok) throw new Error(`Failed to run board: ${res.status}`);
-  return res.json();
-}
+export default function BoardPage({ params }: { params: { id: string } }) {
+  const [data, setData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-export default async function BoardPage({ params }: { params: { id: string } }) {
-  const data = await runBoard(params.id);
+  useEffect(() => {
+    const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+    fetch(`${base}/boards/${params.id}/run`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{}',
+      credentials: 'include',
+    })
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(setData)
+      .catch((e) => setError(String(e)));
+  }, [params.id]);
+
+  if (error) return <div>Error: {error}</div>;
+  if (!data) return <div>Loading...</div>;
 
   return (
     <div>

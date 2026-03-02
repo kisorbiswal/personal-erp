@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { SessionAuthGuard } from './auth.guard';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 
 type BoardSectionQuery = {
@@ -21,6 +22,7 @@ type BoardConfigV1 = {
 };
 
 @Controller('/boards')
+@UseGuards(SessionAuthGuard)
 export class BoardsController {
   constructor(private readonly prisma: PrismaService) {}
 
