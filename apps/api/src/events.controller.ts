@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { PrismaService } from './prisma.service.js';
+import { PrismaService } from './prisma.service';
 
 @Controller('/events')
 export class EventsController {
@@ -60,13 +60,13 @@ export class EventsController {
     const nextCursor = hasMore ? page[page.length - 1]?.id ?? null : null;
 
     return {
-      items: page.map((e) => ({
-        id: e.id,
-        occurredAt: e.occurredAt,
-        content: e.content,
-        source: e.source,
-        sourceRef: e.sourceRef,
-        tags: e.tags.map((t) => t.tag.name),
+      items: page.map((e: any) => ({
+        id: e.id as string,
+        occurredAt: e.occurredAt as Date,
+        content: e.content as string,
+        source: e.source as string | null,
+        sourceRef: e.sourceRef as string | null,
+        tags: (e.tags as any[]).map((t: any) => t.tag.name as string),
       })),
       nextCursor,
     };

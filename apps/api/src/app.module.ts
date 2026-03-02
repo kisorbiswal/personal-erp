@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { HealthController } from './health.controller.js';
-import { PrismaService } from './prisma.service.js';
-import { EventsController } from './events.controller.js';
-import { TagsController } from './tags.controller.js';
+import { HealthController } from './health.controller';
+import { PrismaService } from './prisma.service';
+import { EventsController } from './events.controller';
+import { TagsController } from './tags.controller';
 
 @Module({
   imports: [],

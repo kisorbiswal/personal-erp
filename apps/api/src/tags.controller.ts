@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { PrismaService } from './prisma.service.js';
+import { PrismaService } from './prisma.service';
 
 @Controller('/tags')
 export class TagsController {
@@ -19,7 +19,7 @@ export class TagsController {
     });
 
     return {
-      items: tags.map((t) => ({ id: t.id, name: t.name, count: t._count.eventTags })),
+      items: tags.map((t: any) => ({ id: t.id as string, name: t.name as string, count: t._count.eventTags as number })),
     };
   }
 }
