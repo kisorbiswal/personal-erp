@@ -6,6 +6,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "import:mylogger": "node ./scripts/import-mylogger-sql.mjs",
+    "seed:boards": "node ./scripts/seed-boards.mjs",
     "dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js"

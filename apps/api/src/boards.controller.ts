@@ -1,0 +1,128 @@
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { PrismaService } from './prisma.service';
+
+type BoardSectionQuery = {
+  tagsAny?: string[];
+  q?: string;
+  limit?: number;
+};
+
+type BoardConfigV1 = {
+  version: 1;
+  sections: Array<{
+    id: string;
+    title: string;
+    query: BoardSectionQuery;
+    render: { type: 'list' | 'kanban' | 'chart' };
+  }>;
+};
+
+@Controller('/boards')
+export class BoardsController {
+  constructor(private readonly prisma: PrismaService) {}
+
+  @Get()
+  async list() {
+    const wsId = (await this.prisma.workspace.findFirst({ select: { id: true } }))?.id;
+    if (!wsId) return { items: [] };
+
+    const boards = await this.prisma.board.findMany({
+      where: { workspaceId: wsId },
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true, updatedAt: true },
+    });
+
+    return { items: boards };
+  }
+
+  @Get('/:id')
+  async get(@Param('id') id: string) {
+    const board = await this.prisma.board.findUnique({ where: { id } });
+    if (!board) return { error: 'not_found' };
+    return { id: board.id, name: board.name, config: board.config, updatedAt: board.updatedAt };
+  }
+
+  @Post()
+  async create(@Body() body: { name: string; config?: BoardConfigV1 }) {
+    const wsId = (await this.prisma.workspace.findFirst({ select: { id: true } }))?.id;
+    if (!wsId) return { error: 'no_workspace' };
+
+    const config: BoardConfigV1 =
+      body.config ??
+      ({
+        version: 1,
+        sections: [],
+      } satisfies BoardConfigV1);
+
+    const created = await this.prisma.board.create({
+      data: {
+        workspaceId: wsId,
+        name: body.name,
+        config,
+      },
+      select: { id: true, name: true, config: true },
+    });
+
+    return created;
+  }
+
+  @Post('/:id/run')
+  async run(@Param('id') id: string) {
+    const board = await this.prisma.board.findUnique({ where: { id } });
+    if (!board) return { error: 'not_found' };
+
+    const config = board.config as BoardConfigV1;
+    const sections = config.sections ?? [];
+
+    const results = [] as any[];
+
+    for (const section of sections) {
+      const limit = Math.min(Math.max(section.query?.limit ?? 50, 1), 200);
+
+      const where: any = {
+        workspaceId: board.workspaceId,
+      };
+
+      if (section.query?.q) {
+        where.content = { contains: section.query.q, mode: 'insensitive' };
+      }
+
+      if (section.query?.tagsAny?.length) {
+        where.tags = {
+          some: {
+            tag: {
+              workspaceId: board.workspaceId,
+              name: { in: section.query.tagsAny },
+            },
+          },
+        };
+      }
+
+      const items = await this.prisma.event.findMany({
+        where,
+        orderBy: [{ occurredAt: 'desc' }, { id: 'desc' }],
+        take: limit,
+        include: {
+          tags: { include: { tag: true } },
+        },
+      });
+
+      results.push({
+        id: section.id,
+        title: section.title,
+        render: section.render,
+        items: items.map((e: any) => ({
+          id: e.id,
+          occurredAt: e.occurredAt,
+          content: e.content,
+          tags: (e.tags as any[]).map((t: any) => t.tag.name),
+        })),
+      });
+    }
+
+    return {
+      board: { id: board.id, name: board.name },
+      sections: results,
+    };
+  }
+}

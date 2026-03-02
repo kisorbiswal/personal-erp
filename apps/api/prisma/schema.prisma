@@ -37,6 +37,7 @@ model Workspace {
   members WorkspaceMember[]
   tags    Tag[]
   events  Event[]
+  boards Board[]
 }
 
 model WorkspaceMember {
@@ -100,4 +101,18 @@ model EventTag {
 
   @@unique([eventId, tagId])
   @@index([tagId])
+}
+
+model Board {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  config      Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@unique([workspaceId, name])
 }
