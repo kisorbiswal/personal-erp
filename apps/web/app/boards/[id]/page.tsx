@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 
 type TagItem = { id: string; name: string; count: number };
@@ -11,13 +11,19 @@ type BoardConfigV1 = {
     id: string;
     title: string;
     query: {
-      tagsAny?: string[]; // we will enforce 1 tag in UI
+      tagsAny?: string[]; // enforced 1 tag in UI
       tagsNot?: string[];
       limit?: number;
     };
     render: { type: 'list' | 'kanban' | 'chart' };
   }>;
 };
+
+type Toast = { id: string; type: 'success' | 'error' | 'info'; text: string };
+
+function uid() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 
 export default function BoardPage({ params }: { params: { id: string } }) {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
@@ -36,8 +42,24 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   // bulk selection
   const [selected, setSelected] = useState<Record<string, boolean>>({});
 
-  const tagNames = useMemo(() => new Set(tags.map((t) => t.name)), [tags]);
+  // bulk tag inputs
+  const [bulkAddTagValue, setBulkAddTagValue] = useState('');
+  const [bulkRemoveTagValue, setBulkRemoveTagValue] = useState('done');
 
+  // toasts
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const toastTimers = useRef<Record<string, any>>({});
+
+  function pushToast(type: Toast['type'], text: string) {
+    const id = uid();
+    setToasts((t) => [...t, { id, type, text }]);
+    toastTimers.current[id] = setTimeout(() => {
+      setToasts((t) => t.filter((x) => x.id !== id));
+      delete toastTimers.current[id];
+    }, 3000);
+  }
+
+  const tagNames = useMemo(() => new Set(tags.map((t) => t.name)), [tags]);
   const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
 
   async function fetchBoardAndTags() {
@@ -63,8 +85,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     if (!res.ok) throw new Error(`Run failed: HTTP ${res.status}`);
     const d = await res.json();
     setData(d);
-    // clear selection when data reloads
-    setSelected({});
+    // keep selection (don’t clear) so bulk actions don’t feel like data loss
   }
 
   useEffect(() => {
@@ -77,7 +98,12 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.id, showDone]);
+  }, [params.id]);
+
+  useEffect(() => {
+    runBoard().catch((e) => setError(String(e)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showDone]);
 
   async function saveBoardConfig(next: BoardConfigV1) {
     if (!board) return;
@@ -91,6 +117,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     const updated = await res.json();
     setBoard({ id: updated.id, name: updated.name, config: updated.config });
     await runBoard();
+    pushToast('success', 'Board updated');
   }
 
   function addColumn(tag: string) {
@@ -141,7 +168,9 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
   async function bulkAddTag(tag: string) {
     if (!selectedIds.length) return;
+    if (!tag.trim()) return;
     if (!confirm(`Add tag "${tag}" to ${selectedIds.length} items?`)) return;
+
     const res = await fetch(`${base}/events/bulk/tags/add`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -149,12 +178,15 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       body: JSON.stringify({ eventIds: selectedIds, tag }),
     });
     if (!res.ok) throw new Error(`Bulk add failed: HTTP ${res.status}`);
+    pushToast('success', `Added tag “${tag}” to ${selectedIds.length} items`);
     await runBoard();
   }
 
   async function bulkRemoveTag(tag: string) {
     if (!selectedIds.length) return;
+    if (!tag.trim()) return;
     if (!confirm(`Remove tag "${tag}" from ${selectedIds.length} items?`)) return;
+
     const res = await fetch(`${base}/events/bulk/tags/remove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -162,6 +194,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       body: JSON.stringify({ eventIds: selectedIds, tag }),
     });
     if (!res.ok) throw new Error(`Bulk remove failed: HTTP ${res.status}`);
+    pushToast('success', `Removed tag “${tag}” from ${selectedIds.length} items`);
     await runBoard();
   }
 
@@ -176,7 +209,12 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     if (!res.ok) throw new Error(`Save content failed: HTTP ${res.status}`);
     setEditingId(null);
     setEditingText('');
+    pushToast('success', 'Saved');
     await runBoard();
+  }
+
+  function clearSelection() {
+    setSelected({});
   }
 
   if (error) return <div>Error: {error}</div>;
@@ -184,15 +222,30 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
   return (
     <div>
+      {/* Toasts */}
+      <div style={{ position: 'fixed', top: 12, right: 12, display: 'flex', flexDirection: 'column', gap: 8, zIndex: 9999 }}>
+        {toasts.map((t) => (
+          <div
+            key={t.id}
+            style={{
+              padding: '10px 12px',
+              borderRadius: 10,
+              border: '1px solid #eee',
+              background: t.type === 'error' ? '#fee2e2' : t.type === 'success' ? '#dcfce7' : '#eff6ff',
+              color: '#111',
+              minWidth: 260,
+              boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
+            }}
+          >
+            {t.text}
+          </div>
+        ))}
+      </div>
+
+      {/* Header */}
       <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', gap: 12 }}>
         <Link href="/">← All boards</Link>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          {selectedIds.length ? (
-            <>
-              <button onClick={() => bulkAddTag('done')}>Mark done</button>
-              <button onClick={() => bulkRemoveTag('done')}>Mark not done</button>
-            </>
-          ) : null}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
             <input type="checkbox" checked={showDone} onChange={(e) => setShowDone(e.target.checked)} />
             Show done
@@ -200,6 +253,78 @@ export default function BoardPage({ params }: { params: { id: string } }) {
           <button onClick={() => setEdit((v) => !v)}>{edit ? 'Done editing columns' : 'Edit columns'}</button>
         </div>
       </div>
+
+      {/* Sticky bulk bar */}
+      {selectedIds.length ? (
+        <div
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 50,
+            background: 'rgba(255,255,255,0.95)',
+            border: '1px solid #eee',
+            borderRadius: 10,
+            padding: 10,
+            marginBottom: 14,
+            backdropFilter: 'blur(6px)',
+          }}
+        >
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <strong>Selected: {selectedIds.length}</strong>
+            <button onClick={() => bulkAddTag('done')}>Mark done</button>
+            <button onClick={() => bulkRemoveTag('done')}>Mark not done</button>
+
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <span style={{ fontSize: 12, color: '#444' }}>Add tag</span>
+              <input
+                list="all-tags"
+                value={bulkAddTagValue}
+                onChange={(e) => setBulkAddTagValue(e.target.value)}
+                style={{ padding: 6, minWidth: 140 }}
+                placeholder="tag"
+              />
+              <button
+                onClick={() => {
+                  const t = bulkAddTagValue.trim();
+                  if (!t) return;
+                  bulkAddTag(t).catch((e) => setError(String(e)));
+                  setBulkAddTagValue('');
+                }}
+              >
+                Apply
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <span style={{ fontSize: 12, color: '#444' }}>Remove tag</span>
+              <input
+                list="all-tags"
+                value={bulkRemoveTagValue}
+                onChange={(e) => setBulkRemoveTagValue(e.target.value)}
+                style={{ padding: 6, minWidth: 140 }}
+                placeholder="tag"
+              />
+              <button
+                onClick={() => {
+                  const t = bulkRemoveTagValue.trim();
+                  if (!t) return;
+                  bulkRemoveTag(t).catch((e) => setError(String(e)));
+                }}
+              >
+                Apply
+              </button>
+            </div>
+
+            <button onClick={clearSelection}>Clear</button>
+          </div>
+
+          <datalist id="all-tags">
+            {tags.map((t) => (
+              <option key={t.id} value={t.name} />
+            ))}
+          </datalist>
+        </div>
+      ) : null}
 
       <h1 style={{ marginTop: 0 }}>{board.name}</h1>
 
@@ -241,24 +366,20 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                     onBlur={(e) => {
                       const next = e.target.value.trim();
                       if (!next) return;
-                      if (!tagNames.has(next)) return;
+                      if (!tagNames.has(next)) {
+                        pushToast('error', `Unknown tag: ${next}`);
+                        return;
+                      }
                       setColumnTag(s.id, next);
                     }}
                   />
-                  <datalist id="all-tags">
-                    {tags.map((t) => (
-                      <option key={t.id} value={t.name} />
-                    ))}
-                  </datalist>
 
                   <div style={{ marginTop: 8 }}>
                     <button onClick={() => removeColumn(s.id)} style={{ color: 'white', background: '#b91c1c', padding: '6px 10px' }}>
                       Remove column (presentation only)
                     </button>
                   </div>
-                  <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
-                    Done items are always hidden.
-                  </div>
+                  <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>Done items are hidden by default.</div>
                 </div>
               ) : null}
 
@@ -285,7 +406,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                                 style={{ width: '100%', padding: 8 }}
                               />
                               <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-                                <button onClick={() => saveContent(it.id, editingText)}>Save</button>
+                                <button onClick={() => saveContent(it.id, editingText).catch((e) => setError(String(e)))}>Save</button>
                                 <button
                                   onClick={() => {
                                     setEditingId(null);
@@ -314,7 +435,6 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                             >
                               Edit text
                             </button>
-                            <button onClick={() => bulkAddTag('done')}>Done (bulk)</button>
                           </div>
                         </div>
                       </div>
