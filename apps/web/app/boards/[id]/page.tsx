@@ -46,6 +46,8 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   const [bulkAddTagValue, setBulkAddTagValue] = useState('');
   const [bulkRemoveTagValue, setBulkRemoveTagValue] = useState('done');
 
+  const [tagDrafts, setTagDrafts] = useState<Record<string, string>>({});
+
   // toasts
   const [toasts, setToasts] = useState<Toast[]>([]);
   const toastTimers = useRef<Record<string, any>>({});
@@ -215,6 +217,34 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
   function clearSelection() {
     setSelected({});
+  }
+
+  async function addTagToEvent(eventId: string, tag: string) {
+    const t = tag.trim();
+    if (!t) return;
+    const res = await fetch(`${base}/events/${eventId}/tags/add`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ tag: t }),
+    });
+    if (!res.ok) throw new Error(`Add tag failed: HTTP ${res.status}`);
+    pushToast('success', `Added tag “${t}”`);
+    await runBoard();
+  }
+
+  async function removeTagFromEvent(eventId: string, tag: string) {
+    const t = tag.trim();
+    if (!t) return;
+    const res = await fetch(`${base}/events/${eventId}/tags/remove`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ tag: t }),
+    });
+    if (!res.ok) throw new Error(`Remove tag failed: HTTP ${res.status}`);
+    pushToast('info', `Removed tag “${t}”`);
+    await runBoard();
   }
 
   if (error) return <div>Error: {error}</div>;
@@ -464,6 +494,50 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                           <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>
                             {new Date(it.occurredAt).toLocaleString()} • {it.tags.join(', ')}
                             {it.pinned ? ' • pinned' : ''}
+                          </div>
+
+                          {/* tag chips */}
+                          <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                            {it.tags.map((tg: string) => (
+                              <span
+                                key={tg}
+                                style={{
+                                  fontSize: 12,
+                                  border: '1px solid #e5e7eb',
+                                  background: '#f9fafb',
+                                  borderRadius: 999,
+                                  padding: '2px 8px',
+                                  cursor: 'pointer',
+                                }}
+                                title="Click to remove tag"
+                                onClick={() => removeTagFromEvent(it.id, tg).catch((e) => setError(String(e)))}
+                              >
+                                {tg} ×
+                              </span>
+                            ))}
+                          </div>
+
+                          {/* add tag */}
+                          <div style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: 12, color: '#444' }}>Add tag</span>
+                            <input
+                              list="all-tags"
+                              value={tagDrafts[it.id] || ''}
+                              onChange={(e) => setTagDrafts((m) => ({ ...m, [it.id]: e.target.value }))}
+                              style={{ padding: 6, minWidth: 160 }}
+                              placeholder="type tag"
+                            />
+                            <button
+                              onClick={() => {
+                                const val = (tagDrafts[it.id] || '').trim();
+                                if (!val) return;
+                                addTagToEvent(it.id, val)
+                                  .then(() => setTagDrafts((m) => ({ ...m, [it.id]: '' })))
+                                  .catch((e) => setError(String(e)));
+                              }}
+                            >
+                              Add
+                            </button>
                           </div>
 
                           <div style={{ marginTop: 6, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
