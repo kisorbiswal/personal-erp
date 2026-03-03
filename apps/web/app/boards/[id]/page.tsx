@@ -26,6 +26,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   const [board, setBoard] = useState<{ id: string; name: string; config: BoardConfigV1 } | null>(null);
   const [tags, setTags] = useState<TagItem[]>([]);
   const [edit, setEdit] = useState(false);
+  const [showDone, setShowDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // per-record editing
@@ -56,7 +57,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     const res = await fetch(`${base}/boards/${params.id}/run`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: '{}',
+      body: JSON.stringify({ includeDone: showDone }),
       credentials: 'include',
     });
     if (!res.ok) throw new Error(`Run failed: HTTP ${res.status}`);
@@ -76,7 +77,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.id]);
+  }, [params.id, showDone]);
 
   async function saveBoardConfig(next: BoardConfigV1) {
     if (!board) return;
@@ -192,6 +193,10 @@ export default function BoardPage({ params }: { params: { id: string } }) {
               <button onClick={() => bulkRemoveTag('done')}>Mark not done</button>
             </>
           ) : null}
+          <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
+            <input type="checkbox" checked={showDone} onChange={(e) => setShowDone(e.target.checked)} />
+            Show done
+          </label>
           <button onClick={() => setEdit((v) => !v)}>{edit ? 'Done editing columns' : 'Edit columns'}</button>
         </div>
       </div>

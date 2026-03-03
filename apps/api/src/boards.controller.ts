@@ -95,7 +95,7 @@ export class BoardsController {
   }
 
   @Post('/:id/run')
-  async run(@Param('id') id: string) {
+  async run(@Param('id') id: string, @Body() body: { includeDone?: boolean } = {}) {
     const board = await this.prisma.board.findUnique({ where: { id } });
     if (!board) return { error: 'not_found' };
 
@@ -119,7 +119,8 @@ export class BoardsController {
       };
 
       // Always hide done items by default unless explicitly included
-      const hideDone = section.query?.includeDone ? false : true;
+      const includeDoneOverride = body?.includeDone === true;
+      const hideDone = includeDoneOverride ? false : (section.query?.includeDone ? false : true);
 
       // Compute hidden-done count for this section (so UI can show "X hidden")
       let hiddenDoneCount = 0;
