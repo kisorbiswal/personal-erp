@@ -19,6 +19,9 @@ async function bootstrap() {
   const sessionSecret = process.env.SESSION_SECRET;
   if (!sessionSecret) throw new Error('SESSION_SECRET is required');
 
+  // Needed when running behind nginx/HTTPS termination so secure cookies work correctly
+  (app as any).set('trust proxy', 1);
+
   app.use(
     session({
       name: 'life_session',
@@ -27,7 +30,9 @@ async function bootstrap() {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        sameSite: 'lax',
+        // UI is on a different site (life.kisorbiswal.com) than API (life-api.kisorbiswal.com),
+        // so we must allow cross-site cookies.
+        sameSite: isProd ? 'none' : 'lax',
         secure: isProd,
         maxAge: 1000 * 60 * 60 * 24 * 30,
       },
