@@ -1,5 +1,5 @@
 import { SessionAuthGuard } from './auth.guard';
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Patch, UseGuards } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 
 type BoardSectionQuery = {
@@ -10,6 +10,7 @@ type BoardSectionQuery = {
   sort?: 'occurredAtDesc' | 'occurredAtAsc';
   staleDays?: number; // filter items older than N days (based on occurredAt)
   pinnedOnly?: boolean;
+  includeDone?: boolean;
 };
 
 type BoardConfigV1 = {
@@ -72,6 +73,27 @@ export class BoardsController {
     return created;
   }
 
+
+  @Patch('/:id')
+  async update(
+    @Param('id') id: string,
+    @Body() body: { name?: string; config?: BoardConfigV1 },
+  ) {
+    const board = await this.prisma.board.findUnique({ where: { id } });
+    if (!board) return { error: 'not_found' };
+
+    const updated = await this.prisma.board.update({
+      where: { id },
+      data: {
+        name: body.name ?? undefined,
+        config: body.config ?? undefined,
+      },
+      select: { id: true, name: true, config: true, updatedAt: true },
+    });
+
+    return updated;
+  }
+
   @Post('/:id/run')
   async run(@Param('id') id: string) {
     const board = await this.prisma.board.findUnique({ where: { id } });
@@ -95,6 +117,20 @@ export class BoardsController {
       const where: any = {
         workspaceId: board.workspaceId,
       };
+
+      // Always hide done items by default unless explicitly included
+      const hideDone = section.query?.includeDone ? false : true;
+      if (hideDone) {
+        where.NOT = (where.NOT ?? []).concat([
+          {
+            tags: {
+              some: {
+                tag: { workspaceId: board.workspaceId, name: 'done' },
+              },
+            },
+          },
+        ]);
+      }
 
       if (section.query?.q) {
         where.content = { contains: section.query.q, mode: 'insensitive' };
