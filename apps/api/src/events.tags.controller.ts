@@ -12,7 +12,7 @@ export class EventsTagsController {
     const ws = await this.prisma.workspace.findFirst({ select: { id: true } });
     if (!ws) return { error: 'no_workspace' };
 
-    const tagName = (body.tag || '').trim();
+    const tagName = (body.tag || '').trim().toLowerCase();
     if (!tagName) return { error: 'tag_required' };
 
     const ev = await this.prisma.event.findUnique({ where: { id }, select: { id: true, deletedAt: true } });
@@ -38,7 +38,7 @@ export class EventsTagsController {
     const ws = await this.prisma.workspace.findFirst({ select: { id: true } });
     if (!ws) return { error: 'no_workspace' };
 
-    const tagName = (body.tag || '').trim();
+    const tagName = (body.tag || '').trim().toLowerCase();
     if (!tagName) return { error: 'tag_required' };
 
     const tag = await this.prisma.tag.findUnique({

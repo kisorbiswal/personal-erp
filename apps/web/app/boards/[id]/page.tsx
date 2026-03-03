@@ -355,7 +355,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
               />
               <button
                 onClick={() => {
-                  const t = bulkAddTagValue.trim();
+                  const t = bulkAddTagValue.trim().toLowerCase();
                   if (!t) return;
                   bulkAddTag(t).catch((e) => setError(String(e)));
                   setBulkAddTagValue('');
@@ -376,7 +376,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
               />
               <button
                 onClick={() => {
-                  const t = bulkRemoveTagValue.trim();
+                  const t = bulkRemoveTagValue.trim().toLowerCase();
                   if (!t) return;
                   bulkRemoveTag(t).catch((e) => setError(String(e)));
                 }}
@@ -434,7 +434,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                     defaultValue={tag}
                     style={{ width: '100%', padding: 8 }}
                     onBlur={(e) => {
-                      const next = e.target.value.trim();
+                      const next = e.target.value.trim().toLowerCase();
                       if (!next) return;
                       if (!tagNames.has(next)) {
                         pushToast('error', `Unknown tag: ${next}`);
@@ -529,7 +529,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                             />
                             <button
                               onClick={() => {
-                                const val = (tagDrafts[it.id] || '').trim();
+                                const val = (tagDrafts[it.id] || '').trim().toLowerCase();
                                 if (!val) return;
                                 addTagToEvent(it.id, val)
                                   .then(() => setTagDrafts((m) => ({ ...m, [it.id]: '' })))
