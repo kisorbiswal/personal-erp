@@ -4,6 +4,7 @@ import { PrismaService } from './prisma.service';
 
 type BoardSectionQuery = {
   tagsAny?: string[];
+  tagsNot?: string[];
   q?: string;
   limit?: number;
   sort?: 'occurredAtDesc' | 'occurredAtAsc';
@@ -106,6 +107,21 @@ export class BoardsController {
 
       if (section.query?.pinnedOnly) {
         where.id = { in: [...pinnedEventIds] };
+      }
+
+      if (section.query?.tagsNot?.length) {
+        where.NOT = (where.NOT ?? []).concat([
+          {
+            tags: {
+              some: {
+                tag: {
+                  workspaceId: board.workspaceId,
+                  name: { in: section.query.tagsNot },
+                },
+              },
+            },
+          },
+        ]);
       }
 
       if (section.query?.tagsAny?.length) {
