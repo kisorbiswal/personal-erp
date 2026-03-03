@@ -273,6 +273,46 @@ export default function BoardPage({ params }: { params: { id: string } }) {
             <strong>Selected: {selectedIds.length}</strong>
             <button onClick={() => bulkAddTag('done')}>Mark done</button>
             <button onClick={() => bulkRemoveTag('done')}>Mark not done</button>
+            <button
+              onClick={() => {
+                if (!confirm(`Soft-delete ${selectedIds.length} items?`)) return;
+                fetch(`${base}/events/bulk/delete`, {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ eventIds: selectedIds }),
+                })
+                  .then(async (r) => {
+                    if (!r.ok) throw new Error(`Delete failed: HTTP ${r.status}`);
+                    pushToast('success', `Deleted ${selectedIds.length} items`);
+                    clearSelection();
+                    await runBoard();
+                  })
+                  .catch((e) => setError(String(e)));
+              }}
+            >
+              Delete
+            </button>
+            <button
+              onClick={() => {
+                if (!confirm(`Restore ${selectedIds.length} items?`)) return;
+                fetch(`${base}/events/bulk/restore`, {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ eventIds: selectedIds }),
+                })
+                  .then(async (r) => {
+                    if (!r.ok) throw new Error(`Restore failed: HTTP ${r.status}`);
+                    pushToast('success', `Restored ${selectedIds.length} items`);
+                    clearSelection();
+                    await runBoard();
+                  })
+                  .catch((e) => setError(String(e)));
+              }}
+            >
+              Restore
+            </button>
 
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               <span style={{ fontSize: 12, color: '#444' }}>Add tag</span>

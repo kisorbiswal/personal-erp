@@ -21,7 +21,7 @@ export class EventsController {
     const wsId = workspaceId ?? (await this.prisma.workspace.findFirst({ select: { id: true } }))?.id;
     if (!wsId) return { items: [], nextCursor: null };
 
-    const where: any = { workspaceId: wsId };
+    const where: any = { workspaceId: wsId, deletedAt: null };
 
     if (q) {
       where.content = { contains: q, mode: 'insensitive' };

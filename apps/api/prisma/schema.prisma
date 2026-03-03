@@ -80,6 +80,8 @@ model Event {
   source       String?         // e.g. mylogger, telegram
   sourceRef    String?         // e.g. mylogger:info_list:123
 
+  deletedAt    DateTime?
+
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
 
@@ -89,6 +91,7 @@ model Event {
   pinnedOn BoardPin[]
 
   @@index([workspaceId, occurredAt])
+  @@index([workspaceId, deletedAt])
   @@index([workspaceId, source, sourceRef])
 }
 

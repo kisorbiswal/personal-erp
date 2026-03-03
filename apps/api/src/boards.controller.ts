@@ -116,6 +116,7 @@ export class BoardsController {
 
       const where: any = {
         workspaceId: board.workspaceId,
+        deletedAt: null,
       };
 
       // Always hide done items by default unless explicitly included
@@ -127,6 +128,7 @@ export class BoardsController {
       if (hideDone) {
         const doneOnlyWhere: any = {
           workspaceId: board.workspaceId,
+          deletedAt: null,
           // must have done tag
           tags: {
             some: {

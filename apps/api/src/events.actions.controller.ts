@@ -17,6 +17,24 @@ export class EventsActionsController {
     return updated;
   }
 
+  @Post('/bulk/delete')
+  async bulkDelete(@Body() body: { eventIds: string[] }) {
+    const res = await this.prisma.event.updateMany({
+      where: { id: { in: body.eventIds || [] } },
+      data: { deletedAt: new Date() },
+    });
+    return { ok: true, deleted: res.count };
+  }
+
+  @Post('/bulk/restore')
+  async bulkRestore(@Body() body: { eventIds: string[] }) {
+    const res = await this.prisma.event.updateMany({
+      where: { id: { in: body.eventIds || [] } },
+      data: { deletedAt: null },
+    });
+    return { ok: true, restored: res.count };
+  }
+
   @Post('/bulk/tags/add')
   async bulkAddTag(@Body() body: { eventIds: string[]; tag: string }) {
     const ws = await this.prisma.workspace.findFirst({ select: { id: true } });
