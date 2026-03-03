@@ -3,6 +3,7 @@ import { PassportModule } from '@nestjs/passport';
 import { HealthController } from './health.controller';
 import { PrismaService } from './prisma.service';
 import { EventsController } from './events.controller';
+import { EventsActionsController } from './events.actions.controller';
 import { TagsController } from './tags.controller';
 import { BoardsController } from './boards.controller';
 import { AuthController } from './auth.controller';
@@ -10,7 +11,7 @@ import { GoogleStrategy } from './google.strategy';
 
 @Module({
   imports: [PassportModule.register({ session: false })],
-  controllers: [HealthController, AuthController, EventsController, TagsController, BoardsController],
+  controllers: [HealthController, AuthController, EventsController, EventsActionsController, TagsController, BoardsController],
   providers: [PrismaService, GoogleStrategy],
 })
 export class AppModule {}

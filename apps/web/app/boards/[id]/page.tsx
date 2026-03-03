@@ -11,10 +11,9 @@ type BoardConfigV1 = {
     id: string;
     title: string;
     query: {
-      tagsAny?: string[];
+      tagsAny?: string[]; // we will enforce 1 tag in UI
       tagsNot?: string[];
       limit?: number;
-      includeDone?: boolean;
     };
     render: { type: 'list' | 'kanban' | 'chart' };
   }>;
@@ -29,7 +28,16 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   const [edit, setEdit] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // per-record editing
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState<string>('');
+
+  // bulk selection
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
+
   const tagNames = useMemo(() => new Set(tags.map((t) => t.name)), [tags]);
+
+  const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
 
   async function fetchBoardAndTags() {
     const bRes = await fetch(`${base}/boards/${params.id}`, { credentials: 'include' });
@@ -52,7 +60,10 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       credentials: 'include',
     });
     if (!res.ok) throw new Error(`Run failed: HTTP ${res.status}`);
-    setData(await res.json());
+    const d = await res.json();
+    setData(d);
+    // clear selection when data reloads
+    setSelected({});
   }
 
   useEffect(() => {
@@ -84,8 +95,6 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   function addColumn(tag: string) {
     if (!board) return;
     if (!tagNames.has(tag)) return;
-    const existing = board.config.sections.find((s) => (s.query.tagsAny || []).includes(tag));
-    if (existing) return;
 
     const next: BoardConfigV1 = {
       ...board.config,
@@ -111,7 +120,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     saveBoardConfig(next).catch((e) => setError(String(e)));
   }
 
-  function setColumnTags(sectionId: string, tagsAny: string[]) {
+  function setColumnTag(sectionId: string, tag: string) {
     if (!board) return;
     const next: BoardConfigV1 = {
       ...board.config,
@@ -119,8 +128,9 @@ export default function BoardPage({ params }: { params: { id: string } }) {
         s.id === sectionId
           ? {
               ...s,
-              title: tagsAny.length === 1 ? tagsAny[0] : s.title,
-              query: { ...(s.query || {}), tagsAny },
+              id: `tag:${tag}`,
+              title: tag,
+              query: { ...(s.query || {}), tagsAny: [tag] },
             }
           : s,
       ),
@@ -128,21 +138,69 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     saveBoardConfig(next).catch((e) => setError(String(e)));
   }
 
+  async function bulkAddTag(tag: string) {
+    if (!selectedIds.length) return;
+    if (!confirm(`Add tag "${tag}" to ${selectedIds.length} items?`)) return;
+    const res = await fetch(`${base}/events/bulk/tags/add`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ eventIds: selectedIds, tag }),
+    });
+    if (!res.ok) throw new Error(`Bulk add failed: HTTP ${res.status}`);
+    await runBoard();
+  }
+
+  async function bulkRemoveTag(tag: string) {
+    if (!selectedIds.length) return;
+    if (!confirm(`Remove tag "${tag}" from ${selectedIds.length} items?`)) return;
+    const res = await fetch(`${base}/events/bulk/tags/remove`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ eventIds: selectedIds, tag }),
+    });
+    if (!res.ok) throw new Error(`Bulk remove failed: HTTP ${res.status}`);
+    await runBoard();
+  }
+
+  async function saveContent(eventId: string, content: string) {
+    if (!confirm('Save changes to this record content?')) return;
+    const res = await fetch(`${base}/events/${eventId}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ content }),
+    });
+    if (!res.ok) throw new Error(`Save content failed: HTTP ${res.status}`);
+    setEditingId(null);
+    setEditingText('');
+    await runBoard();
+  }
+
   if (error) return <div>Error: {error}</div>;
   if (!board || !data) return <div>Loading...</div>;
 
   return (
     <div>
-      <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
+      <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', gap: 12 }}>
         <Link href="/">← All boards</Link>
-        <button onClick={() => setEdit((v) => !v)}>{edit ? 'Done editing' : 'Edit columns'}</button>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {selectedIds.length ? (
+            <>
+              <button onClick={() => bulkAddTag('done')}>Mark done</button>
+              <button onClick={() => bulkRemoveTag('done')}>Mark not done</button>
+            </>
+          ) : null}
+          <button onClick={() => setEdit((v) => !v)}>{edit ? 'Done editing columns' : 'Edit columns'}</button>
+        </div>
       </div>
 
       <h1 style={{ marginTop: 0 }}>{board.name}</h1>
 
       {edit ? (
         <div style={{ border: '1px solid #eee', borderRadius: 8, padding: 12, marginBottom: 16 }}>
-          <div style={{ marginBottom: 8, fontWeight: 600 }}>Add a column by tag</div>
+          <div style={{ marginBottom: 8, fontWeight: 600 }}>Add a column (one tag per column)</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {tags.slice(0, 40).map((t) => (
               <button key={t.id} onClick={() => addColumn(t.name)} style={{ padding: '6px 10px' }}>
@@ -150,45 +208,47 @@ export default function BoardPage({ params }: { params: { id: string } }) {
               </button>
             ))}
           </div>
-          <div style={{ marginTop: 10, color: '#666', fontSize: 12 }}>
-            Tip: you can edit each column to include multiple tags.
-          </div>
         </div>
       ) : null}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16 }}>
         {data.sections.map((s: any) => {
           const sectionCfg = board.config.sections.find((x) => x.id === s.id);
-          const tagsAny = sectionCfg?.query?.tagsAny || [];
+          const tag = (sectionCfg?.query?.tagsAny || [])[0] || s.title;
 
           return (
             <div key={s.id} style={{ border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <h3 style={{ margin: 0 }}>{s.title}</h3>
-                <span style={{ color: '#666', fontSize: 12 }}>{s.items.length}</span>
-              </div>
-
-              <div style={{ marginTop: 6, color: '#888', fontSize: 12 }}>
-                tags: {(tagsAny.length ? tagsAny : ['(none)']).join(', ')}
+                <h3 style={{ margin: 0 }}>{tag}</h3>
+                <span style={{ color: '#666', fontSize: 12 }}>
+                  {s.items.length} shown
+                  {s.hiddenDoneCount ? ` • ${s.hiddenDoneCount} hidden(done)` : ''}
+                </span>
               </div>
 
               {edit ? (
                 <div style={{ marginTop: 10, padding: 10, background: '#fafafa', borderRadius: 8 }}>
-                  <div style={{ fontSize: 12, marginBottom: 6, color: '#444' }}>Column tags (comma separated)</div>
+                  <div style={{ fontSize: 12, marginBottom: 6, color: '#444' }}>Tag for this column</div>
                   <input
-                    defaultValue={tagsAny.join(',')}
+                    list="all-tags"
+                    defaultValue={tag}
                     style={{ width: '100%', padding: 8 }}
                     onBlur={(e) => {
-                      const nextTags = e.target.value
-                        .split(',')
-                        .map((x) => x.trim())
-                        .filter(Boolean);
-                      setColumnTags(s.id, nextTags);
+                      const next = e.target.value.trim();
+                      if (!next) return;
+                      if (!tagNames.has(next)) return;
+                      setColumnTag(s.id, next);
                     }}
                   />
+                  <datalist id="all-tags">
+                    {tags.map((t) => (
+                      <option key={t.id} value={t.name} />
+                    ))}
+                  </datalist>
+
                   <div style={{ marginTop: 8 }}>
                     <button onClick={() => removeColumn(s.id)} style={{ color: 'white', background: '#b91c1c', padding: '6px 10px' }}>
-                      Remove column
+                      Remove column (presentation only)
                     </button>
                   </div>
                   <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
@@ -198,15 +258,64 @@ export default function BoardPage({ params }: { params: { id: string } }) {
               ) : null}
 
               <ul style={{ paddingLeft: 18 }}>
-                {s.items.slice(0, 30).map((it: any) => (
-                  <li key={it.id} style={{ margin: '8px 0' }}>
-                    <div style={{ whiteSpace: 'pre-wrap' }}>{it.content}</div>
-                    <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>
-                      {new Date(it.occurredAt).toLocaleString()} • {it.tags.join(', ')}
-                      {it.pinned ? ' • pinned' : ''}
-                    </div>
-                  </li>
-                ))}
+                {s.items.slice(0, 50).map((it: any) => {
+                  const isSelected = !!selected[it.id];
+                  return (
+                    <li key={it.id} style={{ margin: '10px 0' }}>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => setSelected((prev) => ({ ...prev, [it.id]: e.target.checked }))}
+                          style={{ marginTop: 4 }}
+                        />
+
+                        <div style={{ flex: 1 }}>
+                          {editingId === it.id ? (
+                            <>
+                              <textarea
+                                value={editingText}
+                                onChange={(e) => setEditingText(e.target.value)}
+                                rows={4}
+                                style={{ width: '100%', padding: 8 }}
+                              />
+                              <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                                <button onClick={() => saveContent(it.id, editingText)}>Save</button>
+                                <button
+                                  onClick={() => {
+                                    setEditingId(null);
+                                    setEditingText('');
+                                  }}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </>
+                          ) : (
+                            <div style={{ whiteSpace: 'pre-wrap' }}>{it.content}</div>
+                          )}
+
+                          <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>
+                            {new Date(it.occurredAt).toLocaleString()} • {it.tags.join(', ')}
+                            {it.pinned ? ' • pinned' : ''}
+                          </div>
+
+                          <div style={{ marginTop: 6, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            <button
+                              onClick={() => {
+                                setEditingId(it.id);
+                                setEditingText(it.content);
+                              }}
+                            >
+                              Edit text
+                            </button>
+                            <button onClick={() => bulkAddTag('done')}>Done (bulk)</button>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           );

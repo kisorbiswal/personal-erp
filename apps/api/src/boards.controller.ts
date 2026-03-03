@@ -120,7 +120,64 @@ export class BoardsController {
 
       // Always hide done items by default unless explicitly included
       const hideDone = section.query?.includeDone ? false : true;
+
+      // Compute hidden-done count for this section (so UI can show "X hidden")
+      let hiddenDoneCount = 0;
       if (hideDone) {
+        const doneOnlyWhere: any = {
+          workspaceId: board.workspaceId,
+          // must have done tag
+          tags: {
+            some: {
+              tag: { workspaceId: board.workspaceId, name: 'done' },
+            },
+          },
+        };
+
+        // apply the same filters as this section (except for the NOT done filter)
+        if (section.query?.q) {
+          doneOnlyWhere.content = { contains: section.query.q, mode: 'insensitive' };
+        }
+        if (section.query?.staleDays && section.query.staleDays > 0) {
+          const cutoff = new Date(Date.now() - section.query.staleDays * 24 * 60 * 60 * 1000);
+          doneOnlyWhere.occurredAt = { lt: cutoff };
+        }
+        if (section.query?.pinnedOnly) {
+          doneOnlyWhere.id = { in: [...pinnedEventIds] };
+        }
+        if (section.query?.tagsNot?.length) {
+          doneOnlyWhere.NOT = (doneOnlyWhere.NOT ?? []).concat([
+            {
+              tags: {
+                some: {
+                  tag: {
+                    workspaceId: board.workspaceId,
+                    name: { in: section.query.tagsNot },
+                  },
+                },
+              },
+            },
+          ]);
+        }
+        if (section.query?.tagsAny?.length) {
+          // must match tag filter AND have done
+          doneOnlyWhere.AND = (doneOnlyWhere.AND ?? []).concat([
+            {
+              tags: {
+                some: {
+                  tag: {
+                    workspaceId: board.workspaceId,
+                    name: { in: section.query.tagsAny },
+                  },
+                },
+              },
+            },
+          ]);
+        }
+
+        hiddenDoneCount = await this.prisma.event.count({ where: doneOnlyWhere });
+
+        // hide done in actual item query
         where.NOT = (where.NOT ?? []).concat([
           {
             tags: {
@@ -189,6 +246,7 @@ export class BoardsController {
         id: section.id,
         title: section.title,
         render: section.render,
+        hiddenDoneCount,
         items: items.map((e: any) => ({
           id: e.id,
           occurredAt: e.occurredAt,
