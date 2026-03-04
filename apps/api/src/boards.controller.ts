@@ -15,6 +15,7 @@ type BoardSectionQuery = {
 
 type BoardConfigV1 = {
   version: 1;
+  scopeTagsAny?: string[];
   sections: Array<{
     id: string;
     title: string;
@@ -101,6 +102,7 @@ export class BoardsController {
 
     const config = board.config as BoardConfigV1;
     const sections = config.sections ?? [];
+    const scopeTagsAny = (config as any).scopeTagsAny as string[] | undefined;
 
     // Fetch pinned events once (so sections can reuse)
     const pins = await this.prisma.boardPin.findMany({
@@ -119,6 +121,22 @@ export class BoardsController {
         deletedAt: null,
       };
 
+      // apply board scope (if configured): event must match ANY scope tag
+      if (scopeTagsAny?.length) {
+        where.AND = (where.AND ?? []).concat([
+          {
+            tags: {
+              some: {
+                tag: {
+                  workspaceId: board.workspaceId,
+                  name: { in: scopeTagsAny },
+                },
+              },
+            },
+          },
+        ]);
+      }
+
       // Always hide done items by default unless explicitly included
       const includeDoneOverride = body?.includeDone === true;
       const hideDone = includeDoneOverride ? false : (section.query?.includeDone ? false : true);
@@ -129,6 +147,23 @@ export class BoardsController {
         const doneOnlyWhere: any = {
           workspaceId: board.workspaceId,
           deletedAt: null,
+          // board scope
+          ...(scopeTagsAny?.length
+            ? {
+                AND: [
+                  {
+                    tags: {
+                      some: {
+                        tag: {
+                          workspaceId: board.workspaceId,
+                          name: { in: scopeTagsAny },
+                        },
+                      },
+                    },
+                  },
+                ],
+              }
+            : {}),
           // must have done tag
           tags: {
             some: {

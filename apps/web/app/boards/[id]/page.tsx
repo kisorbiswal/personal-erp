@@ -7,6 +7,7 @@ type TagItem = { id: string; name: string; count: number };
 
 type BoardConfigV1 = {
   version: 1;
+  scopeTagsAny?: string[];
   sections: Array<{
     id: string;
     title: string;
@@ -46,6 +47,10 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   const [bulkAddTagValue, setBulkAddTagValue] = useState('');
   const [bulkRemoveTagValue, setBulkRemoveTagValue] = useState('done');
 
+  // board scope
+  const [scopeDraft, setScopeDraft] = useState('');
+
+  // per-record tag drafts
   const [tagDrafts, setTagDrafts] = useState<Record<string, string>>({});
 
   // toasts
@@ -120,6 +125,16 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     setBoard({ id: updated.id, name: updated.name, config: updated.config });
     await runBoard();
     pushToast('success', 'Board updated');
+  }
+
+  function setBoardScopeTags(nextTags: string[]) {
+    if (!board) return;
+    const normalized = Array.from(new Set(nextTags.map((t) => t.trim().toLowerCase()).filter(Boolean)));
+    const next: BoardConfigV1 = {
+      ...board.config,
+      scopeTagsAny: normalized,
+    };
+    saveBoardConfig(next).catch((e) => setError(String(e)));
   }
 
   function addColumn(tag: string) {
@@ -398,6 +413,55 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
       <h1 style={{ marginTop: 0 }}>{board.name}</h1>
 
+      <div style={{ marginBottom: 12, padding: 12, border: '1px solid #eee', borderRadius: 10 }}>
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>Board scope (ANY tag match)</div>
+
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {(board.config.scopeTagsAny || []).length ? (
+            (board.config.scopeTagsAny || []).map((t) => (
+              <span
+                key={t}
+                style={{
+                  fontSize: 12,
+                  border: '1px solid #e5e7eb',
+                  background: '#f9fafb',
+                  borderRadius: 999,
+                  padding: '2px 8px',
+                  cursor: 'pointer',
+                }}
+                title="Click to remove from scope"
+                onClick={() => setBoardScopeTags((board.config.scopeTagsAny || []).filter((x) => x !== t))}
+              >
+                {t} ×
+              </span>
+            ))
+          ) : (
+            <span style={{ color: '#666', fontSize: 12 }}>No scope tags (board shows everything).</span>
+          )}
+        </div>
+
+        <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, color: '#444' }}>Add scope tag</span>
+          <input
+            list="all-tags"
+            value={scopeDraft}
+            onChange={(e) => setScopeDraft(e.target.value)}
+            style={{ padding: 6, minWidth: 180 }}
+            placeholder="e.g. work"
+          />
+          <button
+            onClick={() => {
+              const val = scopeDraft.trim().toLowerCase();
+              if (!val) return;
+              setScopeDraft('');
+              setBoardScopeTags([...(board.config.scopeTagsAny || []), val]);
+            }}
+          >
+            Add
+          </button>
+        </div>
+      </div>
+
       {edit ? (
         <div style={{ border: '1px solid #eee', borderRadius: 8, padding: 12, marginBottom: 16 }}>
           <div style={{ marginBottom: 8, fontWeight: 600 }}>Add a column (one tag per column)</div>
@@ -499,7 +563,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                           )}
 
                           <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>
-                            {new Date(it.occurredAt).toLocaleString()} • {it.tags.join(', ')}
+                            {new Date(it.occurredAt).toLocaleString()} • {it.tags.join(', ')}{board.config.scopeTagsAny?.length ? (<> {' '}• scope: {(board.config.scopeTagsAny || []).filter((t) => it.tags.includes(t)).join(', ') || '—'}</>) : null}
                             {it.pinned ? ' • pinned' : ''}
                           </div>
 
