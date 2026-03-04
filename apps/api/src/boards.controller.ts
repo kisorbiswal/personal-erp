@@ -16,9 +16,17 @@ type BoardSectionQuery = {
 
 type BoardConfigV1 = {
   version: 1;
-  scopeTagsAny?: string[];
-  scopeMatch?: 'any' | 'all';
-  sections: Array<{
+
+  // Preferred naming: boards are collections of columns
+  columns?: Array<{
+    id: string;
+    title: string;
+    query: BoardSectionQuery;
+    render: { type: 'list' | 'kanban' | 'chart' };
+  }>;
+
+  // Backward compat (older configs)
+  sections?: Array<{
     id: string;
     title: string;
     query: BoardSectionQuery;
@@ -61,7 +69,7 @@ export class BoardsController {
       body.config ??
       ({
         version: 1,
-        sections: [],
+        columns: [],
       } satisfies BoardConfigV1);
 
     const created = await this.prisma.board.create({
@@ -103,7 +111,7 @@ export class BoardsController {
     if (!board) return { error: 'not_found' };
 
     const config = board.config as BoardConfigV1;
-    const sections = config.sections ?? [];
+    const columns = config.columns ?? config.sections ?? [];
 
     // Fetch pinned events once (so sections can reuse)
     const pins = await this.prisma.boardPin.findMany({
@@ -114,7 +122,7 @@ export class BoardsController {
 
     const results = [] as any[];
 
-    for (const section of sections) {
+    for (const section of columns) {
       const limit = Math.min(Math.max(section.query?.limit ?? 50, 1), 200);
 
       const where: any = {

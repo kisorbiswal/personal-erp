@@ -7,13 +7,26 @@ type TagItem = { id: string; name: string; count: number };
 
 type BoardConfigV1 = {
   version: 1;
-  sections: Array<{
+  // Preferred
+  columns?: Array<{
     id: string;
     title: string;
     query: {
-      tagsAny?: string[]; // column tags
+      tagsAny?: string[];
       tagsMatch?: 'any' | 'all';
-      includeDone?: boolean; // column-level include done
+      includeDone?: boolean;
+      limit?: number;
+    };
+    render: { type: 'list' | 'kanban' | 'chart' };
+  }>;
+  // Backward compat
+  sections?: Array<{
+    id: string;
+    title: string;
+    query: {
+      tagsAny?: string[];
+      tagsMatch?: 'any' | 'all';
+      includeDone?: boolean;
       limit?: number;
     };
     render: { type: 'list' | 'kanban' | 'chart' };
@@ -241,10 +254,11 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
   function addColumn() {
     if (!board) return;
+    const current = board.config.columns ?? board.config.sections ?? [];
     const next: BoardConfigV1 = {
       ...board.config,
-      sections: [
-        ...board.config.sections,
+      columns: [
+        ...current,
         {
           id: `col:${uid()}`,
           title: 'new',
@@ -259,19 +273,21 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
   function removeColumn(sectionId: string) {
     if (!board) return;
+    const current = board.config.columns ?? board.config.sections ?? [];
     const next: BoardConfigV1 = {
       ...board.config,
-      sections: board.config.sections.filter((s) => s.id !== sectionId),
+      columns: current.filter((s) => s.id !== sectionId),
     };
     setBoard({ ...board, config: next });
     saveBoardConfig(next).catch((e) => setError(String(e)));
   }
 
-  function setColumnQuery(sectionId: string, patch: Partial<BoardConfigV1['sections'][number]['query']>) {
+  function setColumnQuery(sectionId: string, patch: Partial<(NonNullable<BoardConfigV1['columns']>[number])['query']>) {
     if (!board) return;
+    const current = board.config.columns ?? board.config.sections ?? [];
     const next: BoardConfigV1 = {
       ...board.config,
-      sections: board.config.sections.map((s) => (s.id === sectionId ? { ...s, query: { ...(s.query || {}), ...patch } } : s)),
+      columns: current.map((s) => (s.id === sectionId ? { ...s, query: { ...(s.query || {}), ...patch } } : s)),
     };
     setBoard({ ...board, config: next });
     saveBoardConfig(next).catch((e) => setError(String(e)));
@@ -281,14 +297,14 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     if (!board) return;
     const t = tag.trim().toLowerCase();
     if (!t) return;
-    const cur = board.config.sections.find((s) => s.id === sectionId)?.query?.tagsAny || [];
+    const cur = (board.config.columns ?? board.config.sections ?? []).find((s) => s.id === sectionId)?.query?.tagsAny || [];
     const nextTags = Array.from(new Set([...cur, t]));
     setColumnQuery(sectionId, { tagsAny: nextTags });
   }
 
   function removeTagFromColumn(sectionId: string, tag: string) {
     if (!board) return;
-    const cur = board.config.sections.find((s) => s.id === sectionId)?.query?.tagsAny || [];
+    const cur = (board.config.columns ?? board.config.sections ?? []).find((s) => s.id === sectionId)?.query?.tagsAny || [];
     const nextTags = cur.filter((x) => x !== tag);
     setColumnQuery(sectionId, { tagsAny: nextTags });
   }
@@ -572,7 +588,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
           }}
         >
           {(data?.sections || []).map((s: any) => {
-            const sectionCfg = board.config.sections.find((x) => x.id === s.id);
+            const sectionCfg = (board.config.columns ?? board.config.sections ?? []).find((x) => x.id === s.id);
             const columnTags: string[] = (sectionCfg?.query?.tagsAny || []).slice();
             const tagsMatch: 'any' | 'all' = (sectionCfg?.query?.tagsMatch || 'any') as any;
             const includeDone = !!sectionCfg?.query?.includeDone;
