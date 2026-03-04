@@ -1,20 +1,19 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 type TagItem = { id: string; name: string; count: number };
 
 type BoardConfigV1 = {
   version: 1;
-  scopeTagsAny?: string[];
-  scopeMatch?: 'any' | 'all';
   sections: Array<{
     id: string;
     title: string;
     query: {
-      tagsAny?: string[];
-      tagsNot?: string[];
+      tagsAny?: string[]; // column tags
+      tagsMatch?: 'any' | 'all';
+      includeDone?: boolean; // column-level include done
       limit?: number;
     };
     render: { type: 'list' | 'kanban' | 'chart' };
@@ -34,35 +33,33 @@ function uid() {
 export default function BoardPage({ params }: { params: { id: string } }) {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
-  const [data, setData] = useState<any>(null);
   const [board, setBoard] = useState<{ id: string; name: string; config: BoardConfigV1 } | null>(null);
+  const [data, setData] = useState<any>(null);
   const [tags, setTags] = useState<TagItem[]>([]);
-  const [edit, setEdit] = useState(false);
-  const [showDone, setShowDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // All-board feed
+  // All board feed
+  const [showDoneAll, setShowDoneAll] = useState(false);
   const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [feedCursor, setFeedCursor] = useState<string | null>(null);
   const [feedLoading, setFeedLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  // per-record editing
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingText, setEditingText] = useState<string>('');
-
-  // bulk selection
+  // selection + bulk
   const [selected, setSelected] = useState<Record<string, boolean>>({});
-
-  // bulk tag inputs
+  const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
   const [bulkAddTagValue, setBulkAddTagValue] = useState('');
   const [bulkRemoveTagValue, setBulkRemoveTagValue] = useState('done');
 
-  // board scope
-  const [scopeDraft, setScopeDraft] = useState('');
+  // per-record edit
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState<string>('');
 
   // per-record tag drafts
   const [tagDrafts, setTagDrafts] = useState<Record<string, string>>({});
+
+  // per-column tag draft
+  const [colTagDrafts, setColTagDrafts] = useState<Record<string, string>>({});
 
   // toasts
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -78,7 +75,6 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   }
 
   const tagNames = useMemo(() => new Set(tags.map((t) => t.name)), [tags]);
-  const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
 
   async function fetchBoardAndTags() {
     const bRes = await fetch(`${base}/boards/${params.id}`, { credentials: 'include' });
@@ -93,16 +89,29 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     }
   }
 
+  async function saveBoardConfig(next: BoardConfigV1) {
+    if (!board) return;
+    const res = await fetch(`${base}/boards/${board.id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ config: next }),
+    });
+    if (!res.ok) throw new Error(`Save failed: HTTP ${res.status}`);
+    const updated = await res.json();
+    setBoard({ id: updated.id, name: updated.name, config: updated.config });
+    pushToast('success', 'Board updated');
+  }
+
   async function runBoard() {
     const res = await fetch(`${base}/boards/${params.id}/run`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ includeDone: showDone }),
+      body: JSON.stringify({}),
       credentials: 'include',
     });
     if (!res.ok) throw new Error(`Run failed: HTTP ${res.status}`);
-    const d = await res.json();
-    setData(d);
+    setData(await res.json());
   }
 
   async function loadFeedPage(reset = false) {
@@ -112,7 +121,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       const cursor = reset ? null : feedCursor;
       const url = new URL(`${base}/feed`);
       url.searchParams.set('limit', '50');
-      url.searchParams.set('includeDone', showDone ? '1' : '0');
+      url.searchParams.set('includeDone', showDoneAll ? '1' : '0');
       if (cursor) url.searchParams.set('cursor', cursor);
 
       const res = await fetch(url.toString(), { credentials: 'include' });
@@ -126,18 +135,169 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     }
   }
 
+  function clearSelection() {
+    setSelected({});
+  }
+
+  async function bulkAddTag(tag: string) {
+    if (!selectedIds.length) return;
+    const t = tag.trim().toLowerCase();
+    if (!t) return;
+    if (!confirm(`Add tag "${t}" to ${selectedIds.length} items?`)) return;
+
+    const res = await fetch(`${base}/events/bulk/tags/add`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ eventIds: selectedIds, tag: t }),
+    });
+    if (!res.ok) throw new Error(`Bulk add failed: HTTP ${res.status}`);
+    pushToast('success', `Added tag “${t}” to ${selectedIds.length} items`);
+  }
+
+  async function bulkRemoveTag(tag: string) {
+    if (!selectedIds.length) return;
+    const t = tag.trim().toLowerCase();
+    if (!t) return;
+    if (!confirm(`Remove tag "${t}" from ${selectedIds.length} items?`)) return;
+
+    const res = await fetch(`${base}/events/bulk/tags/remove`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ eventIds: selectedIds, tag: t }),
+    });
+    if (!res.ok) throw new Error(`Bulk remove failed: HTTP ${res.status}`);
+    pushToast('success', `Removed tag “${t}” from ${selectedIds.length} items`);
+  }
+
+  async function bulkDelete() {
+    if (!selectedIds.length) return;
+    if (!confirm(`Soft-delete ${selectedIds.length} items?`)) return;
+    const res = await fetch(`${base}/events/bulk/delete`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ eventIds: selectedIds }),
+    });
+    if (!res.ok) throw new Error(`Delete failed: HTTP ${res.status}`);
+    pushToast('success', `Deleted ${selectedIds.length} items`);
+    clearSelection();
+  }
+
+  async function bulkRestore() {
+    if (!selectedIds.length) return;
+    if (!confirm(`Restore ${selectedIds.length} items?`)) return;
+    const res = await fetch(`${base}/events/bulk/restore`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ eventIds: selectedIds }),
+    });
+    if (!res.ok) throw new Error(`Restore failed: HTTP ${res.status}`);
+    pushToast('success', `Restored ${selectedIds.length} items`);
+    clearSelection();
+  }
+
+  async function addTagToEvent(eventId: string, tag: string) {
+    const t = tag.trim().toLowerCase();
+    if (!t) return;
+    const res = await fetch(`${base}/events/${eventId}/tags/add`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ tag: t }),
+    });
+    if (!res.ok) throw new Error(`Add tag failed: HTTP ${res.status}`);
+    pushToast('success', `Added tag “${t}”`);
+  }
+
+  async function removeTagFromEvent(eventId: string, tag: string) {
+    const t = tag.trim().toLowerCase();
+    if (!t) return;
+    const res = await fetch(`${base}/events/${eventId}/tags/remove`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ tag: t }),
+    });
+    if (!res.ok) throw new Error(`Remove tag failed: HTTP ${res.status}`);
+    pushToast('info', `Removed tag “${t}”`);
+  }
+
+  async function saveContent(eventId: string, content: string) {
+    if (!confirm('Save changes to this record content?')) return;
+    const res = await fetch(`${base}/events/${eventId}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ content }),
+    });
+    if (!res.ok) throw new Error(`Save content failed: HTTP ${res.status}`);
+    setEditingId(null);
+    setEditingText('');
+    pushToast('success', 'Saved');
+  }
+
+  function addColumn() {
+    if (!board) return;
+    const next: BoardConfigV1 = {
+      ...board.config,
+      sections: [
+        ...board.config.sections,
+        {
+          id: `col:${uid()}`,
+          title: 'new',
+          query: { tagsAny: [], tagsMatch: 'any', includeDone: false, limit: 50 },
+          render: { type: 'list' },
+        },
+      ],
+    };
+    setBoard({ ...board, config: next });
+    saveBoardConfig(next).catch((e) => setError(String(e)));
+  }
+
+  function removeColumn(sectionId: string) {
+    if (!board) return;
+    const next: BoardConfigV1 = {
+      ...board.config,
+      sections: board.config.sections.filter((s) => s.id !== sectionId),
+    };
+    setBoard({ ...board, config: next });
+    saveBoardConfig(next).catch((e) => setError(String(e)));
+  }
+
+  function setColumnQuery(sectionId: string, patch: Partial<BoardConfigV1['sections'][number]['query']>) {
+    if (!board) return;
+    const next: BoardConfigV1 = {
+      ...board.config,
+      sections: board.config.sections.map((s) => (s.id === sectionId ? { ...s, query: { ...(s.query || {}), ...patch } } : s)),
+    };
+    setBoard({ ...board, config: next });
+    saveBoardConfig(next).catch((e) => setError(String(e)));
+  }
+
+  function addTagToColumn(sectionId: string, tag: string) {
+    if (!board) return;
+    const t = tag.trim().toLowerCase();
+    if (!t) return;
+    const cur = board.config.sections.find((s) => s.id === sectionId)?.query?.tagsAny || [];
+    const nextTags = Array.from(new Set([...cur, t]));
+    setColumnQuery(sectionId, { tagsAny: nextTags });
+  }
+
+  function removeTagFromColumn(sectionId: string, tag: string) {
+    if (!board) return;
+    const cur = board.config.sections.find((s) => s.id === sectionId)?.query?.tagsAny || [];
+    const nextTags = cur.filter((x) => x !== tag);
+    setColumnQuery(sectionId, { tagsAny: nextTags });
+  }
+
   useEffect(() => {
-    (async () => {
-      try {
-        await fetchBoardAndTags();
-      } catch (e: any) {
-        setError(e?.message || String(e));
-      }
-    })();
+    fetchBoardAndTags().catch((e) => setError(String(e)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
-  // When board changes, either run board or load feed
   useEffect(() => {
     if (!board) return;
     if (board.name.toLowerCase() === 'all') {
@@ -150,20 +310,16 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board?.id]);
 
-  // Reload board/feed when showDone changes
   useEffect(() => {
     if (!board) return;
     if (board.name.toLowerCase() === 'all') {
       setFeedItems([]);
       setFeedCursor(null);
       loadFeedPage(true).catch((e) => setError(String(e)));
-    } else {
-      runBoard().catch((e) => setError(String(e)));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showDone]);
+  }, [showDoneAll]);
 
-  // Infinite scroll observer (All board)
   useEffect(() => {
     if (!board) return;
     if (board.name.toLowerCase() !== 'all') return;
@@ -184,224 +340,6 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     return () => obs.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board?.id, feedCursor, feedLoading]);
-
-  async function saveBoardConfig(next: BoardConfigV1) {
-    if (!board) return;
-    const res = await fetch(`${base}/boards/${board.id}`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ config: next }),
-    });
-    if (!res.ok) throw new Error(`Save failed: HTTP ${res.status}`);
-    const updated = await res.json();
-    setBoard({ id: updated.id, name: updated.name, config: updated.config });
-    await runBoard();
-    pushToast('success', 'Board updated');
-  }
-
-  function setBoardScopeTags(nextTags: string[]) {
-    if (!board) return;
-    const normalized = Array.from(new Set(nextTags.map((t) => t.trim().toLowerCase()).filter(Boolean)));
-    const next: BoardConfigV1 = {
-      ...board.config,
-      scopeTagsAny: normalized,
-    };
-
-    setBoard({ ...board, config: next });
-    runBoard().catch(() => {});
-
-    saveBoardConfig(next).catch((e) => setError(String(e)));
-  }
-
-  function addColumn(tag: string) {
-    if (!board) return;
-    const t = tag.trim().toLowerCase();
-    if (!t) return;
-
-    const next: BoardConfigV1 = {
-      ...board.config,
-      sections: [
-        ...board.config.sections,
-        {
-          id: `tag:${t}`,
-          title: t,
-          query: { tagsAny: [t], limit: 50 },
-          render: { type: 'list' },
-        },
-      ],
-    };
-
-    saveBoardConfig(next).catch((e) => setError(String(e)));
-  }
-
-  function removeColumn(sectionId: string) {
-    if (!board) return;
-    const next: BoardConfigV1 = {
-      ...board.config,
-      sections: board.config.sections.filter((s) => s.id !== sectionId),
-    };
-    saveBoardConfig(next).catch((e) => setError(String(e)));
-  }
-
-  function setColumnTag(sectionId: string, tag: string) {
-    if (!board) return;
-    const t = tag.trim().toLowerCase();
-    if (!t) return;
-    const next: BoardConfigV1 = {
-      ...board.config,
-      sections: board.config.sections.map((s) =>
-        s.id === sectionId
-          ? {
-              ...s,
-              id: `tag:${t}`,
-              title: t,
-              query: { ...(s.query || {}), tagsAny: [t] },
-            }
-          : s,
-      ),
-    };
-    saveBoardConfig(next).catch((e) => setError(String(e)));
-  }
-
-  function clearSelection() {
-    setSelected({});
-  }
-
-  async function addTagToEvent(eventId: string, tag: string) {
-    const t = tag.trim().toLowerCase();
-    if (!t) return;
-    const res = await fetch(`${base}/events/${eventId}/tags/add`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ tag: t }),
-    });
-    if (!res.ok) throw new Error(`Add tag failed: HTTP ${res.status}`);
-    pushToast('success', `Added tag “${t}”`);
-    if (board?.name.toLowerCase() === 'all') {
-      await loadFeedPage(true);
-    } else {
-      await runBoard();
-    }
-  }
-
-  async function removeTagFromEvent(eventId: string, tag: string) {
-    const t = tag.trim().toLowerCase();
-    if (!t) return;
-    const res = await fetch(`${base}/events/${eventId}/tags/remove`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ tag: t }),
-    });
-    if (!res.ok) throw new Error(`Remove tag failed: HTTP ${res.status}`);
-    pushToast('info', `Removed tag “${t}”`);
-    if (board?.name.toLowerCase() === 'all') {
-      await loadFeedPage(true);
-    } else {
-      await runBoard();
-    }
-  }
-
-  async function bulkAddTag(tag: string) {
-    if (!selectedIds.length) return;
-    const t = tag.trim().toLowerCase();
-    if (!t) return;
-    if (!confirm(`Add tag "${t}" to ${selectedIds.length} items?`)) return;
-
-    const res = await fetch(`${base}/events/bulk/tags/add`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ eventIds: selectedIds, tag: t }),
-    });
-    if (!res.ok) throw new Error(`Bulk add failed: HTTP ${res.status}`);
-    pushToast('success', `Added tag “${t}” to ${selectedIds.length} items`);
-    if (board?.name.toLowerCase() === 'all') {
-      await loadFeedPage(true);
-    } else {
-      await runBoard();
-    }
-  }
-
-  async function bulkRemoveTag(tag: string) {
-    if (!selectedIds.length) return;
-    const t = tag.trim().toLowerCase();
-    if (!t) return;
-    if (!confirm(`Remove tag "${t}" from ${selectedIds.length} items?`)) return;
-
-    const res = await fetch(`${base}/events/bulk/tags/remove`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ eventIds: selectedIds, tag: t }),
-    });
-    if (!res.ok) throw new Error(`Bulk remove failed: HTTP ${res.status}`);
-    pushToast('success', `Removed tag “${t}” from ${selectedIds.length} items`);
-    if (board?.name.toLowerCase() === 'all') {
-      await loadFeedPage(true);
-    } else {
-      await runBoard();
-    }
-  }
-
-  async function bulkDelete() {
-    if (!selectedIds.length) return;
-    if (!confirm(`Soft-delete ${selectedIds.length} items?`)) return;
-    const res = await fetch(`${base}/events/bulk/delete`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ eventIds: selectedIds }),
-    });
-    if (!res.ok) throw new Error(`Delete failed: HTTP ${res.status}`);
-    pushToast('success', `Deleted ${selectedIds.length} items`);
-    clearSelection();
-    if (board?.name.toLowerCase() === 'all') {
-      await loadFeedPage(true);
-    } else {
-      await runBoard();
-    }
-  }
-
-  async function bulkRestore() {
-    if (!selectedIds.length) return;
-    if (!confirm(`Restore ${selectedIds.length} items?`)) return;
-    const res = await fetch(`${base}/events/bulk/restore`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ eventIds: selectedIds }),
-    });
-    if (!res.ok) throw new Error(`Restore failed: HTTP ${res.status}`);
-    pushToast('success', `Restored ${selectedIds.length} items`);
-    clearSelection();
-    if (board?.name.toLowerCase() === 'all') {
-      await loadFeedPage(true);
-    } else {
-      await runBoard();
-    }
-  }
-
-  async function saveContent(eventId: string, content: string) {
-    if (!confirm('Save changes to this record content?')) return;
-    const res = await fetch(`${base}/events/${eventId}`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ content }),
-    });
-    if (!res.ok) throw new Error(`Save content failed: HTTP ${res.status}`);
-    setEditingId(null);
-    setEditingText('');
-    pushToast('success', 'Saved');
-    if (board?.name.toLowerCase() === 'all') {
-      await loadFeedPage(true);
-    } else {
-      await runBoard();
-    }
-  }
 
   if (error) return <div>Error: {error}</div>;
   if (!board) return <div>Loading...</div>;
@@ -430,16 +368,16 @@ export default function BoardPage({ params }: { params: { id: string } }) {
         ))}
       </div>
 
-      {/* Header */}
       <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', gap: 12 }}>
         <Link href="/">← All boards</Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        {isAll ? (
           <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
-            <input type="checkbox" checked={showDone} onChange={(e) => setShowDone(e.target.checked)} />
+            <input type="checkbox" checked={showDoneAll} onChange={(e) => setShowDoneAll(e.target.checked)} />
             Show done
           </label>
-          {!isAll ? <button onClick={() => setEdit((v) => !v)}>{edit ? 'Done editing columns' : 'Edit columns'}</button> : null}
-        </div>
+        ) : (
+          <button onClick={addColumn}>+ Column</button>
+        )}
       </div>
 
       {/* Sticky bulk bar */}
@@ -459,24 +397,53 @@ export default function BoardPage({ params }: { params: { id: string } }) {
         >
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
             <strong>Selected: {selectedIds.length}</strong>
-            <button onClick={() => bulkAddTag('done').catch((e) => setError(String(e)))}>Mark done</button>
-            <button onClick={() => bulkRemoveTag('done').catch((e) => setError(String(e)))}>Mark not done</button>
-            <button onClick={() => bulkDelete().catch((e) => setError(String(e)))}>Delete</button>
-            <button onClick={() => bulkRestore().catch((e) => setError(String(e)))}>Restore</button>
+            <button
+              onClick={() =>
+                bulkAddTag('done')
+                  .then(() => (isAll ? loadFeedPage(true) : runBoard()))
+                  .catch((e) => setError(String(e)))
+              }
+            >
+              Mark done
+            </button>
+            <button
+              onClick={() =>
+                bulkRemoveTag('done')
+                  .then(() => (isAll ? loadFeedPage(true) : runBoard()))
+                  .catch((e) => setError(String(e)))
+              }
+            >
+              Mark not done
+            </button>
+            <button
+              onClick={() =>
+                bulkDelete()
+                  .then(() => (isAll ? loadFeedPage(true) : runBoard()))
+                  .catch((e) => setError(String(e)))
+              }
+            >
+              Delete
+            </button>
+            <button
+              onClick={() =>
+                bulkRestore()
+                  .then(() => (isAll ? loadFeedPage(true) : runBoard()))
+                  .catch((e) => setError(String(e)))
+              }
+            >
+              Restore
+            </button>
 
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               <span style={{ fontSize: 12, color: '#444' }}>Add tag</span>
-              <input
-                value={bulkAddTagValue}
-                onChange={(e) => setBulkAddTagValue(e.target.value)}
-                style={{ padding: 6, minWidth: 140 }}
-                placeholder="tag"
-              />
+              <input value={bulkAddTagValue} onChange={(e) => setBulkAddTagValue(e.target.value)} style={{ padding: 6, minWidth: 140 }} placeholder="tag" />
               <button
                 onClick={() => {
                   const t = bulkAddTagValue.trim().toLowerCase();
                   if (!t) return;
-                  bulkAddTag(t).catch((e) => setError(String(e)));
+                  bulkAddTag(t)
+                    .then(() => (isAll ? loadFeedPage(true) : runBoard()))
+                    .catch((e) => setError(String(e)));
                   setBulkAddTagValue('');
                 }}
               >
@@ -486,17 +453,14 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               <span style={{ fontSize: 12, color: '#444' }}>Remove tag</span>
-              <input
-                value={bulkRemoveTagValue}
-                onChange={(e) => setBulkRemoveTagValue(e.target.value)}
-                style={{ padding: 6, minWidth: 140 }}
-                placeholder="tag"
-              />
+              <input value={bulkRemoveTagValue} onChange={(e) => setBulkRemoveTagValue(e.target.value)} style={{ padding: 6, minWidth: 140 }} placeholder="tag" />
               <button
                 onClick={() => {
                   const t = bulkRemoveTagValue.trim().toLowerCase();
                   if (!t) return;
-                  bulkRemoveTag(t).catch((e) => setError(String(e)));
+                  bulkRemoveTag(t)
+                    .then(() => (isAll ? loadFeedPage(true) : runBoard()))
+                    .catch((e) => setError(String(e)));
                 }}
               >
                 Apply
@@ -510,37 +474,30 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
       <h1 style={{ marginTop: 0 }}>{board.name}</h1>
 
-      {/* ALL board feed */}
       {isAll ? (
         <div>
-          <div style={{ color: '#666', fontSize: 12, marginBottom: 10 }}>
-            Reverse chronological feed. Scroll to load more.
-          </div>
-
+          <div style={{ color: '#666', fontSize: 12, marginBottom: 10 }}>Reverse chronological feed. Scroll to load more.</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {feedItems.map((it) => {
               const isSelected = !!selected[it.id];
               return (
                 <div key={it.id} style={{ border: '1px solid #eee', borderRadius: 10, padding: 12 }}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={(e) => setSelected((prev) => ({ ...prev, [it.id]: e.target.checked }))}
-                      style={{ marginTop: 4 }}
-                    />
-
+                    <input type="checkbox" checked={isSelected} onChange={(e) => setSelected((prev) => ({ ...prev, [it.id]: e.target.checked }))} style={{ marginTop: 4 }} />
                     <div style={{ flex: 1 }}>
                       {editingId === it.id ? (
                         <>
-                          <textarea
-                            value={editingText}
-                            onChange={(e) => setEditingText(e.target.value)}
-                            rows={4}
-                            style={{ width: '100%', padding: 8 }}
-                          />
+                          <textarea value={editingText} onChange={(e) => setEditingText(e.target.value)} rows={4} style={{ width: '100%', padding: 8 }} />
                           <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-                            <button onClick={() => saveContent(it.id, editingText).catch((e) => setError(String(e)))}>Save</button>
+                            <button
+                              onClick={() =>
+                                saveContent(it.id, editingText)
+                                  .then(() => loadFeedPage(true))
+                                  .catch((e) => setError(String(e)))
+                              }
+                            >
+                              Save
+                            </button>
                             <button
                               onClick={() => {
                                 setEditingId(null);
@@ -555,45 +512,30 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                         <div className="wrap">{it.content}</div>
                       )}
 
-                      <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>
-                        {new Date(it.occurredAt).toLocaleString()} • {it.tags.join(', ') || '(no tags)'}
-                      </div>
+                      <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>{new Date(it.occurredAt).toLocaleString()} • {it.tags.join(', ') || '(no tags)'}</div>
 
-                      {/* tag chips */}
                       <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                         {it.tags.map((tg) => (
                           <span
                             key={tg}
-                            style={{
-                              fontSize: 12,
-                              border: '1px solid #e5e7eb',
-                              background: '#f9fafb',
-                              borderRadius: 999,
-                              padding: '2px 8px',
-                              cursor: 'pointer',
-                            }}
+                            style={{ fontSize: 12, border: '1px solid #e5e7eb', background: '#f9fafb', borderRadius: 999, padding: '2px 8px', cursor: 'pointer' }}
                             title="Click to remove tag"
-                            onClick={() => removeTagFromEvent(it.id, tg).catch((e) => setError(String(e)))}
+                            onClick={() => removeTagFromEvent(it.id, tg).then(() => loadFeedPage(true)).catch((e) => setError(String(e)))}
                           >
                             {tg} ×
                           </span>
                         ))}
                       </div>
 
-                      {/* add tag */}
                       <div style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: 12, color: '#444' }}>Add tag</span>
-                        <input
-                          value={tagDrafts[it.id] || ''}
-                          onChange={(e) => setTagDrafts((m) => ({ ...m, [it.id]: e.target.value }))}
-                          style={{ padding: 6, minWidth: 160 }}
-                          placeholder="type tag"
-                        />
+                        <input value={tagDrafts[it.id] || ''} onChange={(e) => setTagDrafts((m) => ({ ...m, [it.id]: e.target.value }))} style={{ padding: 6, minWidth: 160 }} placeholder="type tag" />
                         <button
                           onClick={() => {
                             const val = (tagDrafts[it.id] || '').trim().toLowerCase();
                             if (!val) return;
                             addTagToEvent(it.id, val)
+                              .then(() => loadFeedPage(true))
                               .then(() => setTagDrafts((m) => ({ ...m, [it.id]: '' })))
                               .catch((e) => setError(String(e)));
                           }}
@@ -620,223 +562,174 @@ export default function BoardPage({ params }: { params: { id: string } }) {
           {feedLoading ? <div style={{ color: '#666', marginTop: 10 }}>Loading…</div> : null}
           {!feedCursor && !feedLoading ? <div style={{ color: '#888', marginTop: 10 }}>End.</div> : null}
         </div>
-      ) : null}
+      ) : (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: 16,
+            alignItems: 'start',
+          }}
+        >
+          {(data?.sections || []).map((s: any) => {
+            const sectionCfg = board.config.sections.find((x) => x.id === s.id);
+            const columnTags: string[] = (sectionCfg?.query?.tagsAny || []).slice();
+            const tagsMatch: 'any' | 'all' = (sectionCfg?.query?.tagsMatch || 'any') as any;
+            const includeDone = !!sectionCfg?.query?.includeDone;
 
-      {/* Normal board columns */}
-      {!isAll && data ? (
-        <>
-          <div style={{ marginBottom: 12, padding: 12, border: '1px solid #eee', borderRadius: 10 }}>
-            <div style={{ fontWeight: 600, marginBottom: 6 }}>Board scope</div>
+            return (
+              <div key={s.id} className="col" style={{ border: '1px solid #eee', borderRadius: 10, padding: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
+                  <div style={{ fontWeight: 700 }}>Column</div>
+                  <button onClick={() => removeColumn(s.id)} style={{ background: '#b91c1c', color: 'white', padding: '4px 10px' }}>
+                    Remove
+                  </button>
+                </div>
 
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {(board.config.scopeTagsAny || []).length ? (
-                (board.config.scopeTagsAny || []).map((t) => (
-                  <span
-                    key={t}
-                    style={{ fontSize: 12, border: '1px solid #e5e7eb', background: '#f9fafb', borderRadius: 999, padding: '2px 8px', cursor: 'pointer' }}
-                    title="Remove scope tag"
-                    onClick={() => setBoardScopeTags((board.config.scopeTagsAny || []).filter((x) => x !== t))}
+                <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {columnTags.length ? (
+                    columnTags.map((tg) => (
+                      <span
+                        key={tg}
+                        style={{ fontSize: 12, border: '1px solid #e5e7eb', background: '#f9fafb', borderRadius: 999, padding: '2px 8px', cursor: 'pointer' }}
+                        title="Remove tag from column"
+                        onClick={() => removeTagFromColumn(s.id, tg)}
+                      >
+                        {tg} ×
+                      </span>
+                    ))
+                  ) : (
+                    <span style={{ color: '#666', fontSize: 12 }}>(no tags — column will show everything)</span>
+                  )}
+                </div>
+
+                <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 12, color: '#444' }}>Add tag</span>
+                  <input
+                    value={colTagDrafts[s.id] || ''}
+                    onChange={(e) => setColTagDrafts((m) => ({ ...m, [s.id]: e.target.value }))}
+                    style={{ padding: 6, minWidth: 160 }}
+                    placeholder="type tag"
+                  />
+                  <button
+                    onClick={() => {
+                      const val = (colTagDrafts[s.id] || '').trim().toLowerCase();
+                      if (!val) return;
+                      setColTagDrafts((m) => ({ ...m, [s.id]: '' }));
+                      addTagToColumn(s.id, val);
+                    }}
                   >
-                    {t} ×
-                  </span>
-                ))
-              ) : (
-                <span style={{ color: '#666', fontSize: 12 }}>No scope tags (board shows everything).</span>
-              )}
-            </div>
+                    Add
+                  </button>
 
-            <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444', marginTop: 8 }}>
-              <input
-                type="checkbox"
-                checked={(board.config.scopeMatch || 'any') === 'all'}
-                onChange={(e) => {
-                  const nextMatch = e.target.checked ? 'all' : 'any';
-                  const next: BoardConfigV1 = { ...board.config, scopeMatch: nextMatch };
-                  setBoard({ ...board, config: next });
-                  runBoard().catch(() => {});
-                  saveBoardConfig(next).catch((err) => setError(String(err)));
-                }}
-              />
-              Require ALL scope tags (instead of ANY)
-            </label>
+                  <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
+                    <input
+                      type="checkbox"
+                      checked={tagsMatch === 'all'}
+                      onChange={(e) => setColumnQuery(s.id, { tagsMatch: e.target.checked ? 'all' : 'any' })}
+                    />
+                    Require ALL
+                  </label>
 
-            <div style={{ marginTop: 10, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 12, color: '#444' }}>Add scope tag</span>
-              <input
-                value={scopeDraft}
-                onChange={(e) => setScopeDraft(e.target.value)}
-                style={{ padding: 6, minWidth: 180 }}
-                placeholder="e.g. oracle"
-              />
-              <button
-                onClick={() => {
-                  const val = scopeDraft.trim().toLowerCase();
-                  if (!val) return;
-                  setScopeDraft('');
-                  setBoardScopeTags([...(board.config.scopeTagsAny || []), val]);
-                }}
-              >
-                Add
-              </button>
-            </div>
-          </div>
+                  <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
+                    <input type="checkbox" checked={includeDone} onChange={(e) => setColumnQuery(s.id, { includeDone: e.target.checked })} />
+                    Show done
+                  </label>
+                </div>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-              gap: 16,
-              alignItems: 'start',
-            }}
-          >
-            {data.sections.map((s: any) => {
-              const sectionCfg = board.config.sections.find((x) => x.id === s.id);
-              const tag = (sectionCfg?.query?.tagsAny || [])[0] || s.title;
+                <div style={{ marginTop: 8, color: '#666', fontSize: 12 }}>
+                  {s.items.length} shown{!includeDone && s.hiddenDoneCount ? ` • ${s.hiddenDoneCount} hidden(done)` : ''}
+                </div>
 
-              return (
-                <div key={s.id} className="col" style={{ border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                    <h3 style={{ margin: 0 }}>{tag}</h3>
-                    <span style={{ color: '#666', fontSize: 12 }}>
-                      {s.items.length} shown
-                      {s.hiddenDoneCount ? ` • ${s.hiddenDoneCount} hidden(done)` : ''}
-                    </span>
-                  </div>
+                <ul style={{ paddingLeft: 18, marginTop: 10 }}>
+                  {s.items.slice(0, 50).map((it: any) => {
+                    const isSelected = !!selected[it.id];
+                    return (
+                      <li key={it.id} style={{ margin: '10px 0' }}>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                          <input type="checkbox" checked={isSelected} onChange={(e) => setSelected((prev) => ({ ...prev, [it.id]: e.target.checked }))} style={{ marginTop: 4 }} />
 
-                  {edit ? (
-                    <div style={{ marginTop: 10, padding: 10, background: '#fafafa', borderRadius: 8 }}>
-                      <div style={{ fontSize: 12, marginBottom: 6, color: '#444' }}>Tag for this column</div>
-                      <input
-                        defaultValue={tag}
-                        style={{ width: '100%', padding: 8 }}
-                        onBlur={(e) => {
-                          const next = e.target.value.trim().toLowerCase();
-                          if (!next) return;
-                          if (!tagNames.has(next)) {
-                            pushToast('error', `Unknown tag: ${next}`);
-                            return;
-                          }
-                          setColumnTag(s.id, next);
-                        }}
-                      />
-
-                      <div style={{ marginTop: 8 }}>
-                        <button onClick={() => removeColumn(s.id)} style={{ color: 'white', background: '#b91c1c', padding: '6px 10px' }}>
-                          Remove column (presentation only)
-                        </button>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <ul style={{ paddingLeft: 18 }}>
-                    {s.items.slice(0, 50).map((it: any) => {
-                      const isSelected = !!selected[it.id];
-                      return (
-                        <li key={it.id} style={{ margin: '10px 0' }}>
-                          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={(e) => setSelected((prev) => ({ ...prev, [it.id]: e.target.checked }))}
-                              style={{ marginTop: 4 }}
-                            />
-
-                            <div style={{ flex: 1 }}>
-                              {editingId === it.id ? (
-                                <>
-                                  <textarea
-                                    value={editingText}
-                                    onChange={(e) => setEditingText(e.target.value)}
-                                    rows={4}
-                                    style={{ width: '100%', padding: 8 }}
-                                  />
-                                  <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-                                    <button onClick={() => saveContent(it.id, editingText).catch((e) => setError(String(e)))}>Save</button>
-                                    <button
-                                      onClick={() => {
-                                        setEditingId(null);
-                                        setEditingText('');
-                                      }}
-                                    >
-                                      Cancel
-                                    </button>
-                                  </div>
-                                </>
-                              ) : (
-                                <div className="wrap">{it.content}</div>
-                              )}
-
-                              <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>
-                                {new Date(it.occurredAt).toLocaleString()} • {it.tags.join(', ')}
-                                {board.config.scopeTagsAny?.length ? (
-                                  <>
-                                    {' '}• scope: {(board.config.scopeTagsAny || []).filter((t) => it.tags.includes(t)).join(', ') || '—'}
-                                  </>
-                                ) : null}
-                              </div>
-
-                              {/* tag chips */}
-                              <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                                {it.tags.map((tg: string) => (
-                                  <span
-                                    key={tg}
-                                    style={{
-                                      fontSize: 12,
-                                      border: '1px solid #e5e7eb',
-                                      background: '#f9fafb',
-                                      borderRadius: 999,
-                                      padding: '2px 8px',
-                                      cursor: 'pointer',
-                                    }}
-                                    title="Click to remove tag"
-                                    onClick={() => removeTagFromEvent(it.id, tg).catch((e) => setError(String(e)))}
+                          <div style={{ flex: 1 }}>
+                            {editingId === it.id ? (
+                              <>
+                                <textarea value={editingText} onChange={(e) => setEditingText(e.target.value)} rows={4} style={{ width: '100%', padding: 8 }} />
+                                <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                                  <button
+                                    onClick={() =>
+                                      saveContent(it.id, editingText)
+                                        .then(() => runBoard())
+                                        .catch((e) => setError(String(e)))
+                                    }
                                   >
-                                    {tg} ×
-                                  </span>
-                                ))}
-                              </div>
+                                    Save
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setEditingId(null);
+                                      setEditingText('');
+                                    }}
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="wrap">{it.content}</div>
+                            )}
 
-                              {/* add tag */}
-                              <div style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                                <span style={{ fontSize: 12, color: '#444' }}>Add tag</span>
-                                <input
-                                  value={tagDrafts[it.id] || ''}
-                                  onChange={(e) => setTagDrafts((m) => ({ ...m, [it.id]: e.target.value }))}
-                                  style={{ padding: 6, minWidth: 160 }}
-                                  placeholder="type tag"
-                                />
-                                <button
-                                  onClick={() => {
-                                    const val = (tagDrafts[it.id] || '').trim().toLowerCase();
-                                    if (!val) return;
-                                    addTagToEvent(it.id, val)
-                                      .then(() => setTagDrafts((m) => ({ ...m, [it.id]: '' })))
-                                      .catch((e) => setError(String(e)));
-                                  }}
+                            <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>
+                              {new Date(it.occurredAt).toLocaleString()} • {it.tags.join(', ') || '(no tags)'}
+                              {it.pinned ? ' • pinned' : ''}
+                            </div>
+
+                            <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                              {(it.tags || []).map((tg: string) => (
+                                <span
+                                  key={tg}
+                                  style={{ fontSize: 12, border: '1px solid #e5e7eb', background: '#f9fafb', borderRadius: 999, padding: '2px 8px', cursor: 'pointer' }}
+                                  title="Click to remove tag"
+                                  onClick={() => removeTagFromEvent(it.id, tg).then(() => runBoard()).catch((e) => setError(String(e)))}
                                 >
-                                  Add
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setEditingId(it.id);
-                                    setEditingText(it.content);
-                                  }}
-                                >
-                                  Edit text
-                                </button>
-                              </div>
+                                  {tg} ×
+                                </span>
+                              ))}
+                            </div>
+
+                            <div style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: 12, color: '#444' }}>Add tag</span>
+                              <input value={tagDrafts[it.id] || ''} onChange={(e) => setTagDrafts((m) => ({ ...m, [it.id]: e.target.value }))} style={{ padding: 6, minWidth: 160 }} placeholder="type tag" />
+                              <button
+                                onClick={() => {
+                                  const val = (tagDrafts[it.id] || '').trim().toLowerCase();
+                                  if (!val) return;
+                                  addTagToEvent(it.id, val)
+                                    .then(() => runBoard())
+                                    .then(() => setTagDrafts((m) => ({ ...m, [it.id]: '' })))
+                                    .catch((e) => setError(String(e)));
+                                }}
+                              >
+                                Add
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingId(it.id);
+                                  setEditingText(it.content);
+                                }}
+                              >
+                                Edit text
+                              </button>
                             </div>
                           </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      ) : null}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
