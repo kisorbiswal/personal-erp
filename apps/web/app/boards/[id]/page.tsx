@@ -411,13 +411,20 @@ export default function BoardPage({ params }: { params: { id: string } }) {
         </div>
       ) : null}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16 }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: 16,
+          alignItems: 'start',
+        }}
+      >
         {data.sections.map((s: any) => {
           const sectionCfg = board.config.sections.find((x) => x.id === s.id);
           const tag = (sectionCfg?.query?.tagsAny || [])[0] || s.title;
 
           return (
-            <div key={s.id} style={{ border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
+            <div key={s.id} className="col" style={{ border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                 <h3 style={{ margin: 0 }}>{tag}</h3>
                 <span style={{ color: '#666', fontSize: 12 }}>
@@ -488,7 +495,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                               </div>
                             </>
                           ) : (
-                            <div style={{ whiteSpace: 'pre-wrap' }}>{it.content}</div>
+                            <div className="wrap">{it.content}</div>
                           )}
 
                           <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>
