@@ -16,6 +16,7 @@ type BoardSectionQuery = {
 type BoardConfigV1 = {
   version: 1;
   scopeTagsAny?: string[];
+  scopeMatch?: 'any' | 'all';
   sections: Array<{
     id: string;
     title: string;
@@ -103,6 +104,7 @@ export class BoardsController {
     const config = board.config as BoardConfigV1;
     const sections = config.sections ?? [];
     const scopeTagsAny = (config as any).scopeTagsAny as string[] | undefined;
+    const scopeMatch = ((config as any).scopeMatch as 'any' | 'all' | undefined) ?? 'any';
 
     // Fetch pinned events once (so sections can reuse)
     const pins = await this.prisma.boardPin.findMany({
@@ -121,20 +123,37 @@ export class BoardsController {
         deletedAt: null,
       };
 
-      // apply board scope (if configured): event must match ANY scope tag
+      // apply board scope (if configured)
+      // - any: event must match ANY scope tag
+      // - all: event must match ALL scope tags
       if (scopeTagsAny?.length) {
-        where.AND = (where.AND ?? []).concat([
-          {
-            tags: {
-              some: {
-                tag: {
-                  workspaceId: board.workspaceId,
-                  name: { in: scopeTagsAny },
+        if (scopeMatch === 'all') {
+          where.AND = (where.AND ?? []).concat(
+            scopeTagsAny.map((t) => ({
+              tags: {
+                some: {
+                  tag: {
+                    workspaceId: board.workspaceId,
+                    name: t,
+                  },
+                },
+              },
+            })),
+          );
+        } else {
+          where.AND = (where.AND ?? []).concat([
+            {
+              tags: {
+                some: {
+                  tag: {
+                    workspaceId: board.workspaceId,
+                    name: { in: scopeTagsAny },
+                  },
                 },
               },
             },
-          },
-        ]);
+          ]);
+        }
       }
 
       // Always hide done items by default unless explicitly included
@@ -149,20 +168,30 @@ export class BoardsController {
           deletedAt: null,
           // board scope
           ...(scopeTagsAny?.length
-            ? {
-                AND: [
-                  {
-                    tags: {
-                      some: {
-                        tag: {
-                          workspaceId: board.workspaceId,
-                          name: { in: scopeTagsAny },
+            ? (scopeMatch === 'all'
+                ? {
+                    AND: scopeTagsAny.map((t) => ({
+                      tags: {
+                        some: {
+                          tag: { workspaceId: board.workspaceId, name: t },
                         },
                       },
-                    },
-                  },
-                ],
-              }
+                    })),
+                  }
+                : {
+                    AND: [
+                      {
+                        tags: {
+                          some: {
+                            tag: {
+                              workspaceId: board.workspaceId,
+                              name: { in: scopeTagsAny },
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  })
             : {}),
           // must have done tag
           tags: {

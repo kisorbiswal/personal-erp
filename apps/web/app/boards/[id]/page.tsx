@@ -8,6 +8,7 @@ type TagItem = { id: string; name: string; count: number };
 type BoardConfigV1 = {
   version: 1;
   scopeTagsAny?: string[];
+  scopeMatch?: 'any' | 'all';
   sections: Array<{
     id: string;
     title: string;
@@ -445,6 +446,21 @@ export default function BoardPage({ params }: { params: { id: string } }) {
             <span style={{ color: '#666', fontSize: 12 }}>No scope tags (board shows everything).</span>
           )}
         </div>
+        <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444', marginTop: 8 }}>
+          <input
+            type="checkbox"
+            checked={(board.config.scopeMatch || 'any') === 'all'}
+            onChange={(e) => {
+              const nextMatch = e.target.checked ? 'all' : 'any';
+              const next: BoardConfigV1 = { ...board.config, scopeMatch: nextMatch };
+              setBoard({ ...board, config: next });
+              runBoard().catch(() => {});
+              saveBoardConfig(next).catch((err) => setError(String(err)));
+            }}
+          />
+          Require ALL scope tags (instead of ANY)
+        </label>
+
 
         {/* Tag cloud / suggestions */}
         <div style={{ marginTop: 10, fontSize: 12, color: '#444' }}>Add scope tags (tap to add)</div>
