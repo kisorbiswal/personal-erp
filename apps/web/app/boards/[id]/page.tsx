@@ -134,6 +134,12 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       ...board.config,
       scopeTagsAny: normalized,
     };
+
+    // optimistic UI update (so scope chips + filtered columns update immediately)
+    setBoard({ ...board, config: next });
+    // run immediately with optimistic config (backend will catch up after PATCH)
+    runBoard().catch(() => {});
+
     saveBoardConfig(next).catch((e) => setError(String(e)));
   }
 
@@ -429,7 +435,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                   padding: '2px 8px',
                   cursor: 'pointer',
                 }}
-                title="Click to remove from scope"
+                title="Remove scope tag"
                 onClick={() => setBoardScopeTags((board.config.scopeTagsAny || []).filter((x) => x !== t))}
               >
                 {t} ×
@@ -440,8 +446,33 @@ export default function BoardPage({ params }: { params: { id: string } }) {
           )}
         </div>
 
-        <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 12, color: '#444' }}>Add scope tag</span>
+        {/* Tag cloud / suggestions */}
+        <div style={{ marginTop: 10, fontSize: 12, color: '#444' }}>Add scope tags (tap to add)</div>
+        <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {tags
+            .filter((t) => !(board.config.scopeTagsAny || []).includes(t.name))
+            .slice(0, 60)
+            .map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setBoardScopeTags([...(board.config.scopeTagsAny || []), t.name])}
+                style={{
+                  fontSize: 12,
+                  border: '1px solid #e5e7eb',
+                  background: '#fff',
+                  borderRadius: 999,
+                  padding: '4px 10px',
+                }}
+                title={`Add scope tag: ${t.name}`}
+              >
+                + {t.name}
+              </button>
+            ))}
+        </div>
+
+        {/* Optional manual add */}
+        <div style={{ marginTop: 10, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, color: '#444' }}>Or type</span>
           <input
             list="all-tags"
             value={scopeDraft}
