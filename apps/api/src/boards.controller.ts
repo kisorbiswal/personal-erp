@@ -4,6 +4,7 @@ import { PrismaService } from './prisma.service';
 
 type BoardSectionQuery = {
   tagsAny?: string[];
+  tagsMatch?: 'any' | 'all';
   tagsNot?: string[];
   q?: string;
   limit?: number;
@@ -103,8 +104,6 @@ export class BoardsController {
 
     const config = board.config as BoardConfigV1;
     const sections = config.sections ?? [];
-    const scopeTagsAny = (config as any).scopeTagsAny as string[] | undefined;
-    const scopeMatch = ((config as any).scopeMatch as 'any' | 'all' | undefined) ?? 'any';
 
     // Fetch pinned events once (so sections can reuse)
     const pins = await this.prisma.boardPin.findMany({
@@ -123,39 +122,6 @@ export class BoardsController {
         deletedAt: null,
       };
 
-      // apply board scope (if configured)
-      // - any: event must match ANY scope tag
-      // - all: event must match ALL scope tags
-      if (scopeTagsAny?.length) {
-        if (scopeMatch === 'all') {
-          where.AND = (where.AND ?? []).concat(
-            scopeTagsAny.map((t) => ({
-              tags: {
-                some: {
-                  tag: {
-                    workspaceId: board.workspaceId,
-                    name: t,
-                  },
-                },
-              },
-            })),
-          );
-        } else {
-          where.AND = (where.AND ?? []).concat([
-            {
-              tags: {
-                some: {
-                  tag: {
-                    workspaceId: board.workspaceId,
-                    name: { in: scopeTagsAny },
-                  },
-                },
-              },
-            },
-          ]);
-        }
-      }
-
       // Always hide done items by default unless explicitly included
       const includeDoneOverride = body?.includeDone === true;
       const hideDone = includeDoneOverride ? false : (section.query?.includeDone ? false : true);
@@ -166,33 +132,6 @@ export class BoardsController {
         const doneOnlyWhere: any = {
           workspaceId: board.workspaceId,
           deletedAt: null,
-          // board scope
-          ...(scopeTagsAny?.length
-            ? (scopeMatch === 'all'
-                ? {
-                    AND: scopeTagsAny.map((t) => ({
-                      tags: {
-                        some: {
-                          tag: { workspaceId: board.workspaceId, name: t },
-                        },
-                      },
-                    })),
-                  }
-                : {
-                    AND: [
-                      {
-                        tags: {
-                          some: {
-                            tag: {
-                              workspaceId: board.workspaceId,
-                              name: { in: scopeTagsAny },
-                            },
-                          },
-                        },
-                      },
-                    ],
-                  })
-            : {}),
           // must have done tag
           tags: {
             some: {
@@ -227,19 +166,32 @@ export class BoardsController {
           ]);
         }
         if (section.query?.tagsAny?.length) {
-          // must match tag filter AND have done
-          doneOnlyWhere.AND = (doneOnlyWhere.AND ?? []).concat([
-            {
-              tags: {
-                some: {
-                  tag: {
-                    workspaceId: board.workspaceId,
-                    name: { in: section.query.tagsAny },
+          const match = section.query?.tagsMatch ?? 'any';
+          const tags = section.query.tagsAny;
+          if (match === 'all') {
+            doneOnlyWhere.AND = (doneOnlyWhere.AND ?? []).concat(
+              tags.map((t) => ({
+                tags: {
+                  some: {
+                    tag: { workspaceId: board.workspaceId, name: t },
+                  },
+                },
+              })),
+            );
+          } else {
+            doneOnlyWhere.AND = (doneOnlyWhere.AND ?? []).concat([
+              {
+                tags: {
+                  some: {
+                    tag: {
+                      workspaceId: board.workspaceId,
+                      name: { in: tags },
+                    },
                   },
                 },
               },
-            },
-          ]);
+            ]);
+          }
         }
 
         hiddenDoneCount = await this.prisma.event.count({ where: doneOnlyWhere });
@@ -285,14 +237,31 @@ export class BoardsController {
       }
 
       if (section.query?.tagsAny?.length) {
-        where.tags = {
-          some: {
-            tag: {
-              workspaceId: board.workspaceId,
-              name: { in: section.query.tagsAny },
+        const match = section.query?.tagsMatch ?? 'any';
+        const tags = section.query.tagsAny;
+        if (match === 'all') {
+          where.AND = (where.AND ?? []).concat(
+            tags.map((t) => ({
+              tags: {
+                some: {
+                  tag: {
+                    workspaceId: board.workspaceId,
+                    name: t,
+                  },
+                },
+              },
+            })),
+          );
+        } else {
+          where.tags = {
+            some: {
+              tag: {
+                workspaceId: board.workspaceId,
+                name: { in: tags },
+              },
             },
-          },
-        };
+          };
+        }
       }
 
       const orderBy: any =
