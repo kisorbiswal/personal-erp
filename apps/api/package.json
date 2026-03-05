@@ -12,7 +12,8 @@
     "start": "node dist/main.js",
     "backfill:done": "node ./scripts/backfill-done-from-mylogger.mjs",
     "tags:normalize": "node ./scripts/normalize-tags-lowercase.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "boards:cleanup": "node ./scripts/cleanup-board-configs.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.8",
