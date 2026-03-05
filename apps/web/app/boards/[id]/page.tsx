@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { TabsBar } from '../../TabsBar';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -48,6 +47,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
   const [board, setBoard] = useState<{ id: string; name: string; config: BoardConfigV1 } | null>(null);
+  const [defaultBoardId, setDefaultBoardId] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
   const [tags, setTags] = useState<TagItem[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -390,6 +390,11 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     fetchBoardAndTags().catch((e) => setError(String(e)));
+    try {
+      setDefaultBoardId(localStorage.getItem('landingBoardId'));
+    } catch {
+      setDefaultBoardId(null);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
@@ -466,23 +471,28 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       <TabsBar activeBoardId={params.id} />
 
       <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Link href="/">← All boards</Link>
-          <button
-            className="tab"
-            onClick={() => {
+        <label
+          className="tab"
+          style={{ cursor: 'pointer' }}
+          title="Opening / will go to this board"
+        >
+          <input
+            type="checkbox"
+            checked={defaultBoardId === params.id}
+            onChange={(e) => {
               try {
-                localStorage.setItem('landingBoardId', params.id);
-                pushToast('success', 'Set as landing board');
+                if (e.target.checked) {
+                  localStorage.setItem('landingBoardId', params.id);
+                  setDefaultBoardId(params.id);
+                  pushToast('success', 'Default board updated');
+                }
               } catch {
-                pushToast('error', 'Could not save landing board');
+                pushToast('error', 'Could not save default board');
               }
             }}
-            title="Opening / will go to this board"
-          >
-            Set as landing
-          </button>
-        </div>
+          />
+          Make it default
+        </label>
         {isAll ? (
           <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
             <input type="checkbox" checked={showDoneAll} onChange={(e) => setShowDoneAll(e.target.checked)} />

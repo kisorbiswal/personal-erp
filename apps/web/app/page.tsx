@@ -1,8 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 type MeResponse = { user: null | { email: string; name?: string | null } };
 
@@ -80,8 +79,6 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [base]);
 
-  const hadLandingAtFirstLoad = useRef<boolean | null>(null);
-
   const landingBoardId = useMemo(() => {
     if (!me?.user) return null;
     if (!boards || boards.length === 0) return null;
@@ -97,29 +94,25 @@ export default function HomePage() {
   }, [me?.user, boards]);
 
   // Behavior:
-  // - If user already has a landing board set -> redirect immediately.
-  // - If not set yet -> show the "all boards" page, but set landing to the first board
-  //   so next visit goes straight to a board.
+  // - If landing board is set -> redirect.
+  // - Else -> set first board as landing and redirect.
   useEffect(() => {
     if (!me?.user) return;
     if (!boards) return;
     if (boards.length === 0) return;
-
-    if (hadLandingAtFirstLoad.current === null) {
-      hadLandingAtFirstLoad.current = Boolean(landingBoardId);
-    }
 
     if (landingBoardId) {
       router.replace(`/boards/${landingBoardId}`);
       return;
     }
 
-    // No landing set: choose the first board as default for next time.
     try {
       localStorage.setItem('landingBoardId', boards[0]!.id);
     } catch {
       // ignore
     }
+
+    router.replace(`/boards/${boards[0]!.id}`);
   }, [boards, landingBoardId, me?.user, router]);
 
   if (error) {
@@ -187,33 +180,10 @@ export default function HomePage() {
     );
   }
 
-  // Default: show all boards (first-time experience). If a landing board is already set,
-  // the useEffect above will redirect immediately.
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <h1 style={{ marginTop: 0 }}>Boards</h1>
-        <a href={`${base}/auth/logout`} style={{ color: '#666' }}>
-          Logout
-        </a>
-      </div>
-
-      <div style={{ marginTop: 18 }}>
-        <ul>
-          {boards.map((b) => (
-            <li key={b.id} style={{ marginBottom: 8 }}>
-              <Link href={`/boards/${b.id}`}>{b.name}</Link>
-              <span style={{ marginLeft: 8, color: '#888', fontSize: 12 }}>
-                updated {new Date(b.updatedAt).toLocaleString()}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div style={{ marginTop: 14, color: '#666', fontSize: 12 }}>
-        Tip: we’ll open your landing board automatically next time.
-      </div>
+      <h1 style={{ marginTop: 0 }}>Personal ERP</h1>
+      <div>Redirecting…</div>
     </div>
   );
 }
