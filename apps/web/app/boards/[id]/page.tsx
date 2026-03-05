@@ -91,15 +91,23 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
   async function fetchJson(url: string, init?: RequestInit) {
     const res = await fetch(url, { ...(init || {}), credentials: 'include' });
-    if (res.status === 401) {
-      // session expired; go back to home which shows login
-      window.location.href = '/';
+
+    // session expired / forbidden
+    if (res.status === 401 || res.status === 403) {
+      window.location.replace('/');
       throw new Error('not_authenticated');
     }
+
     if (!res.ok) {
       const text = await res.text().catch(() => '');
+      // some proxies return 500/502 with auth-related body; treat obvious auth failures the same
+      if (/not_authenticated|unauthorized|forbidden/i.test(text)) {
+        window.location.replace('/');
+        throw new Error('not_authenticated');
+      }
       throw new Error(`HTTP ${res.status} ${text}`);
     }
+
     return res.json();
   }
 
