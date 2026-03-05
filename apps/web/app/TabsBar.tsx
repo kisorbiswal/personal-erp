@@ -142,7 +142,6 @@ export function TabsBar({ activeBoardId }: { activeBoardId?: string }) {
             title={isDefault ? 'Default board' : 'Drag to reorder'}
           >
             {b.name}
-            {isDefault ? <span style={{ fontSize: 11, opacity: 0.9 }}>(default)</span> : null}
           </Link>
         );
       })}

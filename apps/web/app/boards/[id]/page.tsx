@@ -433,28 +433,46 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       <TabsBar activeBoardId={params.id} />
 
       <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <label
-          className="tab"
-          style={{ cursor: 'pointer' }}
-          title="Opening / will go to this board"
-        >
-          <input
-            type="checkbox"
-            checked={defaultBoardId === params.id}
-            onChange={(e) => {
-              try {
-                if (e.target.checked) {
-                  localStorage.setItem('landingBoardId', params.id);
-                  setDefaultBoardId(params.id);
-                  pushToast('success', 'Default board updated');
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <label className="tab" style={{ cursor: 'pointer' }} title="Opening / will go to this board">
+            <input
+              type="checkbox"
+              checked={defaultBoardId === params.id}
+              onChange={(e) => {
+                try {
+                  if (e.target.checked) {
+                    localStorage.setItem('landingBoardId', params.id);
+                    setDefaultBoardId(params.id);
+                    pushToast('success', 'Default board updated');
+                  }
+                } catch {
+                  pushToast('error', 'Could not save default board');
                 }
-              } catch {
-                pushToast('error', 'Could not save default board');
-              }
+              }}
+            />
+            Make it default
+          </label>
+
+          <button
+            className="tab"
+            onClick={() => {
+              const next = prompt('Rename board to?', board.name);
+              if (!next) return;
+              fetchJson(`${base}/boards/${params.id}`, {
+                method: 'PATCH',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ name: next.trim() }),
+              })
+                .then(() => fetchBoardAndTags())
+                .then(() => pushToast('success', 'Renamed'))
+                .catch((e) => setError(String(e)));
             }}
-          />
-          Make it default
-        </label>
+            style={{ cursor: 'pointer' }}
+            title="Rename board"
+          >
+            Rename
+          </button>
+        </div>
 
         <button className="tab" onClick={addColumn} style={{ cursor: 'pointer' }} title="Add a new column">
           + Column

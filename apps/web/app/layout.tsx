@@ -41,11 +41,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             color: white;
           }
         `}</style>
-        <div style={{ padding: 16, borderBottom: '1px solid #eee' }}>
-          <a href="/" style={{ textDecoration: 'none', color: '#111', fontWeight: 700 }}>
-            Personal ERP
+        <div style={{ padding: 16, borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'baseline', flexWrap: 'wrap' }}>
+            <a href="/" style={{ textDecoration: 'none', color: '#111', fontWeight: 700 }}>
+              Personal ERP
+            </a>
+            <span style={{ color: '#666' }}>Boards</span>
+          </div>
+
+          <a
+            href={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'}/auth/logout`}
+            style={{ color: '#666', textDecoration: 'none' }}
+          >
+            Logout
           </a>
-          <span style={{ marginLeft: 12, color: '#666' }}>Boards</span>
         </div>
         <BuildGuard />
         <div style={{ padding: 16 }}>{children}</div>
