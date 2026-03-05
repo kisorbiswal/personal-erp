@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { TabsBar } from '../../TabsBar';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 type TagItem = { id: string; name: string; count: number };
@@ -461,6 +462,8 @@ export default function BoardPage({ params }: { params: { id: string } }) {
           </div>
         ))}
       </div>
+
+      <TabsBar activeBoardId={params.id} />
 
       <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', gap: 12 }}>
         <Link href="/">← All boards</Link>
