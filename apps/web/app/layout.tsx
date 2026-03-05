@@ -1,3 +1,5 @@
+import { BUILD_INFO } from './build-info';
+
 export const metadata = {
   title: 'Personal ERP',
 };
@@ -25,6 +27,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <span style={{ marginLeft: 12, color: '#666' }}>Boards</span>
         </div>
         <div style={{ padding: 16 }}>{children}</div>
+        <div style={{ padding: 12, borderTop: '1px solid #eee', color: '#666', fontSize: 12 }}>
+          Build: <code>{BUILD_INFO.sha}</code> • {BUILD_INFO.builtAt} UTC
+        </div>
       </body>
     </html>
   );
