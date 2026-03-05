@@ -595,7 +595,6 @@ export default function BoardPage({ params }: { params: { id: string } }) {
         </div>
       ) : null}
 
-      <h1 style={{ marginTop: 0 }}>{board.name}</h1>
 
       {isAll ? (
         <div>
