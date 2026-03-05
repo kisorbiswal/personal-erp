@@ -26,6 +26,29 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       create: { email, name },
     });
 
+    // Personal-only default: ensure user has at least one board.
+    const boardCount = await this.prisma.board.count({ where: { userId: user.id } });
+    if (boardCount === 0) {
+      await this.prisma.board.create({
+        data: {
+          userId: user.id,
+          name: 'Board 1',
+          position: 0,
+          config: {
+            version: 1,
+            columns: [
+              {
+                id: `col:${Date.now()}`,
+                title: '',
+                query: { tagsAny: [], tagsMatch: 'any', includeDone: false, limit: 50 },
+                render: { type: 'list' },
+              },
+            ],
+          },
+        },
+      });
+    }
+
     return { userId: user.id, email: user.email, name: user.name };
   }
 }
