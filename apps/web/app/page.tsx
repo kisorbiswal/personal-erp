@@ -13,27 +13,59 @@ export default function HomePage() {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
   const [me, setMe] = useState<MeResponse | null>(null);
-  const [boards, setBoards] = useState<BoardsResponse | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const [boards, setBoards] = useState<BoardItem[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function fetchJson(url: string, init?: RequestInit) {
+    const res = await fetch(url, { ...(init || {}), credentials: 'include' });
+    if (res.status === 401 || res.status === 403) {
+      return { __auth: 'expired' } as any;
+    }
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status} ${text}`);
+    }
+    return res.json();
+  }
 
   useEffect(() => {
     (async () => {
       try {
-        const meRes = await fetch(`${base}/auth/me`, { credentials: 'include' });
-        const meJson = (await meRes.json()) as MeResponse;
-        setMe(meJson);
-        if (meJson.user) {
-          const bRes = await fetch(`${base}/boards`, { credentials: 'include' });
-          if (!bRes.ok) throw new Error(`Failed to load boards: HTTP ${bRes.status}`);
-          setBoards((await bRes.json()) as BoardsResponse);
+        const meJson: any = await fetchJson(`${base}/auth/me`);
+        if (meJson?.__auth === 'expired') {
+          setMe({ user: null });
+          return;
         }
+
+        setMe(meJson as MeResponse);
+
+        if (!meJson.user) {
+          setBoards(null);
+          return;
+        }
+
+        const bJson = (await fetchJson(`${base}/boards`)) as BoardsResponse;
+        setBoards(bJson.items);
       } catch (e: any) {
-        setErr(e?.message || String(e));
+        setError(e?.message || String(e));
+        // fall back to showing login
+        setMe({ user: null });
       }
     })();
   }, [base]);
 
-  if (err) return <div>Error: {err}</div>;
+  if (error) {
+    return (
+      <div>
+        <h1 style={{ marginTop: 0 }}>Personal ERP</h1>
+        <div style={{ color: '#b91c1c', marginBottom: 12 }}>Error: {error}</div>
+        <a href={`${base}/auth/google`} className="tab" style={{ textDecoration: 'none' }}>
+          Sign in with Google
+        </a>
+      </div>
+    );
+  }
+
   if (!me) return <div>Loading...</div>;
 
   if (!me.user) {
@@ -41,10 +73,7 @@ export default function HomePage() {
       <div>
         <h1 style={{ marginTop: 0 }}>Personal ERP</h1>
         <p>You are not signed in.</p>
-        <a
-          href={`${base}/auth/google`}
-          style={{ display: 'inline-block', padding: '10px 14px', border: '1px solid #111', borderRadius: 8 }}
-        >
+        <a href={`${base}/auth/google`} className="tab" style={{ textDecoration: 'none' }}>
           Sign in with Google
         </a>
       </div>
@@ -62,16 +91,16 @@ export default function HomePage() {
         </a>
       </div>
 
-      <ul>
-        {boards.items.map((b) => (
-          <li key={b.id} style={{ marginBottom: 8 }}>
-            <Link href={`/boards/${b.id}`}>{b.name}</Link>
-            <span style={{ marginLeft: 8, color: '#888', fontSize: 12 }}>
-              updated {new Date(b.updatedAt).toLocaleString()}
-            </span>
-          </li>
-        ))}
-      </ul>
+      <div style={{ marginTop: 18 }}>
+        <ul>
+          {boards.map((b) => (
+            <li key={b.id} style={{ marginBottom: 8 }}>
+              <Link href={`/boards/${b.id}`}>{b.name}</Link>
+              <span style={{ marginLeft: 8, color: '#888', fontSize: 12 }}>updated {new Date(b.updatedAt).toLocaleString()}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
