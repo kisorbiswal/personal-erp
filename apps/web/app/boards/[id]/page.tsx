@@ -89,42 +89,50 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
   const tagNames = useMemo(() => new Set(tags.map((t) => t.name)), [tags]);
 
+  async function fetchJson(url: string, init?: RequestInit) {
+    const res = await fetch(url, { ...(init || {}), credentials: 'include' });
+    if (res.status === 401) {
+      // session expired; go back to home which shows login
+      window.location.href = '/';
+      throw new Error('not_authenticated');
+    }
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status} ${text}`);
+    }
+    return res.json();
+  }
+
   async function fetchBoardAndTags() {
-    const bRes = await fetch(`${base}/boards/${params.id}`, { credentials: 'include' });
-    if (!bRes.ok) throw new Error(`Board load failed: HTTP ${bRes.status}`);
-    const b = await bRes.json();
+    const b = await fetchJson(`${base}/boards/${params.id}`);
     setBoard({ id: b.id, name: b.name, config: b.config });
 
-    const tRes = await fetch(`${base}/tags?limit=2000`, { credentials: 'include' });
-    if (tRes.ok) {
-      const tj = await tRes.json();
+    try {
+      const tj = await fetchJson(`${base}/tags?limit=2000`);
       setTags(tj.items || []);
+    } catch {
+      // ignore
     }
   }
 
   async function saveBoardConfig(next: BoardConfigV1) {
     if (!board) return;
-    const res = await fetch(`${base}/boards/${board.id}`, {
+    const updated = await fetchJson(`${base}/boards/${board.id}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
-      credentials: 'include',
       body: JSON.stringify({ config: next }),
     });
-    if (!res.ok) throw new Error(`Save failed: HTTP ${res.status}`);
-    const updated = await res.json();
     setBoard({ id: updated.id, name: updated.name, config: updated.config });
     pushToast('success', 'Board updated');
   }
 
   async function runBoard() {
-    const res = await fetch(`${base}/boards/${params.id}/run`, {
+    const d = await fetchJson(`${base}/boards/${params.id}/run`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({}),
-      credentials: 'include',
     });
-    if (!res.ok) throw new Error(`Run failed: HTTP ${res.status}`);
-    setData(await res.json());
+    setData(d);
   }
 
   async function loadFeedPage(reset = false) {
@@ -137,9 +145,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       url.searchParams.set('includeDone', showDoneAll ? '1' : '0');
       if (cursor) url.searchParams.set('cursor', cursor);
 
-      const res = await fetch(url.toString(), { credentials: 'include' });
-      if (!res.ok) throw new Error(`Feed failed: HTTP ${res.status}`);
-      const j = (await res.json()) as FeedResponse;
+      const j = (await fetchJson(url.toString())) as FeedResponse;
 
       setFeedItems((prev) => (reset ? j.items : [...prev, ...j.items]));
       setFeedCursor(j.nextCursor);
