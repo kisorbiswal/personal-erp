@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 
 type MeResponse = { user: null | { email: string; name?: string | null } };
 
@@ -41,6 +42,7 @@ async function fetchJsonWithTimeout(url: string, init?: RequestInit, timeoutMs =
 
 export default function HomePage() {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+  const router = useRouter();
 
   const [me, setMe] = useState<MeResponse | null>(null);
   const [boards, setBoards] = useState<BoardItem[] | null>(null);
@@ -77,6 +79,27 @@ export default function HomePage() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [base]);
+
+  const redirectTargetId = useMemo(() => {
+    if (!me?.user) return null;
+    if (!boards || boards.length === 0) return null;
+
+    // Temporary (until server-side user preferences exist): use localStorage.
+    // If not set or invalid, fall back to the first board.
+    try {
+      const landing = localStorage.getItem('landingBoardId');
+      if (landing && boards.some((b) => b.id === landing)) return landing;
+    } catch {
+      // ignore
+    }
+
+    return boards[0]?.id ?? null;
+  }, [me?.user, boards]);
+
+  useEffect(() => {
+    if (!redirectTargetId) return;
+    router.replace(`/boards/${redirectTargetId}`);
+  }, [redirectTargetId, router]);
 
   if (error) {
     return (
@@ -125,8 +148,22 @@ export default function HomePage() {
     );
   }
 
-  if (!boards) return <div>Loading boards…</div>;
+  if (!boards) return <div>Loading…</div>;
 
+  // If we have boards, we immediately redirect to the landing/first board.
+  if (boards.length > 0) {
+    return (
+      <div>
+        <h1 style={{ marginTop: 0 }}>Personal ERP</h1>
+        <div>Redirecting to your board…</div>
+        <div style={{ marginTop: 12, color: '#666', fontSize: 12 }}>
+          (If this doesn’t redirect, you can open a board manually from a direct link.)
+        </div>
+      </div>
+    );
+  }
+
+  // No boards yet.
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -136,16 +173,10 @@ export default function HomePage() {
         </a>
       </div>
 
-      <div style={{ marginTop: 18 }}>
-        <ul>
-          {boards.map((b) => (
-            <li key={b.id} style={{ marginBottom: 8 }}>
-              <Link href={`/boards/${b.id}`}>{b.name}</Link>
-              <span style={{ marginLeft: 8, color: '#888', fontSize: 12 }}>updated {new Date(b.updatedAt).toLocaleString()}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <p>No boards yet.</p>
+      <p>
+        Create one from any existing board page UI (or tell me and I’ll add a “Create board” button here too).
+      </p>
     </div>
   );
 }

@@ -8,7 +8,9 @@ export const BUILD_INFO = {
   builtAt:
     process.env.NEXT_PUBLIC_BUILD_TIME ||
     process.env.VERCEL_BUILD_TIME ||
-    'unknown',
+    // Fallback: evaluated when the module is bundled/loaded.
+    // Prevents the footer from ever showing "time unknown".
+    new Date().toISOString(),
 
   deploymentId: process.env.VERCEL_DEPLOYMENT_ID || 'unknown',
 };
