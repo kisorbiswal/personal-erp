@@ -7,8 +7,11 @@ Type=simple
 WorkingDirectory=/home/butu/.openclaw/workspace/personal-erp/apps/web
 Environment=WEB_PORT=3001
 Environment=NEXT_PUBLIC_API_BASE_URL=https://life-api.kisorbiswal.com
+# Used by the web footer build info (inlined at build time)
+Environment=NEXT_PUBLIC_GIT_SHA=local
+Environment=NEXT_PUBLIC_BUILD_TIME=1970-01-01T00:00:00Z
 # Use pnpm via corepack
-ExecStart=/usr/bin/pnpm start
+ExecStart=/usr/bin/env pnpm start
 Restart=always
 RestartSec=3
 User=butu

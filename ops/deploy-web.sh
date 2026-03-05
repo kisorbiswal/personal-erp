@@ -14,6 +14,8 @@ pnpm -r install
 
 echo "==> Building web"
 export NEXT_PUBLIC_API_BASE_URL="https://life-api.kisorbiswal.com"
+export NEXT_PUBLIC_GIT_SHA="$(git rev-parse --short HEAD)"
+export NEXT_PUBLIC_BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 pnpm --filter @personal-erp/web build
 
 echo "==> Restarting service"
