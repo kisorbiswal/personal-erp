@@ -28,7 +28,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
         <div style={{ padding: 16 }}>{children}</div>
         <div style={{ padding: 12, borderTop: '1px solid #eee', color: '#666', fontSize: 12 }}>
-          Build: <code>{BUILD_INFO.sha}</code> • {BUILD_INFO.builtAt} UTC
+          Build: <code>{BUILD_INFO.sha}</code> •{' '}
+          <span suppressHydrationWarning>{new Date(BUILD_INFO.builtAt).toLocaleString()}</span>
         </div>
       </body>
     </html>
