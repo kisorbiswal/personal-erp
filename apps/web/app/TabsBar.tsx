@@ -5,6 +5,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 type BoardItem = { id: string; name: string };
 
+type CreateBoardResponse = { id: string; name: string };
+
 export function TabsBar({ activeBoardId }: { activeBoardId?: string }) {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
   const [boards, setBoards] = useState<BoardItem[]>([]);
@@ -71,6 +73,31 @@ export function TabsBar({ activeBoardId }: { activeBoardId?: string }) {
     }
   }
 
+  async function createBoard() {
+    const name = prompt('New board name?');
+    if (!name) return;
+
+    const res = await fetch(`${base}/boards`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ name: name.trim() }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`Create board failed: HTTP ${res.status} ${text}`);
+    }
+
+    const j = (await res.json()) as CreateBoardResponse;
+    const next = [...boards, { id: j.id, name: j.name }];
+    setBoards(next);
+    persistOrder(next);
+
+    // Navigate to the new board.
+    window.location.href = `/boards/${j.id}`;
+  }
+
   function moveBoard(fromId: string, toId: string) {
     if (fromId === toId) return;
     const fromIdx = boards.findIndex((b) => b.id === fromId);
@@ -84,7 +111,7 @@ export function TabsBar({ activeBoardId }: { activeBoardId?: string }) {
   }
 
   return (
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12, alignItems: 'center' }}>
       {boards.map((b) => {
         const active = b.id === activeBoardId;
         const isDefault = defaultBoardId === b.id;
@@ -117,6 +144,17 @@ export function TabsBar({ activeBoardId }: { activeBoardId?: string }) {
           </Link>
         );
       })}
+
+      <button
+        className="tab"
+        onClick={() => {
+          createBoard().catch((e) => alert(e?.message || String(e)));
+        }}
+        title="Create new board"
+        style={{ cursor: 'pointer' }}
+      >
+        +
+      </button>
     </div>
   );
 }

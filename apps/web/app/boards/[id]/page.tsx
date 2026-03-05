@@ -498,9 +498,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
             <input type="checkbox" checked={showDoneAll} onChange={(e) => setShowDoneAll(e.target.checked)} />
             Show done
           </label>
-        ) : (
-          <button onClick={addColumn}>+ Column</button>
-        )}
+        ) : null}
       </div>
 
       {/* Sticky bulk bar */}
@@ -703,9 +701,24 @@ export default function BoardPage({ params }: { params: { id: string } }) {
               <div key={s.id} className="col" style={{ border: '1px solid #eee', borderRadius: 10, padding: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
                   <div style={{ fontWeight: 700 }}>Column</div>
-                  <button onClick={() => removeColumn(s.id)} style={{ background: '#b91c1c', color: 'white', padding: '4px 10px' }}>
-                    Remove
-                  </button>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <button
+                      className="tab"
+                      onClick={() => addColumn()}
+                      title="Add column"
+                      style={{ padding: '4px 10px', cursor: 'pointer' }}
+                    >
+                      +
+                    </button>
+                    <button
+                      className="tab"
+                      onClick={() => removeColumn(s.id)}
+                      title="Remove column"
+                      style={{ padding: '4px 10px', cursor: 'pointer', borderColor: '#fecaca', background: '#fef2f2', color: '#991b1b' }}
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
 
                 <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
