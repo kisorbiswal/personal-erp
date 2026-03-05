@@ -1,0 +1,88 @@
+name: CI
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: personal_erp
+          POSTGRES_PASSWORD: personal_erp
+          POSTGRES_DB: personal_erp
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U personal_erp -d personal_erp"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install
+        run: pnpm -r install
+
+      - name: Prisma migrate
+        run: |
+          cd apps/api
+          export DATABASE_URL="postgresql://personal_erp:personal_erp@localhost:5433/personal_erp"
+          pnpm prisma:generate
+          pnpm prisma:migrate --name ci
+
+      - name: API unit tests
+        run: |
+          cd apps/api
+          pnpm test
+
+      - name: Install Playwright browsers
+        run: |
+          cd apps/web
+          pnpm exec playwright install --with-deps chromium
+
+      - name: Start API
+        run: |
+          cd apps/api
+          export NODE_ENV=test
+          export DEV_LOGIN_ENABLED=1
+          export API_PORT=4000
+          export SESSION_SECRET=ci-secret
+          export UI_ORIGIN=http://localhost:3001
+          export API_ORIGIN=http://localhost:4000
+          export GOOGLE_CLIENT_ID=dummy
+          export GOOGLE_CLIENT_SECRET=dummy
+          export DATABASE_URL="postgresql://personal_erp:personal_erp@localhost:5433/personal_erp"
+          pnpm build
+          node dist/main.js &
+
+      - name: Start Web
+        run: |
+          cd apps/web
+          export WEB_PORT=3001
+          export NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
+          export NEXT_PUBLIC_GIT_SHA=ci
+          export NEXT_PUBLIC_BUILD_TIME=2026-01-01T00:00:00Z
+          pnpm build
+          pnpm start &
+
+      - name: E2E
+        run: |
+          cd apps/web
+          export WEB_BASE_URL=http://localhost:3001
+          export API_BASE_URL=http://localhost:4000
+          pnpm test:e2e

@@ -10,11 +10,12 @@ import { FeedController } from './feed.controller';
 import { BoardsController } from './boards.controller';
 import { BoardsReorderController } from './boards.reorder.controller';
 import { AuthController } from './auth.controller';
+import { AuthDevController } from './auth.dev.controller';
 import { GoogleStrategy } from './google.strategy';
 
 @Module({
   imports: [PassportModule.register({ session: false })],
-  controllers: [HealthController, AuthController, EventsController, EventsActionsController, EventsTagsController, TagsController, BoardsController, BoardsReorderController, FeedController],
+  controllers: [HealthController, AuthController, AuthDevController, EventsController, EventsActionsController, EventsTagsController, TagsController, BoardsController, BoardsReorderController, FeedController],
   providers: [PrismaService, GoogleStrategy],
 })
 export class AppModule {}
