@@ -223,6 +223,11 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     });
     if (!res.ok) throw new Error(`Add tag failed: HTTP ${res.status}`);
     pushToast('success', `Added tag “${t}”`);
+    if (board?.name.toLowerCase() === 'all') {
+      await loadFeedPage(true);
+    } else {
+      await runBoard();
+    }
   }
 
   async function removeTagFromEvent(eventId: string, tag: string) {
@@ -236,6 +241,11 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     });
     if (!res.ok) throw new Error(`Remove tag failed: HTTP ${res.status}`);
     pushToast('info', `Removed tag “${t}”`);
+    if (board?.name.toLowerCase() === 'all') {
+      await loadFeedPage(true);
+    } else {
+      await runBoard();
+    }
   }
 
   async function saveContent(eventId: string, content: string) {
@@ -250,6 +260,11 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     setEditingId(null);
     setEditingText('');
     pushToast('success', 'Saved');
+    if (board?.name.toLowerCase() === 'all') {
+      await loadFeedPage(true);
+    } else {
+      await runBoard();
+    }
   }
 
   function addColumn() {
