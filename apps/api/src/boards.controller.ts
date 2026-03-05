@@ -69,7 +69,15 @@ export class BoardsController {
       body.config ??
       ({
         version: 1,
-        columns: [],
+        // Default: start with one empty column so user can immediately pick tags.
+        columns: [
+          {
+            id: `col:${Date.now()}`,
+            title: '',
+            query: { tagsAny: [], tagsMatch: 'any', includeDone: false, limit: 50 },
+            render: { type: 'list' },
+          },
+        ],
       } satisfies BoardConfigV1);
 
     const created = await this.prisma.board.create({

@@ -659,8 +659,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
             return (
               <div key={s.id} className="col" style={{ border: '1px solid #eee', borderRadius: 10, padding: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
-                  <div style={{ fontWeight: 700 }}>Column</div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'baseline', gap: 10 }}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <button
                       className="tab"
