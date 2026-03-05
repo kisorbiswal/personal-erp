@@ -465,8 +465,24 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
       <TabsBar activeBoardId={params.id} />
 
-      <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-        <Link href="/">← All boards</Link>
+      <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Link href="/">← All boards</Link>
+          <button
+            className="tab"
+            onClick={() => {
+              try {
+                localStorage.setItem('landingBoardId', params.id);
+                pushToast('success', 'Set as landing board');
+              } catch {
+                pushToast('error', 'Could not save landing board');
+              }
+            }}
+            title="Opening / will go to this board"
+          >
+            Set as landing
+          </button>
+        </div>
         {isAll ? (
           <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
             <input type="checkbox" checked={showDoneAll} onChange={(e) => setShowDoneAll(e.target.checked)} />

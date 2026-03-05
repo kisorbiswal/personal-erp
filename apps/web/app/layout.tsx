@@ -20,6 +20,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           .col {
             min-width: 0; /* allows flex/grid children to shrink and wrap */
           }
+
+          /* Simple "tabs" styling */
+          .tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            background: #f9fafb;
+            color: #111;
+            font-size: 13px;
+            line-height: 1;
+          }
+          .tab:hover { background: #f3f4f6; }
+          .tabActive {
+            background: #111827;
+            border-color: #111827;
+            color: white;
+          }
         `}</style>
         <div style={{ padding: 16, borderBottom: '1px solid #eee' }}>
           <a href="/" style={{ textDecoration: 'none', color: '#111', fontWeight: 700 }}>
