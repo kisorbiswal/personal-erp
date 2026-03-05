@@ -46,7 +46,7 @@ export class BoardsController {
 
     const boards = await this.prisma.board.findMany({
       where: { workspaceId: wsId },
-      orderBy: { name: 'asc' },
+      orderBy: [{ position: 'asc' }, { name: 'asc' }],
       select: { id: true, name: true, updatedAt: true },
     });
 

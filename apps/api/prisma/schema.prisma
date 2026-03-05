@@ -111,6 +111,7 @@ model Board {
   id          String   @id @default(cuid())
   workspaceId String
   name        String
+  position    Int      @default(0)
   config      Json
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
