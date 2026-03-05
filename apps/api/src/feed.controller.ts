@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { SessionAuthGuard } from './auth.guard';
 
@@ -9,19 +9,17 @@ export class FeedController {
 
   @Get()
   async list(
-    @Query('workspaceId') workspaceId?: string,
+    @Req() req: any,
     @Query('limit') limitRaw?: string,
     @Query('cursor') cursor?: string,
     @Query('includeDone') includeDoneRaw?: string,
   ) {
+    const userId = req.user.userId as string;
     const limit = Math.min(Math.max(Number(limitRaw ?? 50) || 50, 1), 200);
     const includeDone = includeDoneRaw === 'true' || includeDoneRaw === '1';
 
-    const wsId = workspaceId ?? (await this.prisma.workspace.findFirst({ select: { id: true } }))?.id;
-    if (!wsId) return { items: [], nextCursor: null };
-
     const where: any = {
-      workspaceId: wsId,
+      userId,
       deletedAt: null,
     };
 
@@ -31,7 +29,7 @@ export class FeedController {
           tags: {
             some: {
               tag: {
-                workspaceId: wsId,
+                userId,
                 name: 'done',
               },
             },

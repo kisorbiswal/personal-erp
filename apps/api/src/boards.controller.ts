@@ -1,5 +1,5 @@
 import { SessionAuthGuard } from './auth.guard';
-import { Body, Controller, Get, Param, Post, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Patch, Req, UseGuards } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 
 type BoardSectionQuery = {
@@ -40,12 +40,11 @@ export class BoardsController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get()
-  async list() {
-    const wsId = (await this.prisma.workspace.findFirst({ select: { id: true } }))?.id;
-    if (!wsId) return { items: [] };
+  async list(@Req() req: any) {
+    const userId = req.user.userId as string;
 
     const boards = await this.prisma.board.findMany({
-      where: { workspaceId: wsId },
+      where: { userId },
       orderBy: [{ position: 'asc' }, { name: 'asc' }],
       select: { id: true, name: true, updatedAt: true },
     });
@@ -54,16 +53,17 @@ export class BoardsController {
   }
 
   @Get('/:id')
-  async get(@Param('id') id: string) {
-    const board = await this.prisma.board.findUnique({ where: { id } });
+  async get(@Req() req: any, @Param('id') id: string) {
+    const userId = req.user.userId as string;
+
+    const board = await this.prisma.board.findFirst({ where: { id, userId } });
     if (!board) return { error: 'not_found' };
     return { id: board.id, name: board.name, config: board.config, updatedAt: board.updatedAt };
   }
 
   @Post()
-  async create(@Body() body: { name: string; config?: BoardConfigV1 }) {
-    const wsId = (await this.prisma.workspace.findFirst({ select: { id: true } }))?.id;
-    if (!wsId) return { error: 'no_workspace' };
+  async create(@Req() req: any, @Body() body: { name: string; config?: BoardConfigV1 }) {
+    const userId = req.user.userId as string;
 
     const config: BoardConfigV1 =
       body.config ??
@@ -82,7 +82,7 @@ export class BoardsController {
 
     const created = await this.prisma.board.create({
       data: {
-        workspaceId: wsId,
+        userId,
         name: body.name,
         config,
       },
@@ -95,10 +95,13 @@ export class BoardsController {
 
   @Patch('/:id')
   async update(
+    @Req() req: any,
     @Param('id') id: string,
     @Body() body: { name?: string; config?: BoardConfigV1 },
   ) {
-    const board = await this.prisma.board.findUnique({ where: { id } });
+    const userId = req.user.userId as string;
+
+    const board = await this.prisma.board.findFirst({ where: { id, userId } });
     if (!board) return { error: 'not_found' };
 
     const updated = await this.prisma.board.update({
@@ -114,8 +117,10 @@ export class BoardsController {
   }
 
   @Post('/:id/run')
-  async run(@Param('id') id: string, @Body() body: { includeDone?: boolean } = {}) {
-    const board = await this.prisma.board.findUnique({ where: { id } });
+  async run(@Req() req: any, @Param('id') id: string, @Body() body: { includeDone?: boolean } = {}) {
+    const userId = req.user.userId as string;
+
+    const board = await this.prisma.board.findFirst({ where: { id, userId } });
     if (!board) return { error: 'not_found' };
 
     const config = board.config as BoardConfigV1;
@@ -134,7 +139,7 @@ export class BoardsController {
       const limit = Math.min(Math.max(section.query?.limit ?? 50, 1), 200);
 
       const where: any = {
-        workspaceId: board.workspaceId,
+        userId: board.userId,
         deletedAt: null,
       };
 
@@ -146,12 +151,12 @@ export class BoardsController {
       let hiddenDoneCount = 0;
       if (hideDone) {
         const doneOnlyWhere: any = {
-          workspaceId: board.workspaceId,
+          userId: board.userId,
           deletedAt: null,
           // must have done tag
           tags: {
             some: {
-              tag: { workspaceId: board.workspaceId, name: 'done' },
+              tag: { userId: board.userId, name: 'done' },
             },
           },
         };
@@ -173,7 +178,7 @@ export class BoardsController {
               tags: {
                 some: {
                   tag: {
-                    workspaceId: board.workspaceId,
+                    userId: board.userId,
                     name: { in: section.query.tagsNot },
                   },
                 },
@@ -189,7 +194,7 @@ export class BoardsController {
               tags.map((t) => ({
                 tags: {
                   some: {
-                    tag: { workspaceId: board.workspaceId, name: t },
+                    tag: { userId: board.userId, name: t },
                   },
                 },
               })),
@@ -200,7 +205,7 @@ export class BoardsController {
                 tags: {
                   some: {
                     tag: {
-                      workspaceId: board.workspaceId,
+                      userId: board.userId,
                       name: { in: tags },
                     },
                   },
@@ -217,7 +222,7 @@ export class BoardsController {
           {
             tags: {
               some: {
-                tag: { workspaceId: board.workspaceId, name: 'done' },
+                tag: { userId: board.userId, name: 'done' },
               },
             },
           },
@@ -243,7 +248,7 @@ export class BoardsController {
             tags: {
               some: {
                 tag: {
-                  workspaceId: board.workspaceId,
+                  userId: board.userId,
                   name: { in: section.query.tagsNot },
                 },
               },
@@ -261,7 +266,7 @@ export class BoardsController {
               tags: {
                 some: {
                   tag: {
-                    workspaceId: board.workspaceId,
+                    userId: board.userId,
                     name: t,
                   },
                 },
@@ -272,7 +277,7 @@ export class BoardsController {
           where.tags = {
             some: {
               tag: {
-                workspaceId: board.workspaceId,
+                userId: board.userId,
                 name: { in: tags },
               },
             },

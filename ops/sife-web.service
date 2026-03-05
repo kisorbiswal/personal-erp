@@ -1,0 +1,17 @@
+[Unit]
+Description=sife-web (Next.js UI)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/butu/.openclaw/workspace/personal-erp/apps/web
+Environment=WEB_PORT=3001
+Environment=NEXT_PUBLIC_API_BASE_URL=https://life-api.kisorbiswal.com
+# Use pnpm via corepack
+ExecStart=/usr/bin/pnpm start
+Restart=always
+RestartSec=3
+User=butu
+
+[Install]
+WantedBy=multi-user.target

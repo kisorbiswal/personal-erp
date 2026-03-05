@@ -1,5 +1,5 @@
 import { SessionAuthGuard } from './auth.guard';
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 
 @Controller('/events')
@@ -9,19 +9,16 @@ export class EventsController {
 
   @Get()
   async list(
-    @Query('workspaceId') workspaceId?: string,
+    @Req() req: any,
     @Query('tag') tag?: string,
     @Query('q') q?: string,
     @Query('limit') limitRaw?: string,
     @Query('cursor') cursor?: string,
   ) {
+    const userId = req.user.userId as string;
     const limit = Math.min(Math.max(Number(limitRaw ?? 50) || 50, 1), 200);
 
-    // default workspace: first one
-    const wsId = workspaceId ?? (await this.prisma.workspace.findFirst({ select: { id: true } }))?.id;
-    if (!wsId) return { items: [], nextCursor: null };
-
-    const where: any = { workspaceId: wsId, deletedAt: null };
+    const where: any = { userId, deletedAt: null };
 
     if (q) {
       where.content = { contains: q, mode: 'insensitive' };
@@ -32,7 +29,7 @@ export class EventsController {
         some: {
           tag: {
             name: tag,
-            workspaceId: wsId,
+            userId,
           },
         },
       };

@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { SessionAuthGuard } from './auth.guard';
 
@@ -8,20 +8,19 @@ export class EventsTagsController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Post('/:id/tags/add')
-  async addTag(@Param('id') id: string, @Body() body: { tag: string }) {
-    const ws = await this.prisma.workspace.findFirst({ select: { id: true } });
-    if (!ws) return { error: 'no_workspace' };
+  async addTag(@Req() req: any, @Param('id') id: string, @Body() body: { tag: string }) {
+    const userId = req.user.userId as string;
 
     const tagName = (body.tag || '').trim().toLowerCase();
     if (!tagName) return { error: 'tag_required' };
 
-    const ev = await this.prisma.event.findUnique({ where: { id }, select: { id: true, deletedAt: true } });
+    const ev = await this.prisma.event.findFirst({ where: { id, userId }, select: { id: true, deletedAt: true } });
     if (!ev || ev.deletedAt) return { error: 'not_found' };
 
     const tag = await this.prisma.tag.upsert({
-      where: { workspaceId_name: { workspaceId: ws.id, name: tagName } },
+      where: { userId_name: { userId, name: tagName } },
       update: {},
-      create: { workspaceId: ws.id, name: tagName },
+      create: { userId, name: tagName },
     });
 
     try {
@@ -34,15 +33,17 @@ export class EventsTagsController {
   }
 
   @Post('/:id/tags/remove')
-  async removeTag(@Param('id') id: string, @Body() body: { tag: string }) {
-    const ws = await this.prisma.workspace.findFirst({ select: { id: true } });
-    if (!ws) return { error: 'no_workspace' };
+  async removeTag(@Req() req: any, @Param('id') id: string, @Body() body: { tag: string }) {
+    const userId = req.user.userId as string;
 
     const tagName = (body.tag || '').trim().toLowerCase();
     if (!tagName) return { error: 'tag_required' };
 
+    const ev = await this.prisma.event.findFirst({ where: { id, userId }, select: { id: true, deletedAt: true } });
+    if (!ev || ev.deletedAt) return { error: 'not_found' };
+
     const tag = await this.prisma.tag.findUnique({
-      where: { workspaceId_name: { workspaceId: ws.id, name: tagName } },
+      where: { userId_name: { userId, name: tagName } },
       select: { id: true },
     });
     if (!tag) return { ok: true, removed: 0 };

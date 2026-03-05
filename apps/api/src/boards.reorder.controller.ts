@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { SessionAuthGuard } from './auth.guard';
 
@@ -8,15 +8,14 @@ export class BoardsReorderController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Post('/reorder')
-  async reorder(@Body() body: { ids: string[] }) {
-    const wsId = (await this.prisma.workspace.findFirst({ select: { id: true } }))?.id;
-    if (!wsId) return { error: 'no_workspace' };
+  async reorder(@Req() req: any, @Body() body: { ids: string[] }) {
+    const userId = req.user.userId as string;
 
     const ids = body.ids || [];
     // set position = index
     for (let i = 0; i < ids.length; i++) {
       await this.prisma.board.updateMany({
-        where: { id: ids[i], workspaceId: wsId },
+        where: { id: ids[i], userId },
         data: { position: i },
       });
     }

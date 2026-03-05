@@ -26,16 +26,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       create: { email, name },
     });
 
-    // Ensure workspace membership exists (single-workspace for now)
-    const ws = await this.prisma.workspace.findFirst({ select: { id: true } });
-    if (ws) {
-      await this.prisma.workspaceMember.upsert({
-        where: { workspaceId_userId: { workspaceId: ws.id, userId: user.id } },
-        update: {},
-        create: { workspaceId: ws.id, userId: user.id, role: 'OWNER' },
-      });
-    }
-
     return { userId: user.id, email: user.email, name: user.name };
   }
 }

@@ -7,15 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum WorkspaceRole {
-  OWNER
-  MEMBER
-}
-
-enum EventVisibility {
-  PRIVATE
-  WORKSPACE
-}
+// Personal-only ERP (no workspaces / no sharing)
+// Multi-account safe by default: every record is scoped to a User.
 
 model User {
   id        String   @id @default(cuid())
@@ -24,75 +17,48 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  memberships WorkspaceMember[]
-  events      Event[] @relation("EventCreatedBy")
-}
-
-model Workspace {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  members WorkspaceMember[]
-  tags    Tag[]
   events  Event[]
+  tags   Tag[]
   boards Board[]
 }
 
-model WorkspaceMember {
-  id          String        @id @default(cuid())
-  workspaceId String
-  userId      String
-  role        WorkspaceRole @default(MEMBER)
-  createdAt   DateTime      @default(now())
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([workspaceId, userId])
-}
-
 model Tag {
-  id          String    @id @default(cuid())
-  workspaceId String
-  name        String
-  createdAt   DateTime  @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  createdAt DateTime @default(now())
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   eventTags EventTag[]
 
-  @@unique([workspaceId, name])
-  @@index([workspaceId, name])
+  @@unique([userId, name])
+  @@index([userId, name])
 }
 
 model Event {
-  id           String          @id @default(cuid())
-  workspaceId  String
-  createdById  String
+  id         String   @id @default(cuid())
+  userId     String
 
-  occurredAt   DateTime
-  ingestedAt   DateTime        @default(now())
+  occurredAt DateTime
+  ingestedAt DateTime @default(now())
 
-  content      String
-  visibility   EventVisibility @default(PRIVATE)
+  content    String
 
-  source       String?         // e.g. mylogger, telegram
-  sourceRef    String?         // e.g. mylogger:info_list:123
+  source     String?  // e.g. mylogger, telegram
+  sourceRef  String?  // e.g. mylogger:info_list:123
 
-  deletedAt    DateTime?
+  deletedAt  DateTime?
 
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  createdBy User @relation("EventCreatedBy", fields: [createdById], references: [id])
-  tags      EventTag[]
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags     EventTag[]
   pinnedOn BoardPin[]
 
-  @@index([workspaceId, occurredAt])
-  @@index([workspaceId, deletedAt])
-  @@index([workspaceId, source, sourceRef])
+  @@index([userId, occurredAt])
+  @@index([userId, deletedAt])
+  @@index([userId, source, sourceRef])
 }
 
 model EventTag {
@@ -108,19 +74,19 @@ model EventTag {
 }
 
 model Board {
-  id          String   @id @default(cuid())
-  workspaceId String
-  name        String
-  position    Int      @default(0)
-  config      Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  position  Int      @default(0)
+  config    Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  pins      BoardPin[]
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pins BoardPin[]
 
-  @@index([workspaceId])
-  @@unique([workspaceId, name])
+  @@index([userId])
+  @@unique([userId, name])
 }
 
 model BoardPin {
