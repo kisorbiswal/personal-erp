@@ -215,6 +215,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   async function addTagToEvent(eventId: string, tag: string) {
     const t = tag.trim().toLowerCase();
     if (!t) return;
+
     const res = await fetch(`${base}/events/${eventId}/tags/add`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -222,7 +223,30 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       body: JSON.stringify({ tag: t }),
     });
     if (!res.ok) throw new Error(`Add tag failed: HTTP ${res.status}`);
+
+    // optimistic UI update
+    if (board?.name.toLowerCase() === 'all') {
+      setFeedItems((prev) =>
+        prev.map((it) => (it.id === eventId ? { ...it, tags: Array.from(new Set([...(it.tags || []), t])) } : it)),
+      );
+    } else {
+      setData((prev: any) => {
+        if (!prev?.sections) return prev;
+        return {
+          ...prev,
+          sections: prev.sections.map((sec: any) => ({
+            ...sec,
+            items: (sec.items || []).map((it: any) =>
+              it.id === eventId ? { ...it, tags: Array.from(new Set([...(it.tags || []), t])) } : it,
+            ),
+          })),
+        };
+      });
+    }
+
     pushToast('success', `Added tag “${t}”`);
+
+    // reconcile from server (also updates filtering)
     if (board?.name.toLowerCase() === 'all') {
       await loadFeedPage(true);
     } else {
@@ -233,6 +257,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   async function removeTagFromEvent(eventId: string, tag: string) {
     const t = tag.trim().toLowerCase();
     if (!t) return;
+
     const res = await fetch(`${base}/events/${eventId}/tags/remove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -240,7 +265,26 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       body: JSON.stringify({ tag: t }),
     });
     if (!res.ok) throw new Error(`Remove tag failed: HTTP ${res.status}`);
+
+    // optimistic UI update
+    if (board?.name.toLowerCase() === 'all') {
+      setFeedItems((prev) => prev.map((it) => (it.id === eventId ? { ...it, tags: (it.tags || []).filter((x) => x !== t) } : it)));
+    } else {
+      setData((prev: any) => {
+        if (!prev?.sections) return prev;
+        return {
+          ...prev,
+          sections: prev.sections.map((sec: any) => ({
+            ...sec,
+            items: (sec.items || []).map((it: any) => (it.id === eventId ? { ...it, tags: (it.tags || []).filter((x: string) => x !== t) } : it)),
+          })),
+        };
+      });
+    }
+
     pushToast('info', `Removed tag “${t}”`);
+
+    // reconcile from server (also updates filtering)
     if (board?.name.toLowerCase() === 'all') {
       await loadFeedPage(true);
     } else {
