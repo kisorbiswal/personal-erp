@@ -131,6 +131,11 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       body: JSON.stringify({ config: next }),
     });
     setBoard({ id: updated.id, name: updated.name, config: updated.config });
+
+    // refresh board results after config changes
+    if (updated.name?.toLowerCase?.() !== 'all') {
+      await runBoard();
+    }
     pushToast('success', 'Board updated');
   }
 
