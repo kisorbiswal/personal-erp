@@ -74,14 +74,16 @@ export function TabsBar({ activeBoardId }: { activeBoardId?: string }) {
   }
 
   async function createBoard() {
-    const name = prompt('New board name?');
-    if (!name) return;
+    const name = prompt('New board name? (leave blank for auto)');
+
+    const trimmed = (name || '').trim();
+    const fallback = `Board ${boards.length + 1}`;
 
     const res = await fetch(`${base}/boards`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ name: name.trim() }),
+      body: JSON.stringify({ name: trimmed || fallback }),
     });
 
     if (!res.ok) {

@@ -134,9 +134,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     setBoard({ id: updated.id, name: updated.name, config: updated.config });
 
     // refresh board results after config changes
-    if (updated.name?.toLowerCase?.() !== 'all') {
-      await runBoard();
-    }
+    await runBoard();
     pushToast('success', 'Board updated');
   }
 
@@ -400,51 +398,15 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     if (!board) return;
-    if (board.name.toLowerCase() === 'all') {
-      setFeedItems([]);
-      setFeedCursor(null);
-      loadFeedPage(true).catch((e) => setError(String(e)));
-    } else {
-      runBoard().catch((e) => setError(String(e)));
-    }
+    runBoard().catch((e) => setError(String(e)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board?.id]);
-
-  useEffect(() => {
-    if (!board) return;
-    if (board.name.toLowerCase() === 'all') {
-      setFeedItems([]);
-      setFeedCursor(null);
-      loadFeedPage(true).catch((e) => setError(String(e)));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showDoneAll]);
-
-  useEffect(() => {
-    if (!board) return;
-    if (board.name.toLowerCase() !== 'all') return;
-    const el = sentinelRef.current;
-    if (!el) return;
-
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const e = entries[0];
-        if (e.isIntersecting && feedCursor && !feedLoading) {
-          loadFeedPage(false).catch((err) => setError(String(err)));
-        }
-      },
-      { root: null, rootMargin: '600px', threshold: 0.01 },
-    );
-
-    obs.observe(el);
-    return () => obs.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [board?.id, feedCursor, feedLoading]);
 
   if (error) return <div>Error: {error}</div>;
   if (!board) return <div>Loading...</div>;
 
-  const isAll = board.name.toLowerCase() === 'all';
+  // Treat every board the same ("All" is not special).
+  const isAll = false;
 
   return (
     <div>
@@ -493,12 +455,10 @@ export default function BoardPage({ params }: { params: { id: string } }) {
           />
           Make it default
         </label>
-        {isAll ? (
-          <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
-            <input type="checkbox" checked={showDoneAll} onChange={(e) => setShowDoneAll(e.target.checked)} />
-            Show done
-          </label>
-        ) : null}
+
+        <button className="tab" onClick={addColumn} style={{ cursor: 'pointer' }} title="Add a new column">
+          + Column
+        </button>
       </div>
 
       {/* Sticky bulk bar */}
