@@ -7,6 +7,54 @@ import { SessionAuthGuard } from './auth.guard';
 export class EventsActionsController {
   constructor(private readonly prisma: PrismaService) {}
 
+  @Post()
+  async create(
+    @Req() req: any,
+    @Body() body: { content: string; occurredAt?: string; tags?: string[] },
+  ) {
+    const userId = req.user.userId as string;
+
+    const content = (body.content || '').trim();
+    if (!content) return { error: 'content_required' };
+
+    const occurredAt = body.occurredAt ? new Date(body.occurredAt) : new Date();
+    const tagNames = Array.from(
+      new Set((body.tags || []).map((t) => String(t || '').trim().toLowerCase()).filter(Boolean)),
+    );
+
+    const created = await this.prisma.$transaction(async (tx) => {
+      const ev = await tx.event.create({
+        data: {
+          userId,
+          occurredAt,
+          content,
+          source: 'ui',
+          sourceRef: null,
+        },
+        select: { id: true, occurredAt: true, content: true },
+      });
+
+      if (tagNames.length) {
+        for (const name of tagNames) {
+          const tag = await tx.tag.upsert({
+            where: { userId_name: { userId, name } },
+            update: {},
+            create: { userId, name },
+            select: { id: true, name: true },
+          });
+
+          await tx.eventTag.create({
+            data: { eventId: ev.id, tagId: tag.id },
+          }).catch(() => undefined);
+        }
+      }
+
+      return ev;
+    });
+
+    return { ok: true, event: created };
+  }
+
   @Patch('/:id')
   async updateContent(@Req() req: any, @Param('id') id: string, @Body() body: { content: string }) {
     const userId = req.user.userId as string;

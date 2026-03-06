@@ -75,6 +75,11 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   // per-column tag draft
   const [colTagDrafts, setColTagDrafts] = useState<Record<string, string>>({});
 
+  // per-column quick capture drafts (auto-create events)
+  const [captureDrafts, setCaptureDrafts] = useState<Record<string, string>>({});
+  const [captureStatus, setCaptureStatus] = useState<Record<string, 'idle' | 'saving' | 'saved' | 'error'>>({});
+  const captureTimers = useRef<Record<string, any>>({});
+
   // toasts
   const [toasts, setToasts] = useState<Toast[]>([]);
   const toastTimers = useRef<Record<string, any>>({});
@@ -327,6 +332,20 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     } else {
       await runBoard();
     }
+  }
+
+  async function createEvent(content: string, tags: string[]) {
+    const res = await fetch(`${base}/events`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ content, tags }),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`Create event failed: HTTP ${res.status} ${text}`);
+    }
+    return res.json();
   }
 
   function addColumn() {
@@ -755,7 +774,50 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                   </label>
                 </div>
 
-                <div style={{ marginTop: 8, color: '#666', fontSize: 12 }}>
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ color: '#666', fontSize: 12, marginBottom: 6 }}>Quick capture</div>
+                  <textarea
+                    value={captureDrafts[s.id] || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCaptureDrafts((m) => ({ ...m, [s.id]: val }));
+                      setCaptureStatus((m) => ({ ...m, [s.id]: 'idle' }));
+
+                      if (captureTimers.current[s.id]) clearTimeout(captureTimers.current[s.id]);
+
+                      captureTimers.current[s.id] = setTimeout(() => {
+                        const content = (val || '').trim();
+                        if (!content) return;
+
+                        setCaptureStatus((m) => ({ ...m, [s.id]: 'saving' }));
+                        createEvent(content, columnTags)
+                          .then(() => {
+                            setCaptureDrafts((m) => ({ ...m, [s.id]: '' }));
+                            setCaptureStatus((m) => ({ ...m, [s.id]: 'saved' }));
+                            return runBoard();
+                          })
+                          .catch((err) => {
+                            setCaptureStatus((m) => ({ ...m, [s.id]: 'error' }));
+                            setError(String(err));
+                          });
+                      }, 800);
+                    }}
+                    rows={3}
+                    placeholder={columnTags.length ? `Auto-tags: ${columnTags.join(', ')}` : 'Write… (no tags selected; will create untagged event)'}
+                    style={{ width: '100%', padding: 10, borderRadius: 10, border: '1px solid #e5e7eb' }}
+                  />
+                  <div style={{ marginTop: 6, fontSize: 12, color: '#888' }}>
+                    {captureStatus[s.id] === 'saving'
+                      ? 'Saving…'
+                      : captureStatus[s.id] === 'saved'
+                        ? 'Saved'
+                        : captureStatus[s.id] === 'error'
+                          ? 'Error saving'
+                          : 'Auto-saves after a short pause'}
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 10, color: '#666', fontSize: 12 }}>
                   {s.items.length} shown{!includeDone && s.hiddenDoneCount ? ` • ${s.hiddenDoneCount} hidden(done)` : ''}
                 </div>
 
