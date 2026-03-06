@@ -1,0 +1,12 @@
+---
+mylogger_id: 42931
+tags: [checklist]
+added: "2020-08-24 10:40:56"
+source: mylogger
+---
+
+# Note 42931
+
+Tags: #checklist
+
+WNmvU1LNPxxvLAaf3rOaeutTD+N5TwqjLFr29XHy5796XAPhOS/K7bSVdfBj7HGfMwtKIfMAlU/pmYBaMLujl/dvr45njbW51P6pwRzHj8XgqTa7+0WCuNJ6J6EDZIX6XBEaQb06WRnOLLzpBZtTtot5fTZFMC88pR2YcIRp0PsyTO4hM1Q748lLNmM5dJblHsluWEHPTqxFl8JPjRAPZIK8/H9zPvzsywz7oQnZSOQSdmdAJQyYIaSDfGSdw1KtXEIKKxI2bk1LKJpNCCJGFB3UT8NtKQn1E//s0PTiGbGgliD/vxFJFTtsNIf+BL2g7H3203J0nMHzhmfIA7cl5vIUHpl3VZnazc7QcbJycPJI384A5bS6Aa2FJgq72odm6uxH4/uWxCEPzITF5G4tjxMrlezufzfgaaXlT0up5R8NPlzZnbufNtis1fgCef8zV4BIrQpMuHZXRlA91qwCySqTLfLZigF3cHt61nHwiuc=

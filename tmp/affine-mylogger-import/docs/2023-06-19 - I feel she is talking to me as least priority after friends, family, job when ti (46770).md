@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 46770
+created: 2023-06-19T18:14:05+00:00
+created_raw: 2023-06-19 18:14:05
+completed_raw: 
+tags:
+  - med1
+---
+
+I feel she is talking to me as least priority after friends, family, job when time remained she talks to me. Generally avoids me completely when her friend Amabalika is with her. Ambalika is aware that we are seeing for marriage, but Swarupa hide our emotional closeness when Ambalika is around. She behaves formal or not responding at all. If I try to reach repeatedly she even gets irritated.nn\nAmablika and she traveled together to Chandigarh, 3 days I think. Then In Cuttack slept in either of homes 3 days, now Ambalika coming to Chennai for a week. Are they in some kind of emotional relationship? Ambalika is married but her husband lives in a different country. Swarupa wanted to stay in different City for 2years or so after marriage. What is logic? All these from Early April to Now.nn\nThese days I feel less ignored, but her attachment with Amalika appears abnormal to me.nn\n\nI called to Swarupa at 11.53pm by then Ambalika has reached, Swarupa was waiting at Airport, I said Amablika welcome to Chennai from her phone, Ambalika said Thank you Thank you. Swarupa said was booking cab when called, so after the short call, she told will book cab, will talk later. Asked if I had eaten.nn\nSo not hiding me from Ambalika, even in late night.nn\nI could be the one needs help but still this what I think now.nn\n

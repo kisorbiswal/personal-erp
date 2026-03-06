@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 45582
+created: 2022-02-21T03:30:28+00:00
+created_raw: 2022-02-21 03:30:28
+completed_raw: 2022-03-11 09:59:04
+tags:
+  - today
+---
+
+Your Aadhaar PVC Card with SRN (S185915769300020220214114207) has been handed over to India Post for delivery via Speed Post. Track  AWB No:UC418571429IN  at www.indiapost.gov.in

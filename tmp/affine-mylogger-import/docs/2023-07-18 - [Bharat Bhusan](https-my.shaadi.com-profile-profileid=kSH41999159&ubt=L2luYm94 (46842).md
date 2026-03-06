@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 46842
+created: 2023-07-18T15:43:22+00:00
+created_raw: 2023-07-18 15:43:22
+completed_raw: 
+tags:
+  - BMS
+---
+
+[Bharat Bhusan](https://my.shaadi.com/profile?profileid=kSH41999159&ubt=L2luYm94L2FjY2VwdGVkL2ludGVyZXN0cz9wYWdlPTEmcGdfc2VhcmNocmVzdWx0c19pZD1pbmJveF9zZXJ2aWNlJTNBM2ZjMGIzM2VkYzRhYWMwNWI2ODU3YjdlNzk3ZjYxZTd8aW5ib3hfc2VydmljZTozZmMwYjMzZWRjNGFhYzA1YjY4NTdiN2U3OTdmNjFlN3xhMWZiY2YzNjM2Y2ZiZGE4N2Y1MWQ3NzNlYzY2MmM0ZA==&source=unified&evt_ref=aW5ib3gtYWNjZXB0ZWRfbWVtYmVycw==&datasrc=api)nn\n34 yrs, 5' 8" , CancerNever MarriedOdiaLives in Bhubaneswar, OrissaHindu, KhandayatHuman Resources ProfessionalMasters degree in Management from Amity University, Uttar PradeshEarns INR 7 Lakh to 10 Lakhnn\n18/07/2023: In some class, he said will callback.nn\n9/8/2023: Let's discuss further if you are interested in my sister's profile. Sent in shaadi.com

@@ -1,0 +1,712 @@
+---
+mylogger_id: 74417
+tags: [lifemanual]
+added: "2026-02-23 09:06:58"
+source: mylogger
+---
+
+# Note 74417
+
+Tags: #lifemanual
+
+# Life Manual(start following from 18th Dec 2019) ###### Updated for 21st Century
+
+## Major Life Skills/Objectives
+
+  - Some important life skills are:  1. Time management 2. Stress management 3. Effective communication 4. Interpersonal skills 5. Decision making 6. Problem solving 7. Coping with change 8. Flexibility 9. Teamwork 10. Assertiveness
+
+### Health
+
+### Sleeping
+
+      - Circadian Rhythm
+
+      - Melatonin
+
+      - Stop Electronics 1 Hour before bed time.
+
+### Eat
+
+      - Diet- Keto, Low Carb, No Grain,
+
+### Exercise
+
+      - Yoga-Stretching
+
+      - Resistance, Strength Training
+
+      - Convict Conditioning
+
+### Stress Management- Chemical, Physical and Emotional
+
+      - Idleness, but it needs different chapter.
+
+      - Meditation
+
+### Avoid all Stimulants * Necotine * RedBull * Coffee/Tea * Cold drinks
+
+### Intermittent Fasting
+
+      - Sunday evneing to Monday Evening  Thursday evening to Friday evening  Later introduce Soft Dry fast --> Hard dry fast.
+
+### Mental Sanity
+
+      - Manage Decision Fatigue Essentialism  Don't sweat the small stuff Do not jump into things, let everything go through a decision making process.(Triage, Kanban and Sprint for different personal tasks)
+
+### Mental Map  Need to Do Should Be doing Want to Do
+
+### Distraction Is this vital? Does it actually matter?
+
+          - Keep The inventory-TODO updated
+
+          - Form Habits
+
+        - Do what is right use of time right now. After seeing the pending list of tasks. Otherwise I feel like all the time I have can do anything until I see the pending things.
+
+        - Allocate time for Fun and Rest.
+
+      - Switch Context Effectively and Completely May need a software like Heap/Stack and pointer in programming.
+
+      - Some tasks takes much less time for actually doing then perceived effort. Changing debit card pin, read the instruction instead of imagining the delay.
+
+      - In 1979, Jon Kabat-Zinn of the University of Massachusetts Medical Center founded the Mindfulness-Based Stress Reduction (MBSR) program
+
+      - Find your Rhythm, block time for undistracted  thinking.
+
+### Vacation
+
+      - Time in Nature
+
+        - Micro Gardening if not full garden available.
+
+        - Slacking in parks
+
+    - Post Surgery Recovery Routine
+
+      - How much activity is recommended? What kind of food part from what the doctor suggests?
+
+### Execution/Project Management
+
+    - 4 Hour Work week: Batching, Outsourcing
+
+    - One task at a time
+
+    - TDD like steps: Each step should give some feedback
+
+    - Beginner’s Mind is the key behind the phenomenon of Beginner’s Luck: a person doing something for the first time often does it much better than he does after he’s practiced for a while Skills vs Competency.  http://csis.pace.edu/~grossman/dcs/XR4-PromiscuousPairing.pdf
+
+    - Checklists
+
+    - Narrative planning and making it accessible to everyone involved. Radically open mindedness.
+
+    - Delegate
+
+    - Crazy Busy to Ready- TED 1. Triage: Red, Yellow, Green, black. Avoid noise while triaging. 2. Let go the blacks. 3. Avoid tunnel vision, Focus on broader view. What's needed? Empathy to see the people in need.
+
+### Hard Thing about Hard Things vs How to Win friends and influence People
+
+### Define criteria for Success, Failure and to Kill the project.
+
+    - Sunk cost bias like fallacies
+
+### Learning
+
+    - Learning Anything * Cognitive Theory overload. Learn slow. Take Break * When learning new things, do with only 1 or 2 things. * Never multi task. No phone, notifications.
+
+    - Take one tactic and practice it. Observe and improve. For life skills take one tactic at a time.
+
+    - Reading
+
+      - Speed Reading
+
+      - Appropriate content to be interested in, Tim Ferris Example.
+
+      - I postpone reading many things assuming it will need more energy and I'm not ready now. Maybe I can assume, just focus on reading, without being worried about outcome.
+
+## References 20hour rule Spaced Repetition and rest https://www.youtube.com/watch?v=IlU-zDU6aQ0 https://www.cocc.edu/teaching-commons/files/learninghowtolearn_kendacaligure_20150213.pdf https://betterexplained.com/articles/adept-method/
+
+    - Keep the curiosity sustained
+
+      - Start with the chunks that you can do. Taking complex things will dissuade you.
+
+    - Strategy to come back after a long gap.
+
+* Maintain cheatsheets and small examples. * Have flashcards to review in random intervals. Only if important.
+
+    - Gamification
+
+    - Taking notes and spaced revision.  Ryan Holiday's book cards.  Note as Tags/small phrases. Note questions/topics to think up on.
+
+### Skills needed ##### conceptual understanding, procedural skills and fluency, and application
+
+      - Theories/Concepts to Understand
+
+        - What is the most effective way to get that result?  Result matters, though people will say they care about the process, still admire the result.
+
+      - Drills/Practices to Do Patterns to recognise
+
+      - Practice all drills as part of entire flow.
+
+      - Relate to other theories I know. Cross domain.
+
+      - All possible ways of doing. Exhaustive checklist
+
+      - The final Checklist I follow
+
+### Coaching
+
+###Adult Learning https://www.linkedin.com/learning/instructional-design-adult-learners/what-to-know-before-watching-this-course?u=2113185  Less cluttered and more focused. Do not show so much information at a time. Should be read at a glance.  Andragogy 1. Why? Purpose of learning. 2. Prior experience as base. 3. Control 4. Work on a immediate problem. 5. Problem oriented. 6. Intrinsic Motivation  ####Cognitive * Repeat * Chunking * Ref cards   ####Behaviorist * Event based actions. e.g When need to do something.  ####Constructive Works on Intuition   * Own experience   * Reflection  ###Learning Curve Unconscious Incompetent Conscious Incompetent Conscious Competent Unconscious Competent  Active vs Passive learning. * Challenge * Validation  * Feedback  ### Learning Modalities * Visual * Auditory * Kinesthetic   ###Create Activities What is the desired learning outcome?    70:20:10 Informal, manager/own experience, formal training  Re enforced by community.   Pedagogy  Adults need to be actively engaged.
+
+    - On Time, Inclusive, Engaging, Safe to fail, anonymous questions, Practice, Experience  Be Confident and calm When unplanned work comes up. ###Workshop Facilitation What output is expected and the activities to do that. 1. Specific goal 2. Moving as a group through the shared process 3. Environment where each person can participate  Be flexible!  Should be broad, and self directed. Contextualized. Why being taught?   Attach to life events/cycle of transformation  Help people to connect to their goals.  ###5 Best practices 1. Why? What's the outcome expected. 2. Environment where all people connect and contribute. Co-create something. 3. Environment: Safe to take risk, make mistake, vulnerable. 4. Chunks of 40min max at a time.   * Discussion   * Free write   * practice  5. Build new habits- Let them do. What is that new habit. Practice in group.  What are the three primary components of transformative learning? psychological, convictional, behavioral  ###Learning plan 1. What is the order of activities?  2. What processing activities will work? Problem first or the solution? It depends on context. 3. Timing-    * Washroom 90-100min   * Processing activities like let people have break. 4. Be flexible and understand your participants. Content may change. Know your audience.   * Group size? based on total no   * Age and experience? What they can do?   * Shared experience? Lingo/Jargons? Existing alliance or conflicts? STEM people need data first.   * Is energy going down?  ###Characteristics  1. Ask questions to relate new content to their previous experience. 2. Pick example from common experience. 3. Discuss vs Deep thinking vs Hands on? Give options 4. Create environment to be vulnerable? Sometimes can gather questions anonymously. 5. Do real rehearsal, practice. Pilot, be open to feedback. 6. Break to small and simpler tasks. 7. 40-50 repetition to build habit. Let it be part for your workshop. 8. Logistics: People's holiday, convenient time, amenities. Tech, A/V needs. 9. Advertise the workshop. Get enrolled, put in calendar, directions, parking, things to bring etc. Give multiple weeks and many opportunities to enroll. 10. Prepare for natural calamities. 11. Follow up, extended learning.  ###Ground Rules to make the environment safe 1. Ask the group for the rules. Ensure it's complete. 2. Remind when violated. 3. Inclusion: Make connection better, more personal: super power, tough time, childhood memory. Encourage risk. 4. Emergency Evacuation. 5. Magic wand: What would you do if no restrictions. 6. What's next? Follow up reading/Action plan.  Books:Wired to grow,
+
+### Team/People Management
+
+    - The Ideal Team Player- Humble, Hungry, Smart.
+
+    - Team Geek
+
+    - Set proper expectation. Show how to do things, trainings as required. Balance micromanagement and freedom.
+
+    - How to apologize: Quickly, specifically, sincerely.
+
+### Leadership/Business Management
+
+#FilmMaking  SOCIAL PERCEPTIVENESS  Being aware of others' reactions and understanding why they react as they do.  COORDINATION  Adjusting actions in relation to others' actions.  PERSUASION  Persuading others to change their minds or behavior.
+
+    - Which areas of my life are in maintenance mode? Which areas are in growth mode?
+
+    - HBR Manager's Handbook: The 17 Skills Leaders Need to Stand
+
+    - Vision/Risk Entrepreneurship
+
+    - Negotiation
+
+      - Think of 2nd, 3rd order consequences. Let the opponent save face.
+
+    - Bottom of the Pyramid
+
+    - Give sincere feedback. Even if trivial positive things.
+
+    - Be authentic, vulnerable, transparent do not pretend to know all the answers.
+
+### Servant leadership Your people are your number one customer. Make a difference from where you are, be generous with people. Loving relationships. Making significant impact on people's life. ### Habits: Start the day with vision and end your day with Thoughtful reflection, enter your day slowly, how do I behave? Read your own obituary, what Do I want to be remembered for? Read your values before starting your day.  ### Performance Management: 1. Planning: Set expectations. 2. Coaching: Day to day coaching. 3. Evaluation: Continuous evaluation, enforced in regular intervals. At the end of year all gets an "A".  ### Culture, built intentionally  1. Clear Vision 2. Clear values 3. Clear internal goals for everyone 4. Focus on people: Make them happy
+
+### Facilitating Leader   When all people are clear on goals. Let them lead the process of solving. So you facilitate.  #### 6 Skills 1. Emotional intelligence 2. Connecting dots 3. Active listening 4. Powerful questions: Let people feel safe to fail.   * Open ended question   *  Genuine curiosity   * Short and simple   * Explicit, direct. Start with what or how? Why makes people defensive? 5. Engaging conflict. Let your inquiry be grounded with goals, be compassionate. LEND: Listen, Express, Negotiate and Align, Do. 6. Flexibility  #### Survey at the end of Meeting  1. Did you feel confident that I had awareness of my thoughts and actions? 2. Did you feel confident that I was aware of you and your needs individually? 2. Did you feel confident that I was aware and engaged with the group dynamics?  3. Did you feel confident that I was aware of any environmental factors that may have influenced the group?   Summarize to improve clarity for the team and yourself. Just synthesize and do not give your opinion.  #### Do Not  Dis-empower.  #### How to empower people? Provide clarity and ownership 1. What are you asking them to do and by when? 2. What does great look like?  3. How does it contribute to your business? 4. How should this person engage with you to receive feedback? 5. What questions do they have?
+
+### Leading through Relationships Give people what they want. Sincere positive feedback. 1. Discover employee's interest, remember and act on it, e.g sending link to a blog post. 2. Do you have the mental stimulus you need? 3. Diverse thinkers, fail safe environment. 4. Make recognition part of your routine. 5. What kind of work you enjoy doing? What kind of environment? Timing? 6. Sense and culture of trust. Why it's important how they fit into the larger goal. 7. Ask for feedback. Make people feel like an insider. 8. When you feel motivated? When you feel frustrated? 9. Cut conflict at root, make it teachable, early and often. 10. Remember important things in their life. 11. Support to people even when you have nothing to gain. 12. Rotate roles, cross training.
+
+### Leading with Emotional Intelligence  Play at least once a week. Recognize, if your Amygdala is hijacked, panic, heart rate etc. Calm down, breath.. journaling, move.  Think beyond the current moment. Do we have required privacy? Sharing something just because asked? Responding before understanding the question?  What are your emotional triggers? Blaming, sarcasm is emotionally less intelligent, it means you are afraid and feeling your life is at threat. It is fight reaction.  How to manage it? Fire drill, have thoughtful plans and practice them. Observer stance.  Meditate!!!  Add play into your life.
+
+### Conflict Management Conflict is normal as people come with unique experiences. Notice your default reaction to conflict.  Fact, no personal judgments, Respectful tone  #### Questions to confirm if healthy conflicts 1. Is this conflict helping the team explore different perspectives, so ultimately the team can make better decisions?  2. Is this conflict helping the team move forward toward their goals?  3. Is this conflict helping to build productive work relationships that actually enhance trust? In general when the answer to these questions are yes, you have conflict that's healthy,
+
+### Basics of Finance/Investment
+
+    - Living By own means
+
+    - Economics Engine
+
+### Sustainability
+
+## Leadership Competence, Charisma, Empathy. They HBR book, Manager's Handbook
+
+      - The Ideal Team Player
+
+    - Fortune at bottom of the pyramid
+
+      - Intangible Assets
+
+    - Improve Agri productivity in Odisha
+
+    - Decide what project to do and scope. MVP model.
+
+### Thinking/Problem solving
+
+## Thinking in Bets/Probability  Having respect for other viewpoints Not being overconfident intellectually Separating one’s ego from one’s intellect Willingness to revise one’s own viewpoint Mental Blind spots like Selective Focus
+
+    - Leaps of reason:  Use computer modeling to visualize the entire flow or steps involved in a product/service that gives an opportunity to see roadblocks. Do a trade off always, if the task takes less time than the model, then do the task. Learn how to model spreading of viruses, policy decisions etc.
+
+    - Design Thinking
+
+    - Thinking fast and slow, Black swans series.
+
+    - https://mentalmodelclub.com/junk-learning-billionaire-mind.html
+
+    - Draw on paper, that's illuminating. The problem of grids where first and last point are connected by a line, how many dots it will touch. I could not solve but after drawing it was visible.
+
+###Critical thinking  1. Validate assumptions 2. Think rationally/logically. 3. Diversify thinking group.
+
+### Systems Thinking- Sounds similar to Principles VUCA: volatile, uncertain, complex, and ambiguous LAMO: refers to our tendency for our thinking to be linear, anthropocentric, mechanistic, and ordered.  The four elements of systems thinking are(DSRP):  1. Distinguish ideas from other ideas (Distinctions),  2. Organize ideas into systems(Systems) 3. Relate ideas to one another, and (Relationships) 4. Look at ideas from many perspectives.(Perspectives)  Mental Model=Information+Thinking  Do you react before thinking? Challenge the way you think. Look for patterns. Is it one of event or recurring?  How things work vs how we think is working?  Observe the real world. Align your thinking. Feedback loop.  The top three things systems thinkers do? 1. Be aware of your mental models.  2. Seek out feedback on how well you're doing.  3. And evolve your mental models to better fit reality.     Visual mapping is important.  CORTEX Man image
+
+### Creativity
+
+    - Attention craving makes you less creative, Attention seeing is as addictive as other drugs https://www.ted.com/talks/joseph_gordon_levitt_how_craving_attention_makes_you_less_creative
+
+      - Flow/Attention paying makes you happier.
+
+    - You have 2 roles one is that creates, sensitive, emotional the other is rational which deals with the feedback, and protects the creator. From both negative and overwhelmed by success.
+
+    - Separate the processes of creation from improving. You can’t write and edit, or sculpt and polish, or make and analyze at the same time. If you do, the editor stops the creator. While you invent, don’t select. While you sketch, don’t inspect. While you write the first draft, don’t reflect. At the start, the creator mind must be unleashed from judgement.
+
+    - Anything real begins with the fiction of what could be. Imagination is therefore the most potent force in the universe, and a skill you can get better at. It’s the one skill in life that benefits from ignoring what everyone else knows.
+
+    - Lifescale: How to Live a More Creative, Productive, and Happy Life
+
+### Personal Finance
+
+    - Definitely needed
+
+**Use money from Salary** * Rajes's Loan repayment * Pinki's marriage 10L
+
+    - Nice to Have
+
+**Only If made side income**  * Emergency money * Car
+
+    - Stop Mindless spending
+
+      - Simulate the use by blocking time. e.g Before buying a course allocate the hours required per week, take the free audit of course. Here you get to judge if you really have time and interest, sometime I just go by flow and buy things that I never unbox.
+
+      - Definitely do not buy anything in midnight, mind is not active to make rational decision, unless it's something you have pre-decided.
+
+    - Keep a budget and a wish list. So the wish list items will get prioritized by budget constraint.
+
+###Stick to Plans  Want to sleep on time, go to Gym
+
+    - Make the decisions default. No obstruction e.g items at eye level are sold more.
+
+    - Read the plans, habits, routines daily like checklist. Goals could be out of reach but not out of sight.
+
+    - Make a routine and definitely do. Do not depend on willpower.
+
+    - Break down to doable small tasks.
+
+    - 1% improvement daily. Eliminate one bad habit or Improve one good habit daily.
+
+      - Track focused productive hours and start improving in that. This is easy to start.
+
+      - After reaching to maximum possible time, focus on quality improvement.
+
+    - Kaizen
+
+    - My work ethics looks bad, e.g now it's end of project and the setup is not working, as we have to work without internet in the age of Gigafiber. I'm not motivated to work, all people are similar, but I'm worse than all.
+
+#Morning #Reflect   #### WDEP Model (Wants, Doing, Evaluate, Plan)  Wants. What do you want? Doing. What are you doing to get what you want? Evaluate. Is what you are doing helping you get to what you want? Plan. Can you make a more effective plan to get what you want?
+
+###Sales/Marketing
+
+    - Branding
+
+    - SEO
+
+    - Story Telling/Writing
+
+    - Influence/Persuation
+
+###Feedback Exchange
+
+    - Observer the nonverbal feedback. Are they avoiding you? Delaying response? Uncomfortable talking to you?
+
+    - Tone of feedback. Supportive, informal, informative, facts/examples and approachable.
+
+###Story telling Clearly explains and grabs attention
+
+### Conversation Casanova * Assume the girl is interested on you and talk. * Enjoy the moment, and make others enjoy it too. * Genuinely appreciate something, inner and outer beauty. Be in present. * Have a successful life. * World building like detail of story telling It's not about you, it's about your audience. Stimulate their emotions, passions, aspirations, excitement. * Dominant, Social, Altruism, Humour * Women are emotional creature. Stubborn men expect women to be logical. * Make people feel excited, loved emotionally. That memory lasts longer/stronger. * Take risk. Not taking risk is the biggest risk.  ### Evolution of Desire * Power, Social status, Attention structure, Money * All of the above are perceived subconsciously. So bad pics, bad behavior is bad for overall desirability score.
+
+###Community
+
+###Resilient
+
+    - 1. Bad things happens to everyone. You are not discrementated. 2. See what good things you still have. 3. Is this action harming me or helping me?
+
+### Mental Resilience  On Loneliness, Failure, guilt, Rejection, Rumination  https://www.ted.com/talks/guy_winch_why_we_all_need_to_practice_emotional_first_aid#t-232417
+
+    - Stress and Isolation together causes cancer, 9 times likely. Each one individually has no impact
+
+###Disciplince
+
+    - Routine
+
+    - Willpower
+
+## Short term Goal
+
+### Technology
+
+* TDD, BDD, Mutation Testing * SA focused PDP in grow portal * Angular, Testing Java Script code * Query Optimization. Internals of SQL * Architecture Discovery and **Solution Architect**  Preparation * Algorithm Enough to Pass Toptal test, use hackerrank, project euler * Basic probability, statistics, calculus; enough to understand their usage in Economics and Machine Learning * Machine learning
+
+### Leadership/Execution
+
+* Focus on specific work. Essentialism,Monotasking, Batching and Automating. * Agile-Scrum/Kanban * Team Player- Humble, Hungry, and People Smart * HBR 17 attributes of an Manager * Team Geek- Mission, Clarity, enforcing the values in team.
+
+### High Impact Business
+
+**Software** * Release English Coach with Grammars * Recruit Student leaders for rural health project * Gamification of English coach -> Add all other skills required -> predict what each individual can do -> Train them in their strength areas -> Suggest jobs -> Monetize from employers/Run Business as a service. * Skill to job mapping -> measure the skills * OCR/NLP for Employment news entry. * Rural health/Medical Infra project. * Apps to train Trinity Music grade. * Dashboard to show today's expense, Overall Debt, future needs etc. Key health parameters  **Gaming** Design and release a Game in July.
+
+**Books** * Preparing for interview in India, Salary Negotiation, What information to expose. Questions. * Release book of the pook in Kindle store for less money- Explore what is copyright liabilities if release with different title. * A manual for me to be effective, process, rituals and Tools used.
+
+### Agri  https://angrau.ac.in/angrau/historical.php?content=mission
+
+### Health
+
+* Do physical exercise and meditation to reduce stress and stop Psychiatric Medicine * Eat Healthy food to reduce weight. Automate the decision. * Plan pre sleep relaxation ritual.
+
+## Passive Income
+
+  - https://medium.com/swlh/50-one-sentence-tips-to-help-you-maximize-your-side-hustle-61fd023adbfb
+
+### Create Software
+
+    - Script to Cartoon films, with physical and social constraints. Can be used to simulate business ideas. e.g Person goes for blood test, gets result.
+
+    - Web/Ebook/Mobile app with Interview prep questions.
+
+    - Complete EC with Grammar.
+
+      - Sell the Entire software to someone for big money
+
+      - Find a partner who can sell the software customized for others to upload content and run their own Coaching App.
+
+    - Software that Links with Life Manual Checklists. The checklist shows up just when you need it.
+
+    - Mapping Skills to Jobs, Quiz to Test Theory behind skill's concepts, practice methods, teaching accessing. gamification.
+
+    - Music/Audio Recognizing software.
+
+      - Singing Feedback
+
+      - Trinity Grade Feedback
+
+        - http://clam-project.org/wiki/Chordata_tutorial
+
+    - NLP enabled Chart Support
+
+    - Inspiration: Gingkoapp https://sunsama.com/ Stay organized https://workflowy.com/#/80fe9eb91867 https://www.skedpal.com/ Routine should be time blocked
+
+### Create Content
+
+    - Publish Books
+
+      - Write New Books
+
+        - Life Manual
+
+      - Publish Public Domain Books
+
+        - A mathematician's Apology https://law.duke.edu/cspd/publicdomainday/2010/pre-1976/
+
+        - The book from Pook
+
+      - Publish Translations of Odia Literature, Upendra Bhanja etc.
+
+    - Audio Books
+
+      - https://www.acx.com/  https://www.createspace.com/ https://kdp.amazon.com/en_US/
+
+      - Hire someone to Read Public Domain books
+
+      - Publish Audio version of A Mathematician's Apology https://www.math.ualberta.ca/mss/misc/A%20Mathematician%27s%20Apology.pdf
+
+    - Blogs
+
+      - A Blog on Odia Culture
+
+      - Digitize Odia Literature
+
+    - Create Tutorial Videos/Udemy etc.
+
+#EC Sentence Block Diagram
+
+    - Give Finance, Accounting etc MBA classes. Video- Check if already there.
+
+    - Videos
+
+      - Practice Music Daily and Record the video. Upload in YouTube and TikTok
+
+### Consulting
+
+    - Offline Networking
+
+    - Toptal
+
+    - Upwork
+
+### Productized Services
+
+    - Email Marketing
+
+    - Accounting/Book keeping as Service.
+
+      - Hire Low Cost MBAs
+
+      - Train people and Take work from Waveapps.
+
+    - Reduce Own Expenses. See if this can be a business.
+
+      - Celebrities have Account manager, can other people have?
+
+    - Train and Deploy Chat Support People
+
+### Strategy/Design
+
+    - Essentialism
+
+## Run a remote only company
+
+  - https://about.gitlab.com/handbook/values/
+
+  - https://www.recurse.com/code-of-conduct
+
+  - https://zapier.com/learn/remote-work/
+
+  - https://www.unsolved.xyz/accelerator Similar to Business as a Service idea
+
+  - Businesses in Village
+
+    - Training institute for all such skills
+
+      - English training
+
+        - Adapt English coach to train +2 English starting with. Then cover all the classes, Odisha syllabus
+
+      - Design course syllabuses and process for All training. Find existing institutes to run those programs as franchise.
+
+        - Kindle book creation and fiverr.com profile.
+
+      - Make the infrastructure accessible
+
+        - Have computer center open and accessible at low cost, preferably free.
+
+    - Manufacturing- Low skill work We need digital alternatives of manufacturing
+
+      - Digitize old public domain books, scanned copy to ebook formats
+
+        - Old Odia books of Upendra Bhanja etc
+
+        - Old books from US and UK, they have written books that are still relevant today.
+
+      - Accounting
+
+      - Digital marketing
+
+      - Graphics icons, game sprite design
+
+    - Let people volunteer in villages. Form an NGO if it helps.
+
+    - Translate/Dub TED videos to Odia.
+
+    - Business Inspirations
+
+      - https://www.santanagrp.com/ Integrated Human Capital
+
+      - Chobani https://drive.google.com/drive/u/0/folders/1zHxr86CqdHvMS30vqkTt4HQ6hA3dqyvG
+
+      - https://imhealthscience.com/ Medical Foods
+
+      - https://digitalmediasolutions.com/ Digital Marketing https://oddduckmedia.com/digital-marketing-rural-areas/
+
+      - https://first.media/about-us Can make for SOLE YA
+
+      - https://en.wikipedia.org/wiki/Medical_Guardian
+
+  - https://hbr.org/2013/05/creating-the-best-workplace-on-earth  it’s a company where  1. individual differences are nurtured;  2. information is not suppressed or spun;  3. the company adds value to employees,  4. rather than merely extracting it from them;  5. the organization stands for something meaningful;  6. the work itself is intrinsically rewarding; and there are no stupid rules.  “I want to work in an organization where I can really feel where the company comes from and what it stands for so that I can live the brand.”
+
+## Checklists
+
+### Development https://docs.google.com/document/d/1B_GbkJQHZz6ba0-wzbj0lwruEqhbTI8ocrSltqv1cLk/edit#heading=h.imhjhrixpuo3 Kisor's workflow
+
+###Code Review  https://docs.google.com/document/d/1k4HiCcBWsxY33P8lMpS41O9NwF10MHSMD_Zmab6f8Nc/edit Clean Code Notes
+
+#Health #Bleeding  * Press the bleeding spot with sterilized cotton. * If it's a minor/skin bruise clean the spot with Hydrogen Peroxide.
+
+## Event Responses
+
+### After DMT
+
+    - KEEP LEARNING Toptal should work as a fallback net. Read Cracking the coding interview. Unfolding the napkin. 20Hr leanring book Prepare for SA.  If have to change: Apply to good paying companies with great culture.  38L Fixed. Multiple products or Service company with good culture. * Good engineering practice  * Value employees * Good internal growth * Less bureaucratic
+
+## Notes
+
+### DS & Algo
+
+###Notes Selection Sort Insertion Sort Bubble Sort  All are O(n^2)  Bubble sort is worst, never used in real. Insertion sort is better if the array is roughly sorted. Selection sort takes same time irrespective of sorted or not.  Find elements in array by index is O(1) Binary search O(log2N)  Insert/Delete operation in Ordered array search+move= O(log2n)+O(n)  Insertion sort can be improved significantly using linked list, do not have to move the elements.  Linked List: Node(Data, Next), Head Doubly Linked List: Head, Tail  Stack: Last in Fast Out  Merge Sort complexity O(n log2n), useful for large data sets. As the constants are hight.  ### Asymptotic Notation  1. how long the algorithm takes, in terms of the size of its input 2. how fast a function grows with the input size  #### Types 1. big-Θ Theta notation,  2. big-O notation, 3. big-Ω Omega notation.  Growth: Constant functions e.g 64 Logarithmic functions e.g log8 n Linear functions e.g 4n Linearithmic functions e.g n log8 n Polynomial functions e.g 8n^2 Exponential functions e.g 2^3n  Tail Recursion, result parameter, there should be a overloaded method so user need not know the internal details. Java does not support it. Merge sort: merge two sorted arrays so the resulting array is also sorted. Complexity: n long2 n, constant is big. Java uses merge sort as default algo.  Merge sort is good only if the data set is large, as the constant is high, for small data sets it's not efficient.  Insertion, Bubble,   Merge, Quick, Shell  Counting, Radix, Bucket are linear time algorithms  Shell Sort: Inteval=Knuth Sequence Interval h=3h+1 keep reducing until that is 1, max h is < array.length. 1, 4, 13, 40, 121, 364. Complexity: O(n^7/6) to O(n^3/2)  Counting sort: If the array is known to have 0-10, create an array of size 10 and keep the count at given index increase when an element found to be of given index, e.g if 3 is found 3 times in the main array, in the counting array [2]=3; Complexity: 3n+k+1. Only if the range of elements is small.  Radix sort: Sort by radix position, e.g 1s, 10s, 100s ... Complexity:   Bucket Sort: Mix of Count and Radix  Heap is a binary tree with two special properties 1. Complete (filled from left, row is filled before going to next row) 2. Any node is >= it's children  ###Hash Tables:  hash functions, collision resolution with chaining and open addressing, open addressing: Linear, Quadratic, double hashing, probing
+
+####Think/Questions How to sort any other objects not just int. Use generics.https://www.linkedin.com/learning/introduction-to-data-structures-algorithms-in-java/sorting-any-type-of-object?u=2113185 Where is attachment to videos?  Big O notation theory?  Can merge sort be unstable?  Derive the big O of merge sort.  Tail Recursion is passing the result as parameter. Tower of Hanoi
+
+### Business Idea generation
+
+    - Selling shovels in gold rush.
+
+    - Unleash Your Inner Company by John Chisholm STAARRS
+
+    - Intersection areas of growing tech.
+
+    - Scalability-Automate
+
+### Clean Code  Top 9 Qualities of Clean Code Bad code does too much – Clean code is focused The language you wrote your code with should look like it was made for the problem It should not be redundant Reading your code should be pleasant Can be easily extended by any other developer It should have minimal dependencies Smaller is better It should have unit and acceptance tests It should be expressive  https://blog.goyello.com/2013/01/21/top-9-principles-clean-code/
+
+### System Design These chunks are called shards or partitions or vnodes etc.  Such loaded partitions are called hotspots.  * List the features * Design tables with minimum keys * Who uses, peak time, load over time * Block diagram of components and connection * Disk needed over time? Can we archive?  * Loadbalance * DB indexing, cache * Application and 2nd level cache * Sharding * CDN
+
+### Databases ACID Eventual consistency
+
+## Happiness * Dependable relationship * Seeing stress and challenge * Physical/Mental exercise * Your perception decides the reality, not the external circumstances. * Every time you have success, your brain moves the goal post ahead. We should not depend on success to be happy. * Happiness advantage. * Be in present and happy. * 2 minutes/day for 21 days  * 3 new gratitudes daily  * Journal: 1 positive things happened in 24 hours.  * Exercise  * Meditation  * Random act of kindness
+
+## JavaScript Language https://www.linkedin.com/learning/learning-the-javascript-language-2/syntax-learning-to-read-and-write?u=2113185  https://eloquentjavascript.net/ javascript good parts Book https://github.com/getify/You-Dont-Know-JS https://caniuse.com/ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide  * 12.0 -> 12 * Decimal points gets truncated after certain length. * Nan * Infinity * Math object * var emptyObject ={} * obj["prop"], obj.prop * delete obj.prop removes the property * var assignment gets reference assigned. * To copy JSON.parse(JSON.stringify(obj)); * Arrays, can store all data types * Add: with [], push(), shift() * Remove: pop(), unshift(), delete, splice(index, howManyToRemove) * == Not strict, compare different data types * === Strict, data type and value both should match * JSON.stringify(), JSON.parse() * window.confirm(), window.prompt() * sequential, enumerative for loops * hasOwnProperty * By default all methods take variable arg. arguments[i] works. * Functions are objects, can be passed as parameters. e.g window.setTimeout(myFunction,5000); * doubltIt = number => number *= 2; * promise.then(function()).then(function()); * async/await  async function doLotOfThings(){   var response1 = await axios.get();   var response2 = await axios.get(); } * Prototypal Inheritance. obj.prototype.newBehaviour = function (); * Losly types, var x=6; x= "Kisor";  * Dynamic imports   * webpack   * roleupjs * Package manager   * npm   * yarn * Transpiler   * Babel   * TypeScript also has own Transpiler
+
+## Routines
+
+  - Time distribution 10% to reflection(Past) 60% to execution(Present) 30% to planning(Future) ### Evening Routine(*Monday*)   #routine #Evening *immediately after coming form office or 8pm*  * Change clothes to something more comfortable * Wash face, hand and feet.  * Soak feet in epsom dissolved warm water for 10min and call to Mom. * Make Todo list for next day, watch videos of what exercise to do. * Eat dinner by 8.30pm, no matter where I'm * Avoid screens after 9.30pm everyday. * Diffused thinking: Review the previous week and think what to improve and Solve some problem on side projects. Make calls on side projects. * 9.50-10pm read music(hard stop), Leila Fletcher and practice 10-10.10pm hard stop. * Go to bed by 10.20pm, meditate 10min(Sleep meditation from head space)
+
+### Evening Routine(*Tuesday*)   #routine #Evening *immediately after coming form office or 8pm*  * Change clothes to something more comfortable * Wash face, hand and feet.  * Soak feet in epsom dissolved warm water for 10min and call to Mom. * Make Todo list for next day, watch videos of what exercise to do. * Eat dinner by 8.30pm, no matter where I'm * Avoid screens after 9.30pm everyday. * Diffused thinking: Solve some problem on side projects. Make calls on side projects. * 9.50-10pm read music(hard stop), Leila Fletcher and practice 10-10.10pm hard stop. * Go to bed by 10.20pm, meditate 10min(Sleep meditation from head space)
+
+### Evening Routine(*Wednesday to Sunday*)   #routine #Evening *immediately after coming form office or 8pm*  * Change clothes to something more comfortable * Wash face, hand and feet.  * Soak feet in epsom dissolved warm water for 10min and call to Mom. * Make Todo list for next day, watch videos of what exercise to do. * Eat dinner by 8.30pm, no matter where I'm * Avoid screens after 9.30pm everyday. * Read literature for getting inspiration and fun 9-9.45pm(PS: do not daydream) * 9.50-10pm read music(hard stop), Leila Fletcher and practice 10-10.10pm hard stop. * Go to bed by 10.20pm, meditate 10min(Sleep meditation from head space)
+
+## `Bad habits`  * Avoid Caffein, Nicotine like stimulants from afternoon onwards. Food that contain these chemicals are Cold drinks, Nekotex, Redbull, Coffee, Tea. Check half time for all above substances. * Carried away by mobile distractions, someone sends a message I tend to respond and it's a loop. * Do not read books that can stimulate e.g new business ideas. * Traps: Reading for longer, practicing music for longer. May look productive but it's not. It sucks energy from the next day with penalty.
+
+## `Consequences`  * Burning palm and sole, terrible punishment sometimes immediately. * Next day is wasted, way more than what I gain from staying late by the traps. * Long term damage to brain. * Increased dependency on medicine.
+
+  - Andrew Huberman    Based on the video, here is a checklist of the suggested morning tasks for peak performance:  [ ] Go for an outdoor walk: Engage in "forward ambulation" to generate optic flow, which helps quiet the amygdala and reduce anxiety [01:01].  [ ] Get direct sunlight: Spend at least 2–10 minutes (ideally up to 30) outdoors without sunglasses to set your circadian rhythm and boost alertness [04:14].  [ ] Hydrate with electrolytes: Drink 450-900ml of water with a small amount (about half a teaspoon) of sea salt to replenish sodium and support neuron function [06:14].  [ ] Delay caffeine intake: Wait 90 to 120 minutes after waking before consuming caffeine to prevent an afternoon energy crash [06:58].  [ ] Practice intermittent fasting: Delay your first meal until approximately 11:00 AM or 12:00 PM to increase adrenaline levels for better focus and learning  ### Morning Routine(*Except Tuesday, Wednesday, Saturday*) #routine #morning  * Brush immediately after waking up. * Eat an easily available protein-rich breakfast. * Start focused work. 1.5hr-3hr based on time availability.Skills that are needed at work. In being a better programmer. * Wall Pushups, Bed crunches, squats at least one set from each. * Keep walking while in stand-up meetings.
+
+### Morning Routine(*Tuesday, Saturday*) #routine #morning  * Brush immediately after waking up. * Eat an easily available protein-rich breakfast. * Start focused work. 1.5hr-3hr based on time availability.Skills to run business. * Wall Pushups, Bed crunches, squats at least one set from each. * Keep walking while in stand-up meetings.
+
+### Morning Routine(*Wednesday*) #routine #morning #Reflect  **Wednesday 24 hour fasting**  * Brush immediately after waking up. * Eat an easily available protein-rich breakfast. * Reflect and adjust plans. * Keep walking while in stand-up meetings.
+
+## Habit
+
+###Don't/avoid List #Habit  * Stop * for 1% improvement. * Completely avoid sugar in any form. * Stop screens, book and phone at 10pm. * Cold drinks * Coffee * Tea * Nicotine * Redbull
+
+###Do List #Habit  * Do one thing at a time and time box everything. * Unplanned task; Priority critical? Else go through triage. * Tasks with deadline should be executed using Scrum and other things with Kanban, according to priority. * Follow all the routines as religious rituals, performed with precision. * Is the worker you working as expected? * Try to put everything into plan at least for a quarter ahead, so it does not disrupt the routine. * Any new task/Project should be tagged to predefined time maps. Critical first! * Automate all recurring decisions. * Think before everything, the basic mundane work also. Avoid, Outsource, Automate what can be done? * Keep track of improvement in focused work, clockify.me. After reach the limit in timing, go for qualitative measures.  ##Now 1. Lean(weight under 66kg), strong lower back and arm muscles. Mental clarity and proper sleep. Physical and Mental stamina. 2. Interview preparation for AmDT- Find previous questions. 3. Math for Economics, Macro and Micro Economics.
+
+## Root Causes
+
+### Possible Adjectives  Lazy, Impulsive, Only interested in Creamy-superficial easy layer, Lack of Discipline  Exhausted, Sleepy, still don't want to sleep.  Not in flow? Low mental stamina?
+
+### Possible Worries  MyLogger tag, MW(My worries)  I'm afraid my family needs me desperately. They can't survive without me. Or I'm afraid they will abandon me if I'm not nice to them.
+
+## Core Principles
+
+### Eliminate the less important
+
+  - When you get an invitation to do something in the future, ask yourself: would you accept this if it was scheduled for tomorrow? Not many promises will pass that immediacy filter.
+
+  - Things will pile up unintentionally, we need a spring cleaning in regular frequency.
+
+  - Will power is kind of an energy, Energy is low will power is low  Avoid making decision during low energy times, keep taking breaks before burnout https://jamesclear.com/willpower-decision-fatigue
+
+### One decision that eliminates 1000s Kill the distractions at source Make recurring decisions e.g eat same food daily instead of choosing everyday.
+
+  - sleep, productivity trap listening audiobook in bed, burning feet, then masturbate
+
+  - Stop buying things in midnight. Buy only after it's proven that I have time and energy to use it. E.g music courses, bath tub
+
+  - Know everything that consumes attention. I discovered at lest 12 side projects running simultaneously, no wonder why nothing is making desired progress. I have to kill a few now.
+
+  - If unable to make minimum required dose of work. Kill projects from bottom of priority list.
+
+### Order the Goals by importance  considering deadline for time sensitive tasks. Be careful not to neglect the critical tasks that does not have a deadline e.g staying healthy, going to gym.
+
+  - Write a Mission statement. It should be embedded into character. Anything see this, should remember why this is needed. Act like guiding star.
+
+  - Outsource whatever is not core
+
+  - Split the goal into small sub tasks. Automate, batch, outsource.
+
+### Appropriate sizing of the tasks. Split into multiple sub tasks.
+
+### Supportive Environment
+
+  - People to Follow/Copy
+
+  - People to associate with
+
+  - Physical Environment to create
+
+    - According to Stanford psychologist and behavior expert, BJ Fogg, design beats willpower. Design is about how you’ve set things up.
+
+    - In order to truly upgrade your life, you can’t just set goals, build morning routines, and begin acting differently.
+
+    - This means that you do not contaminate recovery environments with things like cellphones. If you’re going to go to the beach to relax, don’t ruin that amazing opportunity by bringing your phone.
+
+  - Tools needed to Enable
+
+  - Tools to measure/Track
+
+### Negative Habits to Avoid
+
+  - List of Habits
+
+  - Triggers for such habits
+
+  - Strategy to Avoid them
+
+  - Note and Reflect on the pain points.
+
+### Event based Response strategy
+
+  - Expect the unexpected. Black swan.
+
+  - Thinking in Bets(Probability & Possiblity)
+
+  - Plans for own behavioral, people dependency, policy change failures.
+
+### Execution/Feedback Loop
+
+  - Ray Dalio's Principles and the feedback loop.
+
+  - The Art of Zanshin in Everyday Life https://jamesclear.com/zanshin  https://jamesclear.com/stay-focused
+
+  - Time box everything, ensure essential tasks get recurring attention.
+
+  - Eisenhower Box used by Napoleon.  https://luxafor.com/the-eisenhower-matrix/
+
+### Measuring/Tracking
+
+  - Strategy/Rituals/Time Blocks
+
+  - To make things measurable. Budgeting is better than tracking.
+
+  - Define what is important to measure for everything. Measure only what really matters. But all that matters should be measured.
+
+  - Time for reflection
+
+  - https://medium.com/better-marketing/10-skills-to-becoming-a-millionaire-in-5-years-or-less-e16b8b20500c
+
+### Rituals Rituals should be holistic, combining tasks from different objectives to be performed effectively and efficiently. Mostly time or event based.
+
+### Keep Option to Backoff/Fail
+
+  - Always have proxy like teaching kids through some existing tutor so I have option to backoff.
+
+  - All in bet is existential
+
+  - Make effort to make reversible decisions.
+
+### Willpower
+
+* It's limited * At lowest when exhausted physically or mentally.(Avoid being exhausted, stop on right time)
+
+  - If there is some mandatory courses you do not like, then do it at the earliest, it will cause less stress. Otherwise it burns energy as long as in the Todo list.
+
+### Effective procrastination
+
+  - Start working early, know the basics so brain will get time to think in background over time.
+
+### In Praise of Idleness
+
+  - Diffused Thinking
+
+  - Reduced Stress/Longer Lifespan
+
+### Focus
+
+  - Learn how to take a 20-minute power nap without embarrassment. It improves concentration.
+
+  - Keep mobile away. Never ever look at mobile while talking to someone or in a meeting.
+
+###In praise of Rituals/Checklist
+
+  - Ritual to overcome Willpower Lapses
+
+  - Reading Habit
+
+  - Checklist Manifesto
+
+###Think ahead of time and plan for events e.g Project will stop what to expect, how the transition should happen?

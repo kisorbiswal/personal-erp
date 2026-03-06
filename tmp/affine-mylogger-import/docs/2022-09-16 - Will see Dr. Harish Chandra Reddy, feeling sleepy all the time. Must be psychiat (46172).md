@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 46172
+created: 2022-09-16T07:49:55+00:00
+created_raw: 2022-09-16 07:49:55
+completed_raw: 
+tags:
+  - med
+---
+
+Will see Dr. Harish Chandra Reddy, feeling sleepy all the time. Must be psychiatric issue. Antibiotics Amoxiclav stopped from yesterday and allergy medicine Montair FX stopped from day before yesterday, still feeling too sleepy. From last two days doing walk for 30min in evening also. Sleepy issue from almost 1.5 month but lately it's severe.

@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 46325
+created: 2022-12-17T16:00:39+00:00
+created_raw: 2022-12-17 16:00:39
+completed_raw: 
+tags:
+  - BMS
+---
+
+[Swagat Mishra](https://my.shaadi.com/profile?profileid=2SH76145205&ubt=L2luYm94L2FjY2VwdGVkL2ludGVyZXN0cz9wYWdlPTEmcGdfc2VhcmNocmVzdWx0c19pZD1pbmJveCUzQTRjNTRiZDM1NzMzNzljOGY4YTA2NDI0YjUzODEzZTE3fGluYm94OjRjNTRiZDM1NzMzNzljOGY4YTA2NDI0YjUzODEzZTE3fDA4ZDc2OWUyYTFmNzMyMDZmMjFlNWE1YTc5Mjc4OGQ0&source=unified&evt_ref=aW5ib3gtYWNjZXB0ZWRfbWVtYmVycw==&datasrc=api)nn\nYou & Himnn33 yrs, 5' 10" , TaurusNever MarriedOdiaLives in Kolkata, West BengalHindu, Brahmin - JhaduaSr. Manager / ManagerMasters degree in Management from KIIT School of ManagementEarns INR 10 Lakh to 15 Lakh an

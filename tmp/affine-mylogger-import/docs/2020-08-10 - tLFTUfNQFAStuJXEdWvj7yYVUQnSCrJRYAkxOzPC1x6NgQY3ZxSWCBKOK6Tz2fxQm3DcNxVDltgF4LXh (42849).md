@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 42849
+created: 2020-08-10T04:26:44+00:00
+created_raw: 2020-08-10 04:26:44
+completed_raw: 2020-08-11 04:07:13
+tags:
+  - now
+---
+
+tLFTUfNQFAStuJXEdWvj7yYVUQnSCrJRYAkxOzPC1x6NgQY3ZxSWCBKOK6Tz2fxQm3DcNxVDltgF4LXhwpKHyNIEBgnpvqpFzVyM8um9uAiix+9HXEeUwi06wKfgcQCy4+1Pbnx37+8CBXEr7/ttTmgso5hpQXmUfQLnVgVsy271j49GGzTInMf2SfGG/aihG8ky4W4Aa2z96Zryp5YLwVo2tegzhqU84qHV80NMKV9yhfU9Qn6WdhfL87kqnRXEYn9EtePnbhS/KhUh0OinKyma8ylekMsa874QgoF2jzgTZlF92jsA9RYPDwvcI11YtLyoPCAqrI1Uhql2LNA44z6qWto1FMLdnt2HNBhUiOkr9/Ui+4p/Z5Q4sE9Y7CyhJgWJHA6nGKknedeNVKdIJSoBHHPLbn3UMtIq03HY2hE=

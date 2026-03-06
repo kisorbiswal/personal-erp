@@ -1,0 +1,12 @@
+---
+mylogger_id: 42727
+tags: [feedback]
+added: "2020-07-27 17:12:51"
+source: mylogger
+---
+
+# Note 42727
+
+Tags: #feedback
+
+rdzopxIdXcrd5htcD91Vx/fkMVhLC4I7fHVmnJqcc2h3FpQnMrDPOjmmaegTyo4NrZEuXdu7/3KxziL6Bp1J7NjSb1ILB6ARkXoyVcmbWd7GUcDehcbjcZHJoewOoRsRj05JxIbKV7g4/T9ziTdFQlJxHgDw0dnXRDUNRzTZch3vixsQDCVua/O4Vxe2eN+yV637RnDLtLV+bLGwx+KfcB584JoLi9u5EuTODJBO2g4hFlwqnyxM0sGK8ivhxt/Sp6XxrbKpp7TNs5DHXFJ0vp9aoKdwjqDl+mthxEED2aBJ/HpKgpi9Wiicu6XuB/9bDl2jHyHw7TVyDsIEmUqhL9qG7SLeTbbHENxwbwHqA2EbJh8FQcQWtWSXsvjIx98wQX8ye3XmDBSI3l+OEOgsqwxwp+YnQfsQ45j9odCtmwBkopTTkT7BzU/QWvaeWdOJ4lJOa/OifJgyPUtwCQnNrex8bF4tTjEnfGWBbbudNpjNOHZ5gkbJWXJ4EL2nLb6o8V1jqPvqSPecsKunKN1iPGbv0jjy1cF8B+Cl5Ew+mM6FypBAJ3Yz1PTGSsl4xQooqkMV0/MZ6oKXktNEwC5CIA9SYf/tO5D9dRGawMSG852HZFPcwd/KRsi3YM3gdeC8MzUCR/Iyrudes00FcWVCDw==

@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 46885
+created: 2023-08-07T08:35:18+00:00
+created_raw: 2023-08-07 08:35:18
+completed_raw: 
+tags:
+  - spn
+---
+
+Saying her father got to know that we are meeting and showing my rights on her before marriage which is not good according to him. I should have thought before telling in her home, also not allowed his father to come for Brata, so her mom and dad fought as they had hidden these things from her father. We should not meet, if we meet again he will get to know. Now they are telling everything to him. So Swarupa doesn’t want to meet me before marriage. She is saying don’t be self centred, meeting is good when both wants now she does not want so don’t force her.nn\nShe says: Mu tanku nachauchi mora jaha icha karuchi, tanka ghare conflict hauchi se katha bhabuni

@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 44249
+created: 2021-06-02T11:15:32+00:00
+created_raw: 2021-06-02 11:15:32
+completed_raw: 
+tags:
+  - SA
+---
+
+1Uk29SQ/z8YDxmA8VuYCgc0bHg/ENB6OPKe+aiThoUjv7bZTpYNpDx/eLqJl5fqsj1P5SnCHF19iuckH7K4Znse+JtIhbJS1LGc520tkz6dCwokD5KzEH77s8wbR8Cjr6QupSdViqXXxIa1A63SaYeu0Zlg0sshqBGjlyHchVwr+F4S4lleMN911MDdTSj9AnYHOfEJNoHBD1yUKNGfXaqnCpt2u9PD3pnmZGhNuVmPmpWBxskvA9m2H6ica61+0K211lEEJ+v2Eyg08sNgRuLYuD4c0iMScTiFN93heOzL9vkBFhbtRTMdn4b4XewYUSv9CaOA+/Sss0a34tffSrwPpa2IKPu5p5w8gw76MAQ7Y6hOsiyDCMi4dTxQkHkKIpxQo2a/3BS/+5bgR4yUiPgU2x5v46oWWT2Jg8YcWcw0zCXveRsVN2x/qmaCfoBo0+cTAICDRlAbOkEpEHhRjdAs3TDHLiqHn05GPQUOUGCo70xr3bH5yIBRN2OQunUVjN0Cdd8HovXHi76QQrqjvmWOtkQugOOKeKX3OBiXrz6g=

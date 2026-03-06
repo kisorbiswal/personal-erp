@@ -1,0 +1,12 @@
+---
+mylogger_id: 43019
+tags: [fixfriday]
+added: "2020-09-04 05:15:58"
+source: mylogger
+---
+
+# Note 43019
+
+Tags: #fixfriday
+
+EuYOhCGz7tUXRcqYOKo+WvTd8xC96Zrc/gXvP8j+zEshFkZ7NPXsg9ayDp/aY95EHeok+1L0SWfKRkKJ0byfGKMQRVQlHetleb1R/PiahtRUQivCQvlRAtZdqL5CUcluDacrnR5+HsYNw0HHkd0RZ3/vvPPan7HdU0ecvRRSjpMj6dryniDDj7e5d7vzVf4BXkU6oMLH9v+cufXWONGWoe/XUmpGCD+6tFBnOhDUqiVE2QAgjCcRabEwnfA2B8lTf++889qfsd1TR5y9FFKOkyPp2vKeIMOPt7l3u/NV/gFeRTqgwsf2/5y59dY40Zah79dSakYIP7q0UGc6ENSqJbFNnXoYBK/QNaql5U4Hl2kjFY/OGnXdkgH5m8qytwFBzyIH+pNgrxv0/9lskm48s9a/yj/vNkmatwkQGsFtBU+MPbW7XId+MS3cm2sPOIjT+fQGbbgRXAPZxeJViKnVqtc+ETrsXIm8TUbtlMvZfRsW1NwfMqm7r0nFNKFSqkIaMq0BQ9vtFHrfsTEubY9SFaYXZHQmoohvrxbbKjAArxLTOCfsZNQfjGCrECoxkXd/

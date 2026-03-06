@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 4391
+created: 2013-08-12T15:45:36+00:00
+created_raw: 2013-08-12 15:45:36
+completed_raw: 
+tags:
+  - req
+---
+
+NLP Engineer/Lead              Summary of Requirement              Company is seeking an   expert in the field of Natural Language Processing to spearhead development of   features involving application of NLP concepts in company products. The ideal   person will possess: understanding of information retrieval, extraction methods   and multi source data harvesting; knowledge of computational linguistic   fundamentals, particularly in NLP; track record for applying the above   techniques to solve challenging engineering issues; proven experience with   search engine architectures & large scale ontologies.              Responsibilities              -         Understand NLP system in use at company,   evaluate and recommend alternate solutions       -         Understand new requirements, provide ideas   and drive implementation of features       -         Build creative solutions for content   harvesting       -         Spend 80% time on NLP tasks and 20% on   feature development              Qualification,   Experience, Competencies and Skills              -         Masters/Ph.D in Computer Science with   specialization in NLP       -         Minimum of 1 year of experience in software   development       -         Over 1 year in projects involving research   and implementation of NLP concepts       -         Experience in some or all the below areas of   Natural Language Processing       o      Machine Learning       o      Web Crawling and information extraction       o      Statistical Modeling       o      Data, Text Mining and Analytics       -         Strong analytical and algorithmic skills              Personality Traits              -         Creative, Ingenious and analytical with a   desire to engineer optimum solutions       -         Self-driven and motivated, performs   individually while effectively contributing in a team       -         Learns and applies new technologies quickly              Others              -         Exposure to AGILE development methods       -         Exposure to distributed product development   environment       -         Knowledge of additional programming languages   will be an advantage

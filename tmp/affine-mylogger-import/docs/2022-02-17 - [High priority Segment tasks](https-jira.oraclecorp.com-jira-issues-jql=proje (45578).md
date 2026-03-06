@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 45578
+created: 2022-02-17T05:24:11+00:00
+created_raw: 2022-02-17 05:24:11
+completed_raw: 2022-02-21 10:42:23
+tags:
+  - now
+---
+
+[High priority Segment tasks](https://jira.oraclecorp.com/jira/issues/?jql=project%20%3D%20%22CX%20Product%20Catalog%20Nextgen%22%20AND%20issuetype%20!%3D%20Sub-task%20AND%20key%20in%20(CXCATALOG-619%2C%20CXCATALOG-636%2C%20CXCATALOG-595%2C%20CXCATALOG-585%2C%20CXCATALOG-679%2C%20CXCATALOG-661%2C%20CXCATALOG-677))nn[Low priority Segment tasks](https://jira.oraclecorp.com/jira/browse/CXCATALOG-722?jql=project%20%3D%20%22CX%20Product%20Catalog%20Nextgen%22%20AND%20issuetype%20!%3D%20Sub-task%20AND%20key%20in%20(CXCATALOG-370%2C%20CXCATALOG-620%2C%20CXCATALOG-168%2C%20CXCATALOG-588%2C%20CXCATALOG-675%2C%20CXCATALOG-722))

@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 6445
+created: 2014-10-03T15:57:03+00:00
+created_raw: 2014-10-03 15:57:03
+completed_raw: 
+tags:
+  - top
+---
+
+I used to think I'm a programmer. Now I'm confused what to do. I get interest in Data Science and Econmics, these both need statistics. At Vimukti I need to do marketing now, there is no other way. My be I should start with learning Statistics that will be anyway useful in everything be it programming, marketing, data science or economics. Of course along with marketing, that is need of the hour. Vimukti depends on my marketing skill.

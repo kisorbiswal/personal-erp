@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 41831
+created: 2019-10-28T17:24:58+00:00
+created_raw: 2019-10-28 17:24:58
+completed_raw: 
+tags:
+  - me
+---
+
+I'm working at Epam Systems, Hyderabad as a Lead Software Engineer. I'm rational enough to appear aemotional :) I was born in a Hindu family, but have already turned into an atheist(Don't believe in God). I have selected Hindu as my religion, as I'm accustomed to that way of living. I read business, technology books and play Piano in free time. I have started working after Diploma in IT(10+3), later did BS in Information Systems from BITS, Pilani(distance mode). Note: I'm planning to marry in 2020 or later. My preference criteria is not strict, please send me message if you are interested even if preferences do not match.

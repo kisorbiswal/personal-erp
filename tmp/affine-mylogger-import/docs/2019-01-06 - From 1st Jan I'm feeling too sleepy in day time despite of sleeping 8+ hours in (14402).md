@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 14402
+created: 2019-01-06T14:47:06+00:00
+created_raw: 2019-01-06 14:47:06
+completed_raw: 
+tags:
+  - med
+---
+
+From 1st Jan I'm feeling too sleepy in day time despite of sleeping 8+ hours in night. Taken leave and slept 2,3,4th Jan. 5th Played poker with not that active brain, was doing simple calculation mistakes and missing other people's actions. Today is 6th Sunday feels better, not sleept in day time. Cooked chicken. Decided to eat only home cooked food(Not even cook). Will eat a mixed diet, with fat, protien and carbs all included. The sleepiness I think is due to stopping nicotine. My psychiatrist was not reachable so had tolerated it.

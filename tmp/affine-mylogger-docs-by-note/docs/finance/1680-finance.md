@@ -1,0 +1,12 @@
+---
+mylogger_id: 1680
+tags: [finance]
+added: "2012-12-03 07:23:58"
+source: mylogger
+---
+
+# Note 1680
+
+Tags: #finance
+
+Kotak Rejected my personal loan application, as I dont have a guaranter in Bangalore who owns a house. Infact dont want to give any guaranter, if they dont trust me though I have my salary account there, have credit score of 775/900. I'll take loan from somewheere else. If possible will close all the accounts(Salary account, saving account and trading account) with them.

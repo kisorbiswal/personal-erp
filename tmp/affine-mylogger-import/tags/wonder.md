@@ -1,0 +1,10 @@
+# tag: wonder
+
+total: 1
+
+## #556
+- added: 2011-11-28 13:50:45
+
+http://www.siliconindia.com/shownews/Indias_External_Debt_How_Much_is_Too_Much-nid-98727-cid-3.html?utm_campaign=Newsletter&utm_medium=Email&utm_source=Subscriber Intelligent people
+
+---

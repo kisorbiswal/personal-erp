@@ -1,0 +1,13 @@
+---
+mylogger_id: 5190
+tags: [evening]
+added: "2014-05-27 10:59:36"
+completed: "2014-05-28 10:28:40"
+source: mylogger
+---
+
+# Note 5190
+
+Tags: #evening
+
+http://trc.taboola.com/ndtv/log/3/click?pi=%2Farticle%2Findia%2Fin-meeting-with-nawaz-sharif-pm-narendra-modi-raises-terror-26-11-attacks-531341&ri=749cb4f859667e83bc4a4c29d65b738b&sd=v2_ec641fcc9d971afbd5e00cb4645c0a27_cc6bc395-29a4-475a-b171-61b90757f477_1401188273_1401188273_CAo&ui=cc6bc395-29a4-475a-b171-61b90757f477&it=video&ii=~~V1~~-3882214323078030852~~6KRxJvZZ12ZhrKJZUw4M-GETpS-IsfPSWDTVa_xXoUKuniL6zQG_A7JieeJ4hhMV&pt=text&li=rbox-t2v&redir=http%3A%2F%2Fsearchopinion.com%2Fr%3Fo%3Dutm09%26u%3Dreferrer%26q%3Dhate%26s%3D63679%26r%3Dhttp%253A%252F%252Fidiva.com%252Fphotogallery-relationships%252F10-things-men-hate-in-women%252F27644%253Futm_source%253Daffinity%2526utm_medium%253Dcpc%2526utm_content%253Dmailer%2526utm_campaign%253Dtraffic%2526utm_term%253D63679%26u%3Dndtv&p=affinitysc&vi=1401188271249&r=85

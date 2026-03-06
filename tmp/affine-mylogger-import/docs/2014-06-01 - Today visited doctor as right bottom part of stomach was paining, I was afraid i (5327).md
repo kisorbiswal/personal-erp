@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 5327
+created: 2014-06-01T13:02:54+00:00
+created_raw: 2014-06-01 13:02:54
+completed_raw: 
+tags:
+  - med
+---
+
+Today visited doctor as right bottom part of stomach was paining, I was afraid if it's apendicites, but doctor gave examined by pressing the belly and told must be some bactarial infection or acidity problem. Different parts of stomach mainly upper left was paining intermitently, from a week.

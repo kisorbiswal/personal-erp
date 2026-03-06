@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 2404
+created: 2013-02-02T18:31:20+00:00
+created_raw: 2013-02-02 18:31:20
+completed_raw: 
+tags:
+  - dj
+---
+
+idea: Alternative to XDrive! <http://blog.followinstinct.com/?p=8> July 18th, 2009, the idea I have got in 2009 and now able to implement it. Earlier I had everything but did not think that I can write a FTP client, today used some open source ftp client to copy files. In 2009 I have tired rsync, and file upload using http and had failed. Seems like my execution skill increased.

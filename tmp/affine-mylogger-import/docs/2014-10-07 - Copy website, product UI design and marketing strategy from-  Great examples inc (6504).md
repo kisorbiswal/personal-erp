@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 6504
+created: 2014-10-07T11:11:43+00:00
+created_raw: 2014-10-07 11:11:43
+completed_raw: 
+tags:
+  - mdo
+---
+
+Copy website, product UI design and marketing strategy from>  Great examples include Xero <http://www.xero.com/>, MailChimp <http://www.mailchimp.com/>, CampaignMonitor <http://www.campaignmonitor.com/>, Harvest <http://www.getharvest.com/> and SquareSpace <http://www.squarespace.com/>. For some examples from our own portfolio, check out Zendesk <http://www.zendesk.com/>, FreeAgent <http://www.freeagent.com/>, Clio <http://www.goclio.com/>, Vend <http://www.vendhq.com/> or Geckoboard <http://www.geckoboard.com/>, to name just a few.

@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 43627
+created: 2020-12-11T11:30:11+00:00
+created_raw: 2020-12-11 11:30:11
+completed_raw: 
+tags:
+  - backlog
+---
+
+18ce3KXGtf7QXcdKeRe3ew4lPxD3qX69CrzskMvnzjkT2ptAP0xgQKbb/QhPzahlg0sfKukylNKgCHdNWFmAIB/MJXx0cv1/i86qhfzYZYZ2BQqf/RQQh+Ocx+S4Pl1S/UNt7uZZnott+ELY3BzE7NOSdAQ5n5xEWsThrz/woNUiMdKNSnQfMor4MGu5gYPXa+6W+i1dZyQwkV9/XX7PWOTB+j6FagFa8E5oHhz1FRNgywxn22eqAaqVUc9TRe0TwArXkj8k58Xw7hn2abwLcycTwLLPYWtlDrC9rtqXfWC7BrADgihlQrPun+DLkdmzsr5Jt8zw2/oCspwV8vlA9L7yy23rFQhqYfwmxREwAfv4oLZhU+yK5EN0Pai/FW7mCJKUN+Ai/cI/kbLOw/jMGuFLisgGCX8ozNAgTcnYwK0JmVNE3rFfVl7oyU6d+ndS4ZxYfOOGCZb6lix2lm54C/KibxG6AIIzxHXuKjeiIijhKc2j7A8ap/AtHfyHAKwmnR8JTHqgseu+6HljSzGnmrMBw+nouSe2I66z4zZCMb8=

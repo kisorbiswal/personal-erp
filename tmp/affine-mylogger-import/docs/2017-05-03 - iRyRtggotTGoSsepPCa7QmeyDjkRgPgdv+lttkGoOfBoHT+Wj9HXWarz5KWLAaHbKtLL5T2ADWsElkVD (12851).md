@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 12851
+created: 2017-05-03T12:11:46+00:00
+created_raw: 2017-05-03 12:11:46
+completed_raw: 
+tags:
+  - learnb
+---
+
+iRyRtggotTGoSsepPCa7QmeyDjkRgPgdv+lttkGoOfBoHT+Wj9HXWarz5KWLAaHbKtLL5T2ADWsElkVDb0TXEVrZ3JqL28hxt8G4xP+WrB687FPMOaJgI8k41foXxICCTrirBx0hcWMHu0yO2DVN79rwyEMEZzYnxQTnVGJNHYEX/d9q2I42gpKRy/Zi6da+jJ1JbB5I4ywfvR0Ox/0raRr9GSebevohQkL3QWmzCDeYHRbsIPvM/9E/c2FvOUpakmoNcQNiLSxxdNkPYn8whe/yp9pR6E/CBjYQ2r4WyEdobpn8ZctL6nW6piMd8G+R4ZHl9CKmew40GWi7njEZzTgdNWGHyX9hsQiUl678zLcx7epiYSvWB5irQSKndiyrEpBIJ3k9WW5FMPf10TC+ijaRFI997R5lXvOQr8YOnT30puxIoa9mS/PzlMFD7QihYSa05Id9BkojuA1FT7VgPxSW3+qIjfP0VB2KDFZCGFk=

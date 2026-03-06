@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 5184
+created: 2014-05-26T15:20:42+00:00
+created_raw: 2014-05-26 15:20:42
+completed_raw: 
+tags:
+  - i
+---
+
+A facebook application with browser plugin to collect data like comment etc and links e.g TED and defining rule to do actions later. e.g save a TED video to eatch later, a good tutorial article to read later.

@@ -1,0 +1,13 @@
+---
+mylogger_id: 8433
+tags: [evening]
+added: "2015-09-02 03:56:03"
+completed: "2015-09-15 01:25:44"
+source: mylogger
+---
+
+# Note 8433
+
+Tags: #evening
+
+https://www.cbinsights.com/blog/robot-startups-to-watch/?utm_source=CB+Insights+Newsletter&utm_campaign=775c3ca1fb-Greylock_09_01_2015&utm_medium=email&utm_term=0_9dc0513989-775c3ca1fb-86935489

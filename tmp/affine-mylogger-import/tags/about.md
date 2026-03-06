@@ -1,0 +1,17 @@
+# tag: about
+
+total: 2
+
+## #3846
+- added: 2013-06-27 12:53:32
+
+http://mikestaszel.com/resume.html Learn from it
+
+---
+
+## #683
+- added: 2012-05-31 05:27:27
+
+I have 4+ years of experience in Software development. Started my career with Vimukti Technologies Pvt Ltd, without any degree at age of 19. I love to solve business problems using technologies. I worked on products in Collaboration & Digital Marketing domain. My current project is in security, governance, risk and compliance domain. I can work on any programming language or framework to solve the problem in hand. I strongly believe human capital is an important factor in growth of any country or community.
+
+---

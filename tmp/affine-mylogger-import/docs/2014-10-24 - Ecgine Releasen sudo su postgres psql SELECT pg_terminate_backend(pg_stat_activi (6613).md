@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 6613
+created: 2014-10-24T11:47:38+00:00
+created_raw: 2014-10-24 11:47:38
+completed_raw: 
+tags:
+  - sql
+---
+
+Ecgine Releasen sudo su postgres psql SELECT pg_terminate_backend(pg_stat_activity.procpid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'cs_360_1'; //DROP CONNECTIONS drop database cs_360_1; create database cs_360_1; grant all privileges on database cs_360_1 to meta; \q exit  //@meta: psql -U meta cs_360_1 < cs_360_21-Oct-2014-23-00 psql -U meta cs_360_1 < /mnt/projects/CS360/version2_csu.sql >>dumplog2.txt 2>&1

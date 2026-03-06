@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 213
+created: 2011-09-02T08:43:58+00:00
+created_raw: 2011-09-02 08:43:58
+completed_raw: 
+tags:
+  - dl
+---
+
+Read newspaper or watch tv news stayup to date about local, national and international political and economical situation. Sport and movie also.

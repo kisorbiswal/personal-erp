@@ -1,0 +1,62 @@
+---
+mylogger_id: 499
+tags: [fuse]
+added: "2011-10-18 09:16:53"
+source: mylogger
+---
+
+# Note 499
+
+Tags: #fuse
+
+A jar working on jboss will not work as it is on fuse because the the available jars in fuse and jboss  are not same. Two type of issues related to classes are
+
+      1. Incompatible class found. This occurs when the war brings in a different version of jar which is already available in fuse. The exception thrown are java.lang.LinkageError, loader constraint violation: loader().
+
+Solution: To find the root of problem we need to find which jar brings the incompatible class and exclude that jar from packaging of war. Below you can find how to enable class loading in fuse and how to exclude a jar from packaging.
+
+       2. No class definition found. This occurs some of the classes used in war was available in jboss by default, but not available in fuse.
+
+Solution: Need to pass that class into fuse. If you think the class can be used by multiple modules than you can deploy it as bar, or else you can simply ad into your maven dependency.
+
+My observation is the xml files in side /WEB-INF/lib/some.jar are not available in class path. (Not 100% sure)
+
+Q. How to deploy war file in fuse?
+
+A. See the example
+    osgi:install war:file:///opt/qvantel/webservicejars/falconws.war?webapp-Context=falconws. After its deployed you need to start it as any other osgi module,  it will be accessible at http://10.2.0.37:8181/falconws/.
+
+Q. How to enable class load debugging in fuse?
+
+A.  In servicemix file add JAVA_DEBUG_OPTS="-verbose:class" and  then append JAVA_DEBUG_OPTS in  exec "$JAVA" $JAVA_OPTS $JAVA_DEBUG_OPTS". After this you need to restart the fuse and can see the class loading  details in log file.
+
+Q. How to find which jar brings a particular jar as dependency?
+
+A.  Open pom.xml in eclipse> switch to "Dependency Hierarchy" view. Right side you will see all the jars that are being packaged, when you select a jar in left window you, can see how it came.
+
+Q. How to exclude a dependency jar in pom?
+
+A. See the example
+     <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+            <version>2.2.7</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>saaj-api</artifactId>
+                    <groupId>javax.xml.soap</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>saaj-impl</artifactId>
+                    <groupId>com.sun.xml.messaging.saaj</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>geronimo-stax-api_1.0_spec</artifactId>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+Q. How to make a bar file from jar?
+
+A.  https://luna.qvantel.net/display/QTEC/HowTo-Deploy3rdPartyJar

@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 46777
+created: 2023-06-21T05:43:29+00:00
+created_raw: 2023-06-21 05:43:29
+completed_raw: 
+tags:
+  - med1
+---
+
+incompetent to manage communications having too many friends? Unusual night outs with Ambalika. Not responding to calls or messages in time. Not calling back when she says,  stays on call for long with Ambalika many times she not responded my call or my sister’s call because she was on call with Ambalika. Maybe these are triggering me to see her actions in microscopic view. I might many faults in her communication. That affects my sleep. In past 2 other instances, he has her marriage broke because she was talking to Ambalika late night and not responded, an other time she was roaming in Mumbai and the boy felt neglected and his father cancelled marriage. Not told name but I guess she must be roaming with Ambalika nnI had thought to marry Prasanna Y, never felt like this. Maybe something in subconscious brain says Swarupa is not suitable.

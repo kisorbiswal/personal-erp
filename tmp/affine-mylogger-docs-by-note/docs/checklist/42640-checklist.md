@@ -1,0 +1,12 @@
+---
+mylogger_id: 42640
+tags: [checklist]
+added: "2020-07-18 19:04:40"
+source: mylogger
+---
+
+# Note 42640
+
+Tags: #checklist
+
+7W5frjmpkDbtNmtrOLXkRXz6H5vZ0w84xFggsZ545MlSarS3PEAA9wT/w/JUpSoupAG0+I3rHUztDDRH5F/M9wiRYgaveDBPJqOItwd+lDeQeqUkz/JnxkAQjuOWIA+FXvQxARI5U4Xvz24T6Oy9NfLFnyaSMyL3oLjHfLMPLJYeiz7M8e+7I0e+XiHycd+KWoFUQfDmcMCilmzz44RpBirli6OGVBZelBbHYUU4m80fiubgCfi0+/ukLvIuHt1Uj8FfDLeWal+JkftB6uFRweVtzWuid5WxTojMY3bbGNDagmL5GQMH+TheSAjKXBjlo6YpCB6yyiQNJYeYnCg0powjTCvCQU6vEb1BCxo9CCGqNczIw2rHbvmtPKRmPbn6W0EQR7jwEkfyzRWl0UC3DdcNJBY/8PqAJFRwkhxN56BWwnoURQ5+GdJVQFm51Njs02cJUCnyTHqWTgTaiR/bra9bYnzyimvXJjdxRw9cJwpK/biYLr0GnxxhprjWEC72rkVpVMqHq0G3U0CncWGl44NB4agneVbzWnwRunLlI10PZX8OxA0zsOh39EZKdm415qhfIBCjqKLwD9NCcni7CGCgcl5AZnK0vDMe27HsP06Xok3OUrUVXIEe2RZIx5Np

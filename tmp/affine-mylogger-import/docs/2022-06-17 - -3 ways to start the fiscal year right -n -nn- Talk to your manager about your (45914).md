@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 45914
+created: 2022-06-17T04:18:24+00:00
+created_raw: 2022-06-17 04:18:24
+completed_raw: 2022-06-28 16:24:40
+tags:
+  - now
+---
+
+**3 ways to start the fiscal year right \n **nn* Talk to your manager about your performance goals and how they connect to your development and career aspirations. \n n* Create or adjust your development goals in __[HCM Career Development](https://app.internalcomms.oracle.com/e/er?s=2142201763&lid=9984&elqTrackId=3284a9bf1ef6409dbda2456acd1fafff&elq=ca772874f51c44ccba95b599155280fa&elqaid=5094&elqat=1)__. Include the specific skills and capabilities you want to focus on. \n n* Advance your knowledge of Oracle’s business, strategy, and products, or grow your business, leadership, and technical skills—start exploring at __[Learning at Oracle](https://app.internalcomms.oracle.com/e/er?s=2142201763&lid=13601&elqTrackId=fd0b28b4b5984ccfb63071346fa9efca&elq=ca772874f51c44ccba95b599155280fa&elqaid=5094&elqat=1)__.nn\n

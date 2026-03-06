@@ -1,0 +1,13 @@
+---
+mylogger_id: 6318
+tags: [evening]
+added: "2014-09-11 09:27:49"
+completed: "2014-09-23 11:11:38"
+source: mylogger
+---
+
+# Note 6318
+
+Tags: #evening
+
+https://www.linkedin.com/pulse/article/20140902073237-10553148-one-of-the-challenges-of-being-a-data-scientist?trk=prof-post data science

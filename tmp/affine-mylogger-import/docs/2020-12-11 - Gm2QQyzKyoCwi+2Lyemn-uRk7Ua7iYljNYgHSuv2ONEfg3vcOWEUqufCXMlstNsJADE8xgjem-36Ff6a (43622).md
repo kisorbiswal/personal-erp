@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 43622
+created: 2020-12-11T07:03:04+00:00
+created_raw: 2020-12-11 07:03:04
+completed_raw: 
+tags:
+  - Pi1
+---
+
+Gm2QQyzKyoCwi+2Lyemn/uRk7Ua7iYljNYgHSuv2ONEfg3vcOWEUqufCXMlstNsJADE8xgjem/36Ff6aCrPVH0yDLyiUdGLoDiJyXzyVTVVHPzq8+Z/cmz5ra0axB1qAMS5HVaMIaMPj9YtzkNd4DIWeiTZAkp43hEUZD0PwRezqAqxdRsFt5TCz6Ob7y9ehWBYRnh+fTCGrBcm/vD6LL9xDrvR/8rHt9GYhgx/H56xb2zxfwu2yqurVkJqHMrH9WCUvjOJPfwRk9+YOon86ZYXbWWx1JgOM36Ur6XsPBqyoCUJnQgGLf2FG4oBoEB4VXUIEMVvQuEyVykq0E8xu08tvpMeRzyetDZHiqFQGliAIkbvXSvADNWdavg5XW3x780PSbwjK2dDQvOdLQjWe6OY61Yhln6NR08WZ01blboIJYdEYkIQXiWOis+wPFK1h7E2xNB2kZZglOhDbocZGBm0QfqnkdzvS1sbgpiGfqKZhSnS9a95D38Ks17quCcVMoAeBkl9Vj3wUFvXRIffJQ8qM3RpOdV3s9Te3uYXbBTA=

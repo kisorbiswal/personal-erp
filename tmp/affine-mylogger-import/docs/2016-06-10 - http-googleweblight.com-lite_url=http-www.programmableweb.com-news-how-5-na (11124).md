@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 11124
+created: 2016-06-10T16:56:13+00:00
+created_raw: 2016-06-10 16:56:13
+completed_raw: 
+tags:
+  - Mylogger
+---
+
+http://googleweblight.com/?lite_url=http://www.programmableweb.com/news/how-5-natural-language-processing-apis-stack/analysis/2014/07/28&ei=_tHvyKFd&lc=en-IN&s=1&m=513&host=www.google.co.in&ts=1465540844&sig=APY536wkTEoxH8ibahNVnl41VxZ5EsKnpA

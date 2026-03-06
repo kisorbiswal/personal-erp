@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 12237
+created: 2016-12-17T05:58:00+00:00
+created_raw: 2016-12-17 05:58:00
+completed_raw: 
+tags:
+  - techc
+---
+
+Logging, error handling, KM says we need to have config to enable to capture request body also if some user says nothing works for me. How to debug.

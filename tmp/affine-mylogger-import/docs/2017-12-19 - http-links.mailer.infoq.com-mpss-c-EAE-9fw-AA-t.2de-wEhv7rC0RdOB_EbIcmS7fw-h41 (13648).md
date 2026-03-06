@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 13648
+created: 2017-12-19T13:09:49+00:00
+created_raw: 2017-12-19 13:09:49
+completed_raw: 
+tags:
+  - Techc
+---
+
+http://links.mailer.infoq.com/mpss/c/EAE/9fw-AA/t.2de/wEhv7rC0RdOB_EbIcmS7fw/h41/zHjhRPnwWSw2g-2BRDH3hFbHbkwZdw5NUdlq1U5v5AJewYH5aJ9ob6lPSZJAWYxZDkCiYfIOCJp-2BwuYmloMc2k9EI8PZQRXejTrM-2FgDTIEWbbIRBENOF2kdqRmiNZXAEHd1j9kx49sPuk63z20NMy0GUN42oQgOfgG6rogqN5ZlXJPGtQllGYtAq4qDixlvZb-2B6Dt4qgtUW8ggi4Xb9IUl21pXpo-2BXmOBEbc7ihtOpjRMc1EC0nJNoSIMrRhPjQZCe

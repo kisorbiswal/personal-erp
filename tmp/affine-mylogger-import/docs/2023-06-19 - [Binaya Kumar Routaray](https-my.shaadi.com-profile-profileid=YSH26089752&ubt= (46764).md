@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 46764
+created: 2023-06-19T15:09:20+00:00
+created_raw: 2023-06-19 15:09:20
+completed_raw: 
+tags:
+  - BMS
+---
+
+[Binaya Kumar Routaray](https://my.shaadi.com/profile?profileid=YSH26089752&ubt=L2luYm94L2FjY2VwdGVkL2ludGVyZXN0cz9wYWdlPTEmcGdfc2VhcmNocmVzdWx0c19pZD1pbmJveF9zZXJ2aWNlJTNBM2ZjMGIzM2VkYzRhYWMwNWI2ODU3YjdlNzk3ZjYxZTd8aW5ib3hfc2VydmljZTozZmMwYjMzZWRjNGFhYzA1YjY4NTdiN2U3OTdmNjFlN3w0ZWNjNzQxNjZmZDI0MWUxYjljNDk2MzFjZWQ1NTk1Yg==&source=unified&evt_ref=aW5ib3gtYWNjZXB0ZWRfbWVtYmVycw==&datasrc=api)nn\nYou & Himnn32 yrs, 5' 9" , GeminiNever MarriedOdiaLives in Delhi, Delhi-NCRHindu, Khandayat Mechanical / Production EngineerBachelors degree in Engineering from Biju Patnaik University of TechnologyEarns INR 7 Lakh to 10 Lakhnn\nHome:nnWork Location: Delhi NCRnnEducation: B.TechnnCompany: Tata MotorsnnSalary:nnWhich skills: Mechanical / Production EngineernnExperience:nnHow do we proceed?:nn\n19/6/23: Asked me to send a message on profile so he will check. I sent on shaadi.com as the given number does not have whatsapp.nn\n22/6/23: Sent on Shaadi.comnnHi, Any update?

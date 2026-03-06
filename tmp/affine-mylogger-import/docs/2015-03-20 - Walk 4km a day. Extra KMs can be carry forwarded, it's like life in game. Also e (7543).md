@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 7543
+created: 2015-03-20T04:56:39+00:00
+created_raw: 2015-03-20 04:56:39
+completed_raw: 
+tags:
+  - game
+---
+
+Walk 4km a day. Extra KMs can be carry forwarded, it's like life in game. Also extra restriction is to walk 12 per week even when there is extra KMs.

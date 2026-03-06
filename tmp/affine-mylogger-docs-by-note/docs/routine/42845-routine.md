@@ -1,0 +1,13 @@
+---
+mylogger_id: 42845
+tags: [routine]
+added: "2020-08-09 15:15:05"
+completed: "2020-09-06 20:16:54"
+source: mylogger
+---
+
+# Note 42845
+
+Tags: #routine
+
+wr9E3apkKo8qsyTPP5XGdl267BYUuaYEGl3OXFRjIHf7mJRmQBW71BwgOXHS15rX/JAFCizhZo05RBVy2PZvkOjzjFXB73udpkKaDWZWeoS9q5BLxR7NPM3pLwXPeV54UFg84/zJd4ryYqXsYq5fJU00ShDo9GG14OKAHnKMcooXdd0ushcleKc5csDO+Cl3y0TAJwn3wumqOvqNQpw5PBXk+bGn4TI3LNz5up9j261mNuMYopkELJ6mFO97XbJISnQ9LAJb6pS+QM5JY4t7HJx2J/LgeWiBcnuyoAN+XzMGLk8KSR3FiC+KkOOy4LKWCW42X/y2DjUONH5XQ7Ck9EhpLc9+WmWwqKGhsgGmg/9gYPebsM/k4YbCbzuws5NzZ/dwME+iyLcOPfXnTV4uAXjAiw3zYaoVDdMqHF14nKuCJJSHiDlVOySz5l30AYn+f5e1qBEPblZ11yZoJrlH3bxkzQIwnBHGlwHonFdy6JcTRBtixqqi72L/ffV9Sepf

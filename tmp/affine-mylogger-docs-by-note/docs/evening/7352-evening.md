@@ -1,0 +1,13 @@
+---
+mylogger_id: 7352
+tags: [evening]
+added: "2015-01-29 11:21:39"
+completed: "2015-01-29 13:55:08"
+source: mylogger
+---
+
+# Note 7352
+
+Tags: #evening
+
+http://www.businessinsider.com/skills-for-success-in-the-future-2015-1?utm_content=buffer7fdc3&utm_medium=social&utm_source=facebook.com&utm_campaign=buffer

@@ -1,0 +1,12 @@
+---
+mylogger_id: 570
+tags: [investor]
+added: "2012-01-08 06:58:57"
+source: mylogger
+---
+
+# Note 570
+
+Tags: #investor
+
+http://www.siliconindia.com/shownews/Top_VC_Firms_In_India_In_2011-nid-101830-cid-100.html Indian VCs

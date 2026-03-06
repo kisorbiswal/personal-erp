@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 44609
+created: 2021-08-02T08:12:43+00:00
+created_raw: 2021-08-02 08:12:43
+completed_raw: 2021-08-07 17:04:04
+tags:
+  - now
+---
+
+Dear Citizen, Please pay your property tax against PTIN : 1129948687 , HNO : 8-20/LAN/202, before 31.08.2021 to avoid further 2% monthly interest on first half of 2021-22  Property Tax and on arrear taxes if any. You can pay your tax at GHMC Citizen Service Centers, Bill Collectors, Meeseva or make payment Online through GHMC website /MyGHMC app or by clicking on below link https://onlinepayments.ghmc.gov.in/PTax/ShowPTSearch?PTINO=1129948687 -Commissioner, GHMC.

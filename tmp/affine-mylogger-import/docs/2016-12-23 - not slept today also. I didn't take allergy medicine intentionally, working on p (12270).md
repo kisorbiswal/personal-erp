@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 12270
+created: 2016-12-23T23:59:36+00:00
+created_raw: 2016-12-23 23:59:36
+completed_raw: 
+tags:
+  - Med
+---
+
+not slept today also. I didn't take allergy medicine intentionally, working on planning live chat support business. It's 5.30am. Still not sleepy. But better to avoid sleepless nights.

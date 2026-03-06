@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 46865
+created: 2023-07-24T17:01:17+00:00
+created_raw: 2023-07-24 17:01:17
+completed_raw: 
+tags:
+  - med1
+---
+
+After some gap of communication I’m feeling like something is missing. Probably addiction nnnSmall unresolved issues like marriage date change on event of any death in clan, both moms discussed, it can’t be resolved. Still in anxious.

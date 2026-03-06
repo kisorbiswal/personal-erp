@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 45466
+created: 2022-01-31T10:17:01+00:00
+created_raw: 2022-01-31 10:17:01
+completed_raw: 
+tags:
+  - i
+---
+
+\#BlogPost I'm not what I think I'mnnI think I'm rational still not doing exercise, which may seem acceptable. I eat ice cream too when I have a cold.nnI fail to stick with plans, though keep making many plans. With too many competing things easier ones take priority. The difficult and slow ones that need pause time, get ignored completely, I forget to resume after the pause time. e.g the FBA seller account setup has taken 11+ months already and is nowhere near to close.nn\nI knew up to some extent my performance largely depends on the environment, social context, but now I realize if left alone, I’m just mediocre. Because personal finance, health, personal intimate relationships are completely neglected by me. Because there is are personal, not generally publicly discussed or compared.

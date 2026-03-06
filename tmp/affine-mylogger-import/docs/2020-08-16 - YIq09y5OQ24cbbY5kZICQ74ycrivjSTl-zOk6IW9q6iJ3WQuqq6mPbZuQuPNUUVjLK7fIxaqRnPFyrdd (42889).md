@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 42889
+created: 2020-08-16T12:17:13+00:00
+created_raw: 2020-08-16 12:17:13
+completed_raw: 
+tags:
+  - sa
+---
+
+YIq09y5OQ24cbbY5kZICQ74ycrivjSTl/zOk6IW9q6iJ3WQuqq6mPbZuQuPNUUVjLK7fIxaqRnPFyrddJuIUrYShWSVSiUyDqCgvghWfJHggQ8VC8RvY3/HcsscYChjl/BD9u5bkG4kdRCTCYvkDcqxqID03MxYDXeI/V4iiYPaqCyiZ3h4Mu7caRv2nPmh8F8EtejZ10U3BeIZ0Ld/IIKslTtbWcdpoaw6LN50rpdknp1btuhU93VkY6FY0qh24Ew2a/eLy8O3is+C3/BL4A0it+WpWF/pyAAYCirKcNnHIuC9qLcz6uSphm+xU60FVvzhF1k3I8fbq1Lx6WFpen1y8FYQrimcmQLbjR6pD5KGHdWbZvcyOs8ciR6yVgkvmDCf+xkjmvbkcD1J0/FfnEKazzhS8NfTvylibWvVoy+As8xXYLsOfYr2aoHA4EzcOU4+0+BD9BcOeV85EXTUROQ2ZIsYhznqxfv1AC8WoYDRx+3whNOswOmL0cSBHRxOlb/BgP9U8JRqZ9iy6ZDrBrFm+c309aLIktg5QZBaBr7h/OMUFSpqZ5Qf+A8PWLIOnxN88TrJ6zkRqCBjnZ3+tK4zDn83AF2pJ8/YQQkWR6Lqho7biIFTUiQdcmIy0pQPg

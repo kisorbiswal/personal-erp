@@ -1,0 +1,13 @@
+---
+mylogger_id: 5318
+tags: [evening]
+added: "2014-05-31 10:53:28"
+completed: "2014-05-31 12:41:43"
+source: mylogger
+---
+
+# Note 5318
+
+Tags: #evening
+
+https://www.linkedin.com/nus-trk?trkact=NUS_today_list_large_0&pk=member-home&r=&url=http%3A%2F%2Fwww%2Elinkedin%2Ecom%2Ftoday%2Fpost%2Farticle%2F20140530095704-18069105-work-life-balance-is-dead-as-it-should-be%3Ftrk%3Dtod-home-art-list-large_0&urlhash=5ogn&trk=tod-home-art-list-00AGEfpXQ-M9FeDTFALL

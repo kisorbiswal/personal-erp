@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 45128
+created: 2021-11-24T04:38:18+00:00
+created_raw: 2021-11-24 04:38:18
+completed_raw: 2021-11-25 04:17:15
+tags:
+  - now
+---
+
+- [x] See how to do an API in BOSS to get combined data from multiple BOs.n  - [x] There is no way to do that. So we create a SQL view and an associated BO. Using the bo to get data.n- [x] Discuss with Sampath how he is writing the API for the list page.n- [x] Discuss with Suman: How to manage the user info?nn\n

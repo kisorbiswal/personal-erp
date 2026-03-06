@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 4716
+created: 2013-10-10T15:58:08+00:00
+created_raw: 2013-10-10 15:58:08
+completed_raw: 
+tags:
+  - link
+---
+
+http://vimeo.com/76571389?utm_source=email&utm_medium=clip-transcode_complete-finished-20120100&utm_campaign=7701&email_id=Y2xpcF90cmFuc2NvZGVkfDllZGRjZDExZGM0MzAxMWU0ZTJkNTk2ODhlYTk0MWQ0NzMzfDE2MDYyNzU4fDEzODEzNjQ2OTg%3D

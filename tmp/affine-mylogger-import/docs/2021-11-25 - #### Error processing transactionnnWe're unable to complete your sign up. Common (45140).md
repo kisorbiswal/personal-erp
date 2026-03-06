@@ -1,0 +1,11 @@
+---
+source: mylogger
+mylogger_id: 45140
+created: 2021-11-25T14:45:15+00:00
+created_raw: 2021-11-25 14:45:15
+completed_raw: 2021-11-29 06:35:41
+tags:
+  - now
+---
+
+#### Error processing transactionnnWe're unable to complete your sign up. Common sign up errors are due to: (a) Using prepaid cards. Oracle only accepts credit card and debit cards (b) Intentionally or unintentionally masking one's location or identity (c) Entering incomplete or inaccurate account details. Please [try again](https://signup.cloud.oracle.com/?verify_email=eyJhbGciOiJIUzI1NiJ9.eyJmaXJzdE5hbWUiOiJLaXNvciIsImxhc3ROYW1lIjoiQmlzd2FsIiwiY291bnRyeSI6IklOIiwic3ViIjoib2NpLXNpZ251cCIsImlzcyI6Imh0dHBzOlwvXC9zaWdudXAub3JhY2xlY2xvdWQuY29tIiwiaXNPcGF5T3V0YWdlIjpmYWxzZSwidXNlclNlc3Npb25JZCI6InNpZ251cF9iNDUwOThjOC0xZTQ2LTQ2NWEtYTBjOC1kMGQ1M2E4MDkyNGUiLCJleHAiOjE2Mzc4NTI0NDksImlhdCI6MTYzNzg1MDY0OSwiZW1haWwiOiJraXNvckBkaGFzdXNvbHV0aW9ucy5jb20ifQ.Q4S0qSMClnw9jtLRvYdOOKJ6ZPYR98yVptaMoSWRFdM&sourceType=_ref_coc-asset-opcSignIn#) if this applies to you. Otherwise, contact [Oracle Customer Service](https://go.oracle.com/LP=96969?elqCampaignId=260306).

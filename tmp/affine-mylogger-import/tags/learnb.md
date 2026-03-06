@@ -1,0 +1,52 @@
+# tag: learnb
+
+total: 7
+
+## #45422
+- added: 2022-01-26 15:05:36
+
+* [CISSP Certification](https://www.linkedin.com/learning/ccsp-cert-prep-1-cloud-concepts-architecture-and-design/cloud-concepts-2?dApp=48371594&u=42751868) Certification\n* [Certified Cloud Security Professional (CCSP)](https://www.linkedin.com/learning/cissp-cert-prep-1-security-and-risk-management-2018/the-goals-of-information-security?autoAdvance=true&autoSkip=true&autoplay=true&resume=false&u=42751868)\n* [Personal Branding](https://www.linkedin.com/learning/learning-personal-branding-2018/your-most-powerful-marketing-tool-2?dApp=48371594&u=42751868)\n\n\\\n
+
+---
+
+## #43644
+- added: 2020-12-14 09:57:07
+
+gMXO3rxwzAZ/12FYU+L6eDKQHgE4Zx1aHZh3lTPPi5H5st4k9jvIZyMRaQ8o5ofeQkMrxbemKcTIKctBcqjFS2hYMCaWt8q/bHktiU8B25JjVDyZ8DAWHc1WSamCRUIGDgvCjypDLO01mCKwjH7OWesz/bruIodod5QmGe3SNtJgW8Yo0PG57q85vXAl+xWFeTlmLzIkqa5UozamxNrGGIRUiVUC3qyvaP0EGgXnuPJYhvq7z2k2UtzUvLFL7xoE2ORIxS6Z1xI9KJ1xcGL3Zu5lCM65FYVclF2P+0oJUsrCJUNJh+s/LA0T3iW3pwLVyOcT49NCUsVlphhjmM2ADSVLpRCoLJPIKssPduRSLnIs64Ca3wO4hVc9yCzjomJZ9+94HPwDs+VtxabiDPwLObizuZ9ExbWXvAnNAaoUGOJb+813XhCR7KKDc7hMVSwwcGH4ww7H1C7uvA0VVqoM+u+aU+B7pidFHv+VZCZLIGO1Urk8CCWQU55DPa1f//T8wqZF6zFCWFKNoO+ffEv9GPFYh8DciUAuZf1GXHyV/+Rz/wBkF4E5GhdnTomuQAO6IP7cPN15PiiwvKeaoUr1aMWsByHZkfOk4Xdll7D6DGXvv+jDPVKouKWLX8rNRdfFW9aZIJyntzZSVtD+pt7ovrU8sBr5ImXPS8yZuDV4o2Hw2w8tIl1tqPkxblDJKGiwEW9XysvyGRSHVJ1jkH6y5Q8MpCZ2mX99hGHUCccjoOYveNEQrJIoUIFqVKwbC/McREK+GoaITnt77bpATi+rygZBOcN5E2f/y2Ewm2W5S5/HJmE4Z6OCVO7gdvYrjG0k6ER4/ocWeWQkvFBu/vM2j0Zw3Kb9HzAgMKs0Ej3zntWwOPfm0C8EbXyZNiX/S+LR6jj+LExqQc0IGRLifluqXQQ4qM/ZhvPTn57wNj/gptU8sYmw2cg4moPVdFOP8ktTwCxFRwjMcjzuLeqhNcVFM4EwtwTMbCJiLuueMu0+HX/DK6fglbpPAi9ejdUnIUJ4CqySjuXrHn/kI/BlN6rQ8D1MgQhkCEgu4EIr/V3+xDccgJTsBVs1IiByeXHlbD4AnWKE9sfwH/b1g1XTH8N1+RqRL/gAF6bcefoOkiUjNpEJHCaWonMlVSNdJ6LzlE3y
+
+---
+
+## #43055
+- added: 2020-09-09 12:18:45
+
+zI4bnhqVBQQGGTXO3Kw8b7IeNo3my6uD65YIsTB6KepCIg/dUkgF+cIJNQI6DKBtcy/5z4cvt8WCW+phrgW1zCXSLCbEaEXLFosqZyu7GBYwY3r5cZ3BbqnSjWOd0IQulSN3WkAnYFlza+6hDM9ACQLk7bNl9hDqCmHTbAT2XV04Rzc4zuS12hV0WQXqkGwK8vbYsT7Fjw3eeBziHwx89kBqA3PIa/TC5Y4DH57g4uCX946rr55zfllXxVwvk/Y2Dhpt+YukQVgMHRbJY3/qh8/1rYfNWat5JNMGZKYDEl0gCfYicthQehX+zimgvNjD8ID6U4mWuDUMU95p5OnQZ0lq8h7r6lUX98Edbzq8gJU=
+
+---
+
+## #42880
+- added: 2020-08-14 09:55:15
+
+2gzWKQW4q1QJ4YyoxDnyDJDip2WA95cEZgW8GxNYzQg=
+
+---
+
+## #42847
+- added: 2020-08-09 16:49:31
+
+78QNuhNbh0MFDS7rjnQjADIvxce5SGnR35NWUscobO4yN4ABAVXhrUArGIaWk9yEjzHOxjxMM06GyJeowdlvk+TevURhP6ulhjggwlEj8fk=
+
+---
+
+## #12851
+- added: 2017-05-03 12:11:46
+
+iRyRtggotTGoSsepPCa7QmeyDjkRgPgdv+lttkGoOfBoHT+Wj9HXWarz5KWLAaHbKtLL5T2ADWsElkVDb0TXEVrZ3JqL28hxt8G4xP+WrB687FPMOaJgI8k41foXxICCTrirBx0hcWMHu0yO2DVN79rwyEMEZzYnxQTnVGJNHYEX/d9q2I42gpKRy/Zi6da+jJ1JbB5I4ywfvR0Ox/0raRr9GSebevohQkL3QWmzCDeYHRbsIPvM/9E/c2FvOUpakmoNcQNiLSxxdNkPYn8whe/yp9pR6E/CBjYQ2r4WyEdobpn8ZctL6nW6piMd8G+R4ZHl9CKmew40GWi7njEZzTgdNWGHyX9hsQiUl678zLcx7epiYSvWB5irQSKndiyrEpBIJ3k9WW5FMPf10TC+ijaRFI997R5lXvOQr8YOnT30puxIoa9mS/PzlMFD7QihYSa05Id9BkojuA1FT7VgPxSW3+qIjfP0VB2KDFZCGFk=
+
+---
+
+## #12850
+- added: 2017-05-03 08:39:40
+
+fSzLzHAxQ2iwnAjE0d4Cr4IbbdzkxVQLtnvBrIQquXXLKcyLFS/+HBt8vmW5F1+Ka5GRsYOegsJh2hcJzKhuBFyVpexmbB2lTPq8y7RpX3Ln4r2RS2PPbZqS9MXvVKSJCO4jMeU0SC0Z/SPcHj/jjMoH7l93ApN75u/racB8U4wUWNe+bWtXbhBX5CPWeHZwpz//GI1LEUL0gTreSFQMt/YfSqDgV7n3QZw6l5ufvombrSVV5CEZCPavOfQzmffCEChX1yxLpGyOB7PflWECQ6VcuYzyqQk2hAQV3gQlhVK/G+1oKl0IbNuNQJnIyFJ7PYYVWVpf17rEv0NzLD4URnswTN42yc9w/F8z5Zzmz7gz4ZHejc9f047DNIPb7p0NysTzVgA1SkrBCKTWi/FBoChLIQbYZ7eFxgi2WDHx9eUAZa9WL/34SfEMA3LjgLewZgHQmEKJMLd137AU6BFKNsHp0OL4NP37N7X+YeL3LPoKg7z/zrxj9zskKuNYWAhZB9H9/kD9VZvnBxlurg08i3ZOTz5WMQxkhyVF0XDxc7fQCdIWlo0iIAzeVXVAkccOj4z6iEDWwYmL0WXkEIN6FdMggiH4K2sb/zxovBcY3WnD1sR8MRdsZdyAl9mDS/BChsXDIXn/QOys7b+szQvJtEl6gSSKKufddKevViGhMQzFe/BksAmUN1LFBedWdQ3Q
+
+---
