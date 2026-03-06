@@ -5,12 +5,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 type BoardItem = { id: string; name: string };
 
+type RenameBoardResponse = { id: string; name: string };
+
 type CreateBoardResponse = { id: string; name: string };
 
 export function TabsBar({ activeBoardId }: { activeBoardId?: string }) {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
   const [boards, setBoards] = useState<BoardItem[]>([]);
   const dragIdRef = useRef<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState<string>('');
 
   useEffect(() => {
     (async () => {
@@ -73,6 +77,26 @@ export function TabsBar({ activeBoardId }: { activeBoardId?: string }) {
     }
   }
 
+  async function renameBoard(id: string, nextName: string) {
+    const name = nextName.trim();
+    if (!name) return;
+
+    const res = await fetch(`${base}/boards/${id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ name }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`Rename failed: HTTP ${res.status} ${text}`);
+    }
+
+    const j = (await res.json()) as RenameBoardResponse;
+    setBoards((prev) => prev.map((b) => (b.id === id ? { ...b, name: j.name } : b)));
+  }
+
   async function createBoard() {
     const name = prompt('New board name? (leave blank for auto)');
 
@@ -117,22 +141,24 @@ export function TabsBar({ activeBoardId }: { activeBoardId?: string }) {
       {boards.map((b) => {
         const active = b.id === activeBoardId;
         const isDefault = defaultBoardId === b.id;
+        const isEditing = editingId === b.id;
 
         return (
-          <Link
+          <div
             key={b.id}
-            href={`/boards/${b.id}`}
             className={`tab ${active ? 'tabActive' : ''}`}
             style={{ textDecoration: 'none', userSelect: 'none' }}
-            draggable
+            draggable={!isEditing}
             onDragStart={() => {
               dragIdRef.current = b.id;
             }}
             onDragOver={(e) => {
+              if (isEditing) return;
               // allow drop
               e.preventDefault();
             }}
             onDrop={(e) => {
+              if (isEditing) return;
               e.preventDefault();
               const from = dragIdRef.current;
               dragIdRef.current = null;
@@ -141,8 +167,75 @@ export function TabsBar({ activeBoardId }: { activeBoardId?: string }) {
             }}
             title={isDefault ? 'Default board' : 'Drag to reorder'}
           >
-            {b.name}
-          </Link>
+            {isEditing ? (
+              <input
+                autoFocus
+                value={editingText}
+                onChange={(e) => setEditingText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setEditingId(null);
+                    setEditingText('');
+                  }
+                  if (e.key === 'Enter') {
+                    renameBoard(b.id, editingText)
+                      .then(() => {
+                        setEditingId(null);
+                        setEditingText('');
+                      })
+                      .catch((err) => alert(err?.message || String(err)));
+                  }
+                }}
+                onBlur={() => {
+                  if (!editingText.trim()) {
+                    setEditingId(null);
+                    setEditingText('');
+                    return;
+                  }
+                  renameBoard(b.id, editingText)
+                    .then(() => {
+                      setEditingId(null);
+                      setEditingText('');
+                    })
+                    .catch((err) => alert(err?.message || String(err)));
+                }}
+                style={{
+                  border: '1px solid rgba(255,255,255,0.35)',
+                  borderRadius: 8,
+                  padding: '2px 6px',
+                  fontSize: 13,
+                  minWidth: 110,
+                }}
+              />
+            ) : (
+              <>
+                <Link href={`/boards/${b.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  {b.name}
+                </Link>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setEditingId(b.id);
+                    setEditingText(b.name);
+                  }}
+                  title="Rename"
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    padding: 0,
+                    marginLeft: 6,
+                    color: active ? 'white' : '#6b7280',
+                    cursor: 'pointer',
+                    fontSize: 12,
+                    lineHeight: 1,
+                  }}
+                >
+                  ✎
+                </button>
+              </>
+            )}
+          </div>
         );
       })}
 
