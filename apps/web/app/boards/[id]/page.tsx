@@ -497,6 +497,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
             <strong>Selected: {selectedIds.length}</strong>
             <button
+              className="tab"
               onClick={() =>
                 bulkAddTag('done')
                   .then(() => (isAll ? loadFeedPage(true) : runBoard()))
@@ -506,6 +507,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
               Mark done
             </button>
             <button
+              className="tab"
               onClick={() =>
                 bulkRemoveTag('done')
                   .then(() => (isAll ? loadFeedPage(true) : runBoard()))
@@ -515,6 +517,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
               Mark not done
             </button>
             <button
+              className="tab tabDanger"
               onClick={() =>
                 bulkDelete()
                   .then(() => (isAll ? loadFeedPage(true) : runBoard()))
@@ -524,6 +527,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
               Delete
             </button>
             <button
+              className="tab"
               onClick={() =>
                 bulkRestore()
                   .then(() => (isAll ? loadFeedPage(true) : runBoard()))
@@ -536,7 +540,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               <span style={{ fontSize: 12, color: '#444' }}>Add tag</span>
               <input value={bulkAddTagValue} onChange={(e) => setBulkAddTagValue(e.target.value)} style={{ padding: 6, minWidth: 140 }} placeholder="tag" />
-              <button
+              <button className="tab"
                 onClick={() => {
                   const t = bulkAddTagValue.trim().toLowerCase();
                   if (!t) return;
@@ -553,7 +557,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               <span style={{ fontSize: 12, color: '#444' }}>Remove tag</span>
               <input value={bulkRemoveTagValue} onChange={(e) => setBulkRemoveTagValue(e.target.value)} style={{ padding: 6, minWidth: 140 }} placeholder="tag" />
-              <button
+              <button className="tab"
                 onClick={() => {
                   const t = bulkRemoveTagValue.trim().toLowerCase();
                   if (!t) return;
@@ -566,7 +570,9 @@ export default function BoardPage({ params }: { params: { id: string } }) {
               </button>
             </div>
 
-            <button onClick={clearSelection}>Clear</button>
+            <button className="tab" onClick={clearSelection}>
+              Clear
+            </button>
           </div>
         </div>
       ) : null}
@@ -587,7 +593,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                         <>
                           <textarea value={editingText} onChange={(e) => setEditingText(e.target.value)} rows={4} style={{ width: '100%', padding: 8 }} />
                           <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-                            <button
+                            <button className="tab"
                               onClick={() =>
                                 saveContent(it.id, editingText)
                                   .then(() => loadFeedPage(true))
@@ -596,7 +602,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                             >
                               Save
                             </button>
-                            <button
+                            <button className="tab"
                               onClick={() => {
                                 setEditingId(null);
                                 setEditingText('');
@@ -616,7 +622,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                         {it.tags.map((tg) => (
                           <span
                             key={tg}
-                            style={{ fontSize: 12, border: '1px solid #e5e7eb', background: '#f9fafb', borderRadius: 999, padding: '2px 8px', cursor: 'pointer' }}
+                            className="chip"
                             title="Click to remove tag"
                             onClick={() => removeTagFromEvent(it.id, tg).then(() => loadFeedPage(true)).catch((e) => setError(String(e)))}
                           >
@@ -628,7 +634,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                       <div style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: 12, color: '#444' }}>Add tag</span>
                         <input value={tagDrafts[it.id] || ''} onChange={(e) => setTagDrafts((m) => ({ ...m, [it.id]: e.target.value }))} style={{ padding: 6, minWidth: 160 }} placeholder="type tag" />
-                        <button
+                        <button className="tab"
                           onClick={() => {
                             const val = (tagDrafts[it.id] || '').trim().toLowerCase();
                             if (!val) return;
@@ -640,7 +646,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                         >
                           Add
                         </button>
-                        <button
+                        <button className="tab"
                           onClick={() => {
                             setEditingId(it.id);
                             setEditingText(it.content);
@@ -703,7 +709,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                     columnTags.map((tg) => (
                       <span
                         key={tg}
-                        style={{ fontSize: 12, border: '1px solid #e5e7eb', background: '#f9fafb', borderRadius: 999, padding: '2px 8px', cursor: 'pointer' }}
+                        className="chip"
                         title="Remove tag from column"
                         onClick={() => removeTagFromColumn(s.id, tg)}
                       >
@@ -723,7 +729,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                     style={{ padding: 6, minWidth: 160 }}
                     placeholder="type tag"
                   />
-                  <button
+                  <button className="tab"
                     onClick={() => {
                       const val = (colTagDrafts[s.id] || '').trim().toLowerCase();
                       if (!val) return;
@@ -766,7 +772,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                               <>
                                 <textarea value={editingText} onChange={(e) => setEditingText(e.target.value)} rows={4} style={{ width: '100%', padding: 8 }} />
                                 <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-                                  <button
+                                  <button className="tab"
                                     onClick={() =>
                                       saveContent(it.id, editingText)
                                         .then(() => runBoard())
@@ -775,7 +781,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                                   >
                                     Save
                                   </button>
-                                  <button
+                                  <button className="tab"
                                     onClick={() => {
                                       setEditingId(null);
                                       setEditingText('');
@@ -798,7 +804,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                               {(it.tags || []).map((tg: string) => (
                                 <span
                                   key={tg}
-                                  style={{ fontSize: 12, border: '1px solid #e5e7eb', background: '#f9fafb', borderRadius: 999, padding: '2px 8px', cursor: 'pointer' }}
+                                  className="chip"
                                   title="Click to remove tag"
                                   onClick={() => removeTagFromEvent(it.id, tg).then(() => runBoard()).catch((e) => setError(String(e)))}
                                 >
@@ -810,7 +816,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                             <div style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: 12, color: '#444' }}>Add tag</span>
                               <input value={tagDrafts[it.id] || ''} onChange={(e) => setTagDrafts((m) => ({ ...m, [it.id]: e.target.value }))} style={{ padding: 6, minWidth: 160 }} placeholder="type tag" />
-                              <button
+                              <button className="tab"
                                 onClick={() => {
                                   const val = (tagDrafts[it.id] || '').trim().toLowerCase();
                                   if (!val) return;
@@ -822,7 +828,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                               >
                                 Add
                               </button>
-                              <button
+                              <button className="tab"
                                 onClick={() => {
                                   setEditingId(it.id);
                                   setEditingText(it.content);

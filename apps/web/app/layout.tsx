@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             min-width: 0; /* allows flex/grid children to shrink and wrap */
           }
 
-          /* Simple "tabs" styling */
+          /* Simple "tabs" / pill styling */
           .tab {
             display: inline-flex;
             align-items: center;
@@ -40,6 +40,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             border-color: #111827;
             color: white;
           }
+          .tabDanger {
+            border-color: #fecaca;
+            background: #fef2f2;
+            color: #991b1b;
+          }
+
+          .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            background: #f9fafb;
+            font-size: 12px;
+            line-height: 1.2;
+            cursor: pointer;
+            user-select: none;
+          }
+          .chip:hover { background: #f3f4f6; }
         `}</style>
         <div style={{ padding: 16, borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'baseline', flexWrap: 'wrap' }}>
