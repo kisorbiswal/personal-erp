@@ -1,5 +1,6 @@
 import { BUILD_INFO } from './build-info';
 import { BuildGuard } from './BuildGuard';
+import { BuildFooter } from './BuildFooter';
 
 export const metadata = {
   title: 'Personal ERP',
@@ -78,17 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
         <BuildGuard />
         <div style={{ padding: 16 }}>{children}</div>
-        <div style={{ padding: 12, borderTop: '1px solid #eee', color: '#666', fontSize: 12 }}>
-          Build: <code>{BUILD_INFO.sha}</code>
-          {BUILD_INFO.builtAt !== 'unknown' ? (
-            <>
-              {' '}• <span suppressHydrationWarning>{new Date(BUILD_INFO.builtAt).toLocaleString()}</span>
-            </>
-          ) : (
-            <> • <span>time unknown</span></>
-          )}
-          {' '}• <span style={{ color: '#999' }}>dpl {String(BUILD_INFO.deploymentId).slice(0, 10)}</span>
-        </div>
+        <BuildFooter sha={BUILD_INFO.sha} builtAt={BUILD_INFO.builtAt} deploymentId={String(BUILD_INFO.deploymentId)} />
       </body>
     </html>
   );
