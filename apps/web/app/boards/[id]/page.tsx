@@ -730,6 +730,10 @@ export default function BoardPage({ params }: { params: { id: string } }) {
             const tagsMatch: 'any' | 'all' = (sectionCfg?.query?.tagsMatch || 'any') as any;
             const includeDone = !!sectionCfg?.query?.includeDone;
 
+            const visibleItems = (s.items || []).slice(0, 50);
+            const visibleIds = visibleItems.map((it: any) => it.id);
+            const allSelectedInColumn = visibleIds.length > 0 && visibleIds.every((id: string) => !!selected[id]);
+
             return (
               <div key={s.id} className="col" style={{ border: '1px solid #eee', borderRadius: 10, padding: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'baseline', gap: 10 }}>
@@ -843,12 +847,32 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                   </div>
                 </div>
 
-                <div style={{ marginTop: 10, color: '#666', fontSize: 12 }}>
-                  {s.items.length} shown{!includeDone && s.hiddenDoneCount ? ` • ${s.hiddenDoneCount} hidden(done)` : ''}
+                <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <div style={{ color: '#666', fontSize: 12 }}>
+                    {s.items.length} shown{!includeDone && s.hiddenDoneCount ? ` • ${s.hiddenDoneCount} hidden(done)` : ''}
+                  </div>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#444' }}>
+                    <input
+                      type="checkbox"
+                      checked={allSelectedInColumn}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setSelected((prev) => {
+                          const next = { ...prev } as Record<string, boolean>;
+                          for (const id of visibleIds) {
+                            next[id] = checked;
+                          }
+                          return next;
+                        });
+                      }}
+                    />
+                    Select all in column
+                  </label>
                 </div>
 
                 <ul style={{ paddingLeft: 18, marginTop: 10 }}>
-                  {s.items.slice(0, 50).map((it: any) => {
+                  {visibleItems.map((it: any) => {
                     const isSelected = !!selected[it.id];
                     return (
                       <li key={it.id} style={{ margin: '10px 0' }}>
