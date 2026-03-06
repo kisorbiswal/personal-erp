@@ -68,6 +68,8 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   // per-record edit
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState<string>('');
+  const editAutosaveTimer = useRef<any>(null);
+  const lastSavedById = useRef<Record<string, string>>({});
 
   // per-record tag drafts
   const [tagDrafts, setTagDrafts] = useState<Record<string, string>>({});
@@ -78,7 +80,6 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   // per-column quick capture drafts (auto-create events)
   const [captureDrafts, setCaptureDrafts] = useState<Record<string, string>>({});
   const [captureStatus, setCaptureStatus] = useState<Record<string, 'idle' | 'saving' | 'saved' | 'error'>>({});
-  const captureTimers = useRef<Record<string, any>>({});
 
   // toasts
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -315,8 +316,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     }
   }
 
-  async function saveContent(eventId: string, content: string) {
-    if (!confirm('Save changes to this record content?')) return;
+  async function saveContent(eventId: string, content: string, opts?: { silent?: boolean; keepEditing?: boolean }) {
     const res = await fetch(`${base}/events/${eventId}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
@@ -324,9 +324,18 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       body: JSON.stringify({ content }),
     });
     if (!res.ok) throw new Error(`Save content failed: HTTP ${res.status}`);
-    setEditingId(null);
-    setEditingText('');
-    pushToast('success', 'Saved');
+
+    lastSavedById.current[eventId] = content;
+
+    if (!opts?.keepEditing) {
+      setEditingId(null);
+      setEditingText('');
+    }
+
+    if (!opts?.silent) {
+      pushToast('success', 'Saved');
+    }
+
     if (board?.name.toLowerCase() === 'all') {
       await loadFeedPage(true);
     } else {
@@ -420,6 +429,26 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     runBoard().catch((e) => setError(String(e)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board?.id]);
+
+  // Autosave edited event text after short pause.
+  useEffect(() => {
+    if (!editingId) return;
+
+    if (editAutosaveTimer.current) clearTimeout(editAutosaveTimer.current);
+
+    editAutosaveTimer.current = setTimeout(() => {
+      const next = (editingText || '').trim();
+      const prev = (lastSavedById.current[editingId] || '').trim();
+      if (!next || next === prev) return;
+
+      saveContent(editingId, editingText, { silent: true, keepEditing: true }).catch((e) => setError(String(e)));
+    }, 800);
+
+    return () => {
+      if (editAutosaveTimer.current) clearTimeout(editAutosaveTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingId, editingText]);
 
   if (error) return <div>Error: {error}</div>;
   if (!board) return <div>Loading...</div>;
@@ -669,6 +698,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                           onClick={() => {
                             setEditingId(it.id);
                             setEditingText(it.content);
+                            lastSavedById.current[it.id] = it.content;
                           }}
                         >
                           Edit text
@@ -779,28 +809,24 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                   <textarea
                     value={captureDrafts[s.id] || ''}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setCaptureDrafts((m) => ({ ...m, [s.id]: val }));
+                      setCaptureDrafts((m) => ({ ...m, [s.id]: e.target.value }));
                       setCaptureStatus((m) => ({ ...m, [s.id]: 'idle' }));
+                    }}
+                    onBlur={() => {
+                      const content = (captureDrafts[s.id] || '').trim();
+                      if (!content) return;
 
-                      if (captureTimers.current[s.id]) clearTimeout(captureTimers.current[s.id]);
-
-                      captureTimers.current[s.id] = setTimeout(() => {
-                        const content = (val || '').trim();
-                        if (!content) return;
-
-                        setCaptureStatus((m) => ({ ...m, [s.id]: 'saving' }));
-                        createEvent(content, columnTags)
-                          .then(() => {
-                            setCaptureDrafts((m) => ({ ...m, [s.id]: '' }));
-                            setCaptureStatus((m) => ({ ...m, [s.id]: 'saved' }));
-                            return runBoard();
-                          })
-                          .catch((err) => {
-                            setCaptureStatus((m) => ({ ...m, [s.id]: 'error' }));
-                            setError(String(err));
-                          });
-                      }, 800);
+                      setCaptureStatus((m) => ({ ...m, [s.id]: 'saving' }));
+                      createEvent(content, columnTags)
+                        .then(() => {
+                          setCaptureDrafts((m) => ({ ...m, [s.id]: '' }));
+                          setCaptureStatus((m) => ({ ...m, [s.id]: 'saved' }));
+                          return runBoard();
+                        })
+                        .catch((err) => {
+                          setCaptureStatus((m) => ({ ...m, [s.id]: 'error' }));
+                          setError(String(err));
+                        });
                     }}
                     rows={3}
                     placeholder={columnTags.length ? `Auto-tags: ${columnTags.join(', ')}` : 'Write… (no tags selected; will create untagged event)'}
@@ -813,7 +839,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                         ? 'Saved'
                         : captureStatus[s.id] === 'error'
                           ? 'Error saving'
-                          : 'Auto-saves after a short pause'}
+                          : 'Saves on blur'}
                   </div>
                 </div>
 
@@ -894,6 +920,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                                 onClick={() => {
                                   setEditingId(it.id);
                                   setEditingText(it.content);
+                                  lastSavedById.current[it.id] = it.content;
                                 }}
                               >
                                 Edit text
