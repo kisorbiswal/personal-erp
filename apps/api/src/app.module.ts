@@ -12,9 +12,10 @@ import { BoardsReorderController } from './boards.reorder.controller';
 import { AuthController } from './auth.controller';
 import { AuthDevController } from './auth.dev.controller';
 import { GoogleStrategy } from './google.strategy';
+import { TelegramModule } from './telegram.module';
 
 @Module({
-  imports: [PassportModule.register({ session: false })],
+  imports: [PassportModule.register({ session: false }), TelegramModule],
   controllers: [HealthController, AuthController, AuthDevController, EventsController, EventsActionsController, EventsTagsController, TagsController, BoardsController, BoardsReorderController, FeedController],
   providers: [PrismaService, GoogleStrategy],
 })
