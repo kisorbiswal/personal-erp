@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type MeResponse = { user: null | { email: string; name?: string | null } };
 
@@ -79,41 +79,12 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [base]);
 
-  const landingBoardId = useMemo(() => {
-    if (!me?.user) return null;
-    if (!boards || boards.length === 0) return null;
-
-    try {
-      const landing = localStorage.getItem('landingBoardId');
-      if (landing && boards.some((b) => b.id === landing)) return landing;
-    } catch {
-      // ignore
-    }
-
-    return null;
-  }, [me?.user, boards]);
-
-  // Behavior:
-  // - If landing board is set -> redirect.
-  // - Else -> set first board as landing and redirect.
+  // Redirect to first board (position=0 in DB = default board).
   useEffect(() => {
     if (!me?.user) return;
-    if (!boards) return;
-    if (boards.length === 0) return;
-
-    if (landingBoardId) {
-      router.replace(`/boards/${landingBoardId}`);
-      return;
-    }
-
-    try {
-      localStorage.setItem('landingBoardId', boards[0]!.id);
-    } catch {
-      // ignore
-    }
-
+    if (!boards || boards.length === 0) return;
     router.replace(`/boards/${boards[0]!.id}`);
-  }, [boards, landingBoardId, me?.user, router]);
+  }, [boards, me?.user, router]);
 
   if (error) {
     return (

@@ -47,7 +47,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
   const [board, setBoard] = useState<{ id: string; name: string; config: BoardConfigV1 } | null>(null);
-  const [defaultBoardId, setDefaultBoardId] = useState<string | null>(null);
+  const [defaultBoardId, setDefaultBoardId] = useState<string | null>(null); // first board in position order
   const [data, setData] = useState<any>(null);
   const [tags, setTags] = useState<TagItem[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -136,15 +136,16 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   }
 
   async function fetchBoardAndTags() {
-    const b = await fetchJson(`${base}/boards/${params.id}`);
+    const [b, allBoards, tj] = await Promise.all([
+      fetchJson(`${base}/boards/${params.id}`),
+      fetchJson(`${base}/boards`).catch(() => ({ items: [] })),
+      fetchJson(`${base}/tags?limit=2000`).catch(() => ({ items: [] })),
+    ]);
     setBoard({ id: b.id, name: b.name, config: b.config });
-
-    try {
-      const tj = await fetchJson(`${base}/tags?limit=2000`);
-      setTags(tj.items || []);
-    } catch {
-      // ignore
-    }
+    // Default board = first in position-ordered list (position=0)
+    const firstBoard = (allBoards.items || [])[0];
+    if (firstBoard) setDefaultBoardId(firstBoard.id);
+    setTags(tj.items || []);
   }
 
   async function saveBoardConfig(next: BoardConfigV1) {
@@ -433,11 +434,6 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     fetchBoardAndTags().catch((e) => setError(String(e)));
-    try {
-      setDefaultBoardId(localStorage.getItem('landingBoardId'));
-    } catch {
-      setDefaultBoardId(null);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
@@ -506,9 +502,8 @@ export default function BoardPage({ params }: { params: { id: string } }) {
               onChange={async (e) => {
                 if (!e.target.checked) return;
                 try {
-                  localStorage.setItem('landingBoardId', params.id);
                   setDefaultBoardId(params.id);
-                  // Persist to DB: put this board first so boards[0] = default on any device
+                  // Persist to DB: put this board first (position=0) so it's the default on any device
                   const allBoards = await fetchJson(`${base}/boards`);
                   const ids: string[] = (allBoards.items || []).map((b: any) => b.id);
                   const reordered = [params.id, ...ids.filter((id) => id !== params.id)];
