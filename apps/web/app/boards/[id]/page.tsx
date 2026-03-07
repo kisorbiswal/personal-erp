@@ -746,10 +746,12 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                       />
                       Require ALL
                     </label>
-                    <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
-                      <input type="checkbox" checked={includeDone} onChange={(e) => setColumnQuery(s.id, { includeDone: e.target.checked })} />
-                      Show done
-                    </label>
+                    {(includeDone || s.hiddenDoneCount > 0) && (
+                      <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
+                        <input type="checkbox" checked={includeDone} onChange={(e) => setColumnQuery(s.id, { includeDone: e.target.checked })} />
+                        Show done {s.hiddenDoneCount > 0 && !includeDone ? `(${s.hiddenDoneCount})` : ''}
+                      </label>
+                    )}
                   </div>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <button
