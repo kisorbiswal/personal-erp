@@ -75,6 +75,13 @@ export function TabsBar({ activeBoardId }: { activeBoardId?: string }) {
     } catch {
       // ignore
     }
+    // Persist to DB
+    fetch(`${base}/boards/reorder`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ ids: next.map((b) => b.id) }),
+    }).catch(() => { /* ignore */ });
   }
 
   async function renameBoard(id: string, nextName: string) {

@@ -77,6 +77,23 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   // per-column tag draft
   const [colTagDrafts, setColTagDrafts] = useState<Record<string, string>>({});
 
+  // column drag-and-drop
+  const colDragIdRef = useRef<string | null>(null);
+
+  function moveColumn(fromId: string, toId: string) {
+    if (!board || fromId === toId) return;
+    const current = board.config.columns ?? board.config.sections ?? [];
+    const fromIdx = current.findIndex((c) => c.id === fromId);
+    const toIdx = current.findIndex((c) => c.id === toId);
+    if (fromIdx < 0 || toIdx < 0) return;
+    const next = current.slice();
+    const [moved] = next.splice(fromIdx, 1);
+    next.splice(toIdx, 0, moved);
+    const nextConfig: BoardConfigV1 = { ...board.config, columns: next };
+    setBoard({ ...board, config: nextConfig });
+    saveBoardConfig(nextConfig).catch((e) => setError(String(e)));
+  }
+
   // per-column quick capture drafts (auto-create events)
   const [captureDrafts, setCaptureDrafts] = useState<Record<string, string>>({});
   const [captureStatus, setCaptureStatus] = useState<Record<string, 'idle' | 'saving' | 'saved' | 'error'>>({});
@@ -735,7 +752,20 @@ export default function BoardPage({ params }: { params: { id: string } }) {
             const allSelectedInColumn = visibleIds.length > 0 && visibleIds.every((id: string) => !!selected[id]);
 
             return (
-              <div key={s.id} className="col" style={{ border: '1px solid #eee', borderRadius: 10, padding: 12 }}>
+              <div
+                key={s.id}
+                className="col"
+                style={{ border: '1px solid #eee', borderRadius: 10, padding: 12 }}
+                draggable
+                onDragStart={() => { colDragIdRef.current = s.id; }}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const from = colDragIdRef.current;
+                  colDragIdRef.current = null;
+                  if (from) moveColumn(from, s.id);
+                }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
