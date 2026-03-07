@@ -69,8 +69,12 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  private reply(chatId: number, text: string) {
-    return this.bot?.sendMessage(chatId, text, { parse_mode: 'HTML' });
+  private reply(chatId: number, text: string, html = false) {
+    return this.bot?.sendMessage(chatId, text, html ? { parse_mode: 'HTML' } : {});
+  }
+
+  private static escHtml(s: string) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   private async handleMessage(msg: TelegramBot.Message) {
@@ -84,15 +88,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     if (/^\/?(help|start)$/i.test(raw)) {
       await this.reply(
         chatId,
-        `<b>MyLoggerBot commands:</b>
-• <code>tag: info text</code> — add event with tag
-• <code>L tag</code> or <code>/l tag</code> — list last 10 events with tag
-• <code>L</code> — list last 10 events (any tag)
-• <code>/moreN</code> — next page from offset N (e.g. /more10)
-• <code>tags</code> — list all tags with counts
-• <code>done 1,2</code> — mark items 1,2 from last list as done
-• <code>delete 1,2</code> — soft-delete items 1,2 from last list
-• <code>undo</code> — delete most recently created event`,
+        `<b>MyLoggerBot commands:</b>\n• <code>tag: info text</code> — add event with tag\n• <code>L tag</code> or <code>/l tag</code> — list last 10 events with tag\n• <code>L</code> — list last 10 events (any tag)\n• <code>/moreN</code> — next page from offset N (e.g. /more10)\n• <code>tags</code> — list all tags with counts\n• <code>done 1,2</code> — mark items 1,2 from last list as done\n• <code>delete 1,2</code> — soft-delete items 1,2 from last list\n• <code>undo</code> — delete most recently created event`,
+        true,
       );
       return;
     }
