@@ -1,7 +1,7 @@
 'use client';
 
 import { TabsBar } from '../../TabsBar';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type TagItem = { id: string; name: string; count: number };
 
@@ -58,6 +58,19 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   const [feedCursor, setFeedCursor] = useState<string | null>(null);
   const [feedLoading, setFeedLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // Infinite scroll per-column state
+  const [colItems, setColItems] = useState<Record<string, any[]>>({});
+  const [colCursors, setColCursors] = useState<Record<string, string | null>>({});
+  const [colLoadingMore, setColLoadingMore] = useState<Record<string, boolean>>({});
+  // Refs for latest state (used in observer callbacks)
+  const colCursorsRef = useRef<Record<string, string | null>>({});
+  const colLoadingMoreRef = useRef<Record<string, boolean>>({});
+  // Sentinel refs for each column
+  const colSentinelRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => { colCursorsRef.current = colCursors; }, [colCursors]);
+  useEffect(() => { colLoadingMoreRef.current = colLoadingMore; }, [colLoadingMore]);
 
   // selection + bulk
   const [selected, setSelected] = useState<Record<string, boolean>>({});
@@ -169,7 +182,75 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       body: JSON.stringify({}),
     });
     setData(d);
+    // Initialize per-column items and cursors from fresh response
+    const newColItems: Record<string, any[]> = {};
+    const newColCursors: Record<string, string | null> = {};
+    for (const sec of d.sections || []) {
+      newColItems[sec.id] = sec.items || [];
+      newColCursors[sec.id] = sec.nextCursor ?? null;
+    }
+    setColItems(newColItems);
+    setColCursors(newColCursors);
+    setColLoadingMore({});
   }
+
+  async function loadMoreForColumn(colId: string, cursor: string) {
+    setColLoadingMore((prev) => ({ ...prev, [colId]: true }));
+    try {
+      const d = await fetchJson(`${base}/boards/${params.id}/run`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ cursors: { [colId]: cursor } }),
+      });
+      // Find the section result for this column
+      const sec = (d.sections || []).find((s: any) => s.id === colId);
+      if (sec) {
+        setColItems((prev) => ({ ...prev, [colId]: [...(prev[colId] || []), ...(sec.items || [])] }));
+        setColCursors((prev) => ({ ...prev, [colId]: sec.nextCursor ?? null }));
+      }
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setColLoadingMore((prev) => ({ ...prev, [colId]: false }));
+    }
+  }
+
+  // Set up IntersectionObserver for each column's sentinel
+  useEffect(() => {
+    if (!data?.sections) return;
+
+    const observers: IntersectionObserver[] = [];
+
+    for (const sec of data.sections) {
+      const sentinel = colSentinelRefs.current[sec.id];
+      if (!sentinel) continue;
+
+      const colId = sec.id;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              const cursor = colCursorsRef.current[colId];
+              const loading = colLoadingMoreRef.current[colId];
+              if (cursor && !loading) {
+                loadMoreForColumn(colId, cursor);
+              }
+            }
+          }
+        },
+        { threshold: 0 },
+      );
+
+      observer.observe(sentinel);
+      observers.push(observer);
+    }
+
+    return () => {
+      for (const obs of observers) obs.disconnect();
+    };
+    // Re-run when sections change (new columns added/removed)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.sections?.map((s: any) => s.id).join(',')]);
 
   async function loadFeedPage(reset = false) {
     if (feedLoading) return;
@@ -207,7 +288,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       body: JSON.stringify({ eventIds: selectedIds, tag: t }),
     });
     if (!res.ok) throw new Error(`Bulk add failed: HTTP ${res.status}`);
-    pushToast('success', `Added tag “${t}” to ${selectedIds.length} items`);
+    pushToast('success', `Added tag "${t}" to ${selectedIds.length} items`);
   }
 
   async function bulkRemoveTag(tag: string) {
@@ -223,7 +304,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       body: JSON.stringify({ eventIds: selectedIds, tag: t }),
     });
     if (!res.ok) throw new Error(`Bulk remove failed: HTTP ${res.status}`);
-    pushToast('success', `Removed tag “${t}” from ${selectedIds.length} items`);
+    pushToast('success', `Removed tag "${t}" from ${selectedIds.length} items`);
   }
 
   async function bulkDelete() {
@@ -267,33 +348,20 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     if (!res.ok) throw new Error(`Add tag failed: HTTP ${res.status}`);
 
     // optimistic UI update
-    if (board?.name.toLowerCase() === 'all') {
-      setFeedItems((prev) =>
-        prev.map((it) => (it.id === eventId ? { ...it, tags: Array.from(new Set([...(it.tags || []), t])) } : it)),
-      );
-    } else {
-      setData((prev: any) => {
-        if (!prev?.sections) return prev;
-        return {
-          ...prev,
-          sections: prev.sections.map((sec: any) => ({
-            ...sec,
-            items: (sec.items || []).map((it: any) =>
-              it.id === eventId ? { ...it, tags: Array.from(new Set([...(it.tags || []), t])) } : it,
-            ),
-          })),
-        };
-      });
-    }
+    setColItems((prev) => {
+      const next = { ...prev };
+      for (const colId of Object.keys(next)) {
+        next[colId] = (next[colId] || []).map((it) =>
+          it.id === eventId ? { ...it, tags: Array.from(new Set([...(it.tags || []), t])) } : it,
+        );
+      }
+      return next;
+    });
 
-    pushToast('success', `Added tag “${t}”`);
+    pushToast('success', `Added tag "${t}"`);
 
     // reconcile from server (also updates filtering)
-    if (board?.name.toLowerCase() === 'all') {
-      await loadFeedPage(true);
-    } else {
-      await runBoard();
-    }
+    await runBoard();
   }
 
   async function removeTagFromEvent(eventId: string, tag: string) {
@@ -309,29 +377,20 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     if (!res.ok) throw new Error(`Remove tag failed: HTTP ${res.status}`);
 
     // optimistic UI update
-    if (board?.name.toLowerCase() === 'all') {
-      setFeedItems((prev) => prev.map((it) => (it.id === eventId ? { ...it, tags: (it.tags || []).filter((x) => x !== t) } : it)));
-    } else {
-      setData((prev: any) => {
-        if (!prev?.sections) return prev;
-        return {
-          ...prev,
-          sections: prev.sections.map((sec: any) => ({
-            ...sec,
-            items: (sec.items || []).map((it: any) => (it.id === eventId ? { ...it, tags: (it.tags || []).filter((x: string) => x !== t) } : it)),
-          })),
-        };
-      });
-    }
+    setColItems((prev) => {
+      const next = { ...prev };
+      for (const colId of Object.keys(next)) {
+        next[colId] = (next[colId] || []).map((it) =>
+          it.id === eventId ? { ...it, tags: (it.tags || []).filter((x: string) => x !== t) } : it,
+        );
+      }
+      return next;
+    });
 
-    pushToast('info', `Removed tag “${t}”`);
+    pushToast('info', `Removed tag "${t}"`);
 
     // reconcile from server (also updates filtering)
-    if (board?.name.toLowerCase() === 'all') {
-      await loadFeedPage(true);
-    } else {
-      await runBoard();
-    }
+    await runBoard();
   }
 
   async function saveContent(eventId: string, content: string, opts?: { silent?: boolean; keepEditing?: boolean }) {
@@ -354,11 +413,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
       pushToast('success', 'Saved');
     }
 
-    if (board?.name.toLowerCase() === 'all') {
-      await loadFeedPage(true);
-    } else {
-      await runBoard();
-    }
+    await runBoard();
   }
 
   async function createEvent(content: string, tags: string[]) {
@@ -750,9 +805,12 @@ export default function BoardPage({ params }: { params: { id: string } }) {
             const tagsMatch: 'any' | 'all' = (sectionCfg?.query?.tagsMatch || 'any') as any;
             const includeDone = !!sectionCfg?.query?.includeDone;
 
-            const visibleItems = (s.items || []).slice(0, 50);
+            // Use per-column accumulated items (falls back to section items on first load)
+            const visibleItems = colItems[s.id] ?? s.items ?? [];
             const visibleIds = visibleItems.map((it: any) => it.id);
             const allSelectedInColumn = visibleIds.length > 0 && visibleIds.every((id: string) => !!selected[id]);
+            const hasMore = !!colCursors[s.id];
+            const isLoadingMore = !!colLoadingMore[s.id];
 
             return (
               <div
@@ -881,7 +939,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                 <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <span style={{ color: '#666', fontSize: 12 }}>
-                      {s.items.length} shown{!includeDone && s.hiddenDoneCount ? ` • ${s.hiddenDoneCount} hidden(done)` : ''}
+                      {visibleItems.length} shown{!includeDone && s.hiddenDoneCount ? ` • ${s.hiddenDoneCount} hidden(done)` : ''}
                     </span>
                     {(includeDone || s.hiddenDoneCount > 0) && (
                       <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
@@ -995,6 +1053,19 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                     );
                   })}
                 </ul>
+
+                {/* Infinite scroll sentinel + loading indicator */}
+                <div
+                  ref={(el) => { colSentinelRefs.current[s.id] = el; }}
+                  data-col-id={s.id}
+                  style={{ height: 4, marginTop: 8 }}
+                />
+                {isLoadingMore && (
+                  <div style={{ color: '#666', fontSize: 12, textAlign: 'center', padding: '8px 0' }}>Loading…</div>
+                )}
+                {!hasMore && visibleItems.length > 0 && (
+                  <div style={{ color: '#bbb', fontSize: 11, textAlign: 'center', padding: '4px 0' }}>— end —</div>
+                )}
               </div>
             );
           })}

@@ -117,7 +117,11 @@ export class BoardsController {
   }
 
   @Post('/:id/run')
-  async run(@Req() req: any, @Param('id') id: string, @Body() body: { includeDone?: boolean } = {}) {
+  async run(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: { includeDone?: boolean; cursors?: Record<string, string> } = {},
+  ) {
     const userId = req.user.userId as string;
 
     const board = await this.prisma.board.findFirst({ where: { id, userId } });
@@ -285,10 +289,59 @@ export class BoardsController {
         }
       }
 
-      const orderBy: any =
-        section.query?.sort === 'occurredAtAsc'
-          ? [{ occurredAt: 'asc' }, { id: 'asc' }]
-          : [{ occurredAt: 'desc' }, { id: 'desc' }];
+      const sortDesc = (section.query?.sort ?? 'occurredAtDesc') !== 'occurredAtAsc';
+      const orderBy: any = sortDesc
+        ? [{ occurredAt: 'desc' }, { id: 'desc' }]
+        : [{ occurredAt: 'asc' }, { id: 'asc' }];
+
+      // Apply cursor-based pagination if provided
+      const cursorStr = body?.cursors?.[section.id];
+      if (cursorStr) {
+        try {
+          const decoded = Buffer.from(cursorStr, 'base64').toString('utf-8');
+          // Format: "2024-01-01T12:30:00.000Z:cuid123"
+          // Date ends with Z, then colon, then id
+          const zColonIdx = decoded.indexOf('Z:');
+          if (zColonIdx !== -1) {
+            const cursorOccurredAt = new Date(decoded.substring(0, zColonIdx + 1));
+            const cursorId = decoded.substring(zColonIdx + 2);
+
+            if (sortDesc) {
+              // For DESC: items where occurredAt < cursor OR (occurredAt == cursor AND id < cursorId)
+              where.AND = (where.AND ?? []).concat([
+                {
+                  OR: [
+                    { occurredAt: { lt: cursorOccurredAt } },
+                    {
+                      AND: [
+                        { occurredAt: { equals: cursorOccurredAt } },
+                        { id: { lt: cursorId } },
+                      ],
+                    },
+                  ],
+                },
+              ]);
+            } else {
+              // For ASC: items where occurredAt > cursor OR (occurredAt == cursor AND id > cursorId)
+              where.AND = (where.AND ?? []).concat([
+                {
+                  OR: [
+                    { occurredAt: { gt: cursorOccurredAt } },
+                    {
+                      AND: [
+                        { occurredAt: { equals: cursorOccurredAt } },
+                        { id: { gt: cursorId } },
+                      ],
+                    },
+                  ],
+                },
+              ]);
+            }
+          }
+        } catch {
+          // Invalid cursor — ignore
+        }
+      }
 
       const items = await this.prisma.event.findMany({
         where,
@@ -299,11 +352,20 @@ export class BoardsController {
         },
       });
 
+      // Build nextCursor from last item (null if fewer items than limit returned)
+      let nextCursor: string | null = null;
+      if (items.length >= limit) {
+        const last = items[items.length - 1];
+        const raw = `${(last.occurredAt as Date).toISOString()}:${last.id}`;
+        nextCursor = Buffer.from(raw).toString('base64');
+      }
+
       results.push({
         id: section.id,
         title: section.title,
         render: section.render,
         hiddenDoneCount,
+        nextCursor,
         items: items.map((e: any) => ({
           id: e.id,
           occurredAt: e.occurredAt,
