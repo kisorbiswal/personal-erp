@@ -503,13 +503,21 @@ export default function BoardPage({ params }: { params: { id: string } }) {
             <input
               type="checkbox"
               checked={defaultBoardId === params.id}
-              onChange={(e) => {
+              onChange={async (e) => {
+                if (!e.target.checked) return;
                 try {
-                  if (e.target.checked) {
-                    localStorage.setItem('landingBoardId', params.id);
-                    setDefaultBoardId(params.id);
-                    pushToast('success', 'Default board updated');
-                  }
+                  localStorage.setItem('landingBoardId', params.id);
+                  setDefaultBoardId(params.id);
+                  // Persist to DB: put this board first so boards[0] = default on any device
+                  const allBoards = await fetchJson(`${base}/boards`);
+                  const ids: string[] = (allBoards.items || []).map((b: any) => b.id);
+                  const reordered = [params.id, ...ids.filter((id) => id !== params.id)];
+                  await fetchJson(`${base}/boards/reorder`, {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ ids: reordered }),
+                  });
+                  pushToast('success', 'Default board saved');
                 } catch {
                   pushToast('error', 'Could not save default board');
                 }
