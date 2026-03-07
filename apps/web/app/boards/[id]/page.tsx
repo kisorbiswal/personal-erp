@@ -793,19 +793,6 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                     Add
                   </button>
 
-                  <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
-                    <input
-                      type="checkbox"
-                      checked={tagsMatch === 'all'}
-                      onChange={(e) => setColumnQuery(s.id, { tagsMatch: e.target.checked ? 'all' : 'any' })}
-                    />
-                    Require ALL
-                  </label>
-
-                  <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
-                    <input type="checkbox" checked={includeDone} onChange={(e) => setColumnQuery(s.id, { includeDone: e.target.checked })} />
-                    Show done
-                  </label>
                 </div>
 
                 <div style={{ marginTop: 10 }}>
@@ -847,9 +834,23 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                   </div>
                 </div>
 
-                <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                  <div style={{ color: '#666', fontSize: 12 }}>
-                    {s.items.length} shown{!includeDone && s.hiddenDoneCount ? ` • ${s.hiddenDoneCount} hidden(done)` : ''}
+                <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span style={{ color: '#666', fontSize: 12 }}>
+                      {s.items.length} shown{!includeDone && s.hiddenDoneCount ? ` • ${s.hiddenDoneCount} hidden(done)` : ''}
+                    </span>
+                    <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
+                      <input
+                        type="checkbox"
+                        checked={tagsMatch === 'all'}
+                        onChange={(e) => setColumnQuery(s.id, { tagsMatch: e.target.checked ? 'all' : 'any' })}
+                      />
+                      Require ALL
+                    </label>
+                    <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
+                      <input type="checkbox" checked={includeDone} onChange={(e) => setColumnQuery(s.id, { includeDone: e.target.checked })} />
+                      Show done
+                    </label>
                   </div>
 
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#444' }}>
