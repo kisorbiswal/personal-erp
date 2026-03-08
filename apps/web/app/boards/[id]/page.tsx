@@ -1038,6 +1038,20 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                           <input type="checkbox" checked={isSelected} onChange={(e) => setSelected((prev) => ({ ...prev, [it.id]: e.target.checked }))} style={{ marginTop: 3, flexShrink: 0 }} />
 
                           <div style={{ flex: 1, minWidth: 0 }}>
+                            {/* Pencil — top-right of card content */}
+                            {editingId !== it.id && (
+                              <button
+                                title="Edit content"
+                                onClick={() => {
+                                  setEditingId(it.id);
+                                  setEditingText(it.content);
+                                  lastSavedById.current[it.id] = it.content;
+                                }}
+                                style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, padding: '0 0 4px 6px', color: '#d1d5db', lineHeight: 1 }}
+                              >
+                                ✏️
+                              </button>
+                            )}
                             {editingId === it.id ? (
                               <>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1107,7 +1121,8 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                               {it.pinned ? ' • pinned' : ''}
                             </div>
 
-                            <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                            {/* Tags + inline add input in one chip row */}
+                            <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
                               {(it.tags || []).map((tg: string) => (
                                 <span
                                   key={tg}
@@ -1118,9 +1133,6 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                                   {tg} ×
                                 </span>
                               ))}
-                            </div>
-
-                            <div style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                               <input
                                 value={tagDrafts[it.id] || ''}
                                 list={`tags-dl-${it.id}`}
@@ -1144,23 +1156,17 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                                     .then(() => setTagDrafts((m) => ({ ...m, [it.id]: '' })))
                                     .catch((e) => setError(String(e)));
                                 }}
-                                style={{ padding: '4px 8px', fontSize: 12, borderRadius: 6, border: '1px solid #d1d5db', minWidth: 120, flex: 1 }}
-                                placeholder="add tag…"
+                                style={{
+                                  border: 'none', outline: 'none', background: 'transparent',
+                                  fontSize: 12, color: '#6b7280', padding: '2px 0',
+                                  width: tagDrafts[it.id] ? `${(tagDrafts[it.id] || '').length + 2}ch` : '6ch',
+                                  minWidth: '6ch', maxWidth: '20ch',
+                                }}
+                                placeholder="+ tag"
                               />
                               <datalist id={`tags-dl-${it.id}`}>
                                 {tags.map((t) => <option key={t.id} value={t.name} />)}
                               </datalist>
-                              <button
-                                title="Edit content"
-                                onClick={() => {
-                                  setEditingId(it.id);
-                                  setEditingText(it.content);
-                                  lastSavedById.current[it.id] = it.content;
-                                }}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, padding: '2px 4px', color: '#9ca3af', lineHeight: 1 }}
-                              >
-                                ✏️
-                              </button>
                             </div>
                           </div>
                         </div>
