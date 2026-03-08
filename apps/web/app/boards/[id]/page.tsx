@@ -1,6 +1,7 @@
 'use client';
 
 import { TabsBar } from '../../TabsBar';
+import { MarkdownContent } from '../../MarkdownContent';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type TagItem = { id: string; name: string; count: number };
@@ -715,7 +716,18 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                     <div style={{ flex: 1 }}>
                       {editingId === it.id ? (
                         <>
-                          <textarea value={editingText} onChange={(e) => setEditingText(e.target.value)} rows={4} style={{ width: '100%', padding: 8 }} />
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <textarea
+                              value={editingText}
+                              onChange={(e) => setEditingText(e.target.value)}
+                              rows={8}
+                              style={{ width: '100%', padding: 8, fontFamily: 'ui-monospace, monospace', fontSize: 13, borderRadius: 6, border: '1px solid #d1d5db', resize: 'vertical' }}
+                              placeholder="Markdown supported…"
+                            />
+                            <div style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 6, background: '#fafafa', overflowY: 'auto', maxHeight: 300 }}>
+                              <MarkdownContent content={editingText || '_preview_'} />
+                            </div>
+                          </div>
                           <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
                             <button className="tab"
                               onClick={() =>
@@ -737,7 +749,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                           </div>
                         </>
                       ) : (
-                        <div className="wrap">{it.content}</div>
+                        <MarkdownContent content={it.content} />
                       )}
 
                       <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>{new Date(it.occurredAt).toLocaleString()} • {it.tags.join(', ') || '(no tags)'}</div>
@@ -1029,7 +1041,18 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                           <div style={{ flex: 1 }}>
                             {editingId === it.id ? (
                               <>
-                                <textarea value={editingText} onChange={(e) => setEditingText(e.target.value)} rows={4} style={{ width: '100%', padding: 8 }} />
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                                  <textarea
+                                    value={editingText}
+                                    onChange={(e) => setEditingText(e.target.value)}
+                                    rows={8}
+                                    style={{ width: '100%', padding: 8, fontFamily: 'ui-monospace, monospace', fontSize: 13, borderRadius: 6, border: '1px solid #d1d5db', resize: 'vertical' }}
+                                    placeholder="Markdown supported…"
+                                  />
+                                  <div style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 6, background: '#fafafa', overflowY: 'auto', maxHeight: 300 }}>
+                                    <MarkdownContent content={editingText || '_preview_'} />
+                                  </div>
+                                </div>
                                 <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
                                   <button className="tab"
                                     onClick={() =>
@@ -1051,7 +1074,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                                 </div>
                               </>
                             ) : (
-                              <div className="wrap">{it.content}</div>
+                              <MarkdownContent content={it.content} />
                             )}
 
                             <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>

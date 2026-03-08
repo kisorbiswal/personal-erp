@@ -1,6 +1,7 @@
 import { BUILD_INFO } from './build-info';
 import { BuildGuard } from './BuildGuard';
 import { BuildFooter } from './BuildFooter';
+import { markdownCss } from './MarkdownContent';
 
 export const metadata = {
   title: 'Personal ERP',
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             user-select: none;
           }
           .chip:hover { background: #f3f4f6; }
+          ${markdownCss}
         `}</style>
         <div style={{ padding: 16, borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'baseline', flexWrap: 'wrap' }}>
