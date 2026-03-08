@@ -32,7 +32,33 @@ export class SourcesController {
       where: { userId: req.user.userId },
       orderBy: { createdAt: 'desc' },
     });
-    return sources.map(({ credentials, ...rest }) => rest);
+
+    const HISTORY_START = new Date('2010-01-01').getTime();
+    const now = Date.now();
+
+    return Promise.all(
+      sources.map(async ({ credentials, config, ...rest }) => {
+        const [dataPointCount, newest] = await Promise.all([
+          this.prisma.dataPoint.count({ where: { sourceId: rest.id } }),
+          this.prisma.dataPoint.findFirst({
+            where: { sourceId: rest.id },
+            orderBy: { occurredAt: 'desc' },
+            select: { occurredAt: true },
+          }),
+        ]);
+
+        let syncProgress: number | null = null;
+        if (rest.syncStatus === 'syncing' && newest) {
+          const cur = new Date(newest.occurredAt).getTime();
+          syncProgress = Math.min(99, Math.round(((cur - HISTORY_START) / (now - HISTORY_START)) * 100));
+        }
+        if (rest.syncStatus === 'idle' && dataPointCount > 0) {
+          syncProgress = 100;
+        }
+
+        return { ...rest, dataPointCount, syncProgress };
+      }),
+    );
   }
 
   /** List available providers with connection status */

@@ -14,6 +14,8 @@ type DataSource = {
   lastSyncAt: string | null;
   syncStatus: string;
   syncError: string | null;
+  dataPointCount?: number;
+  syncProgress?: number | null;
 };
 
 type DataPoint = {
@@ -23,13 +25,22 @@ type DataPoint = {
   payload: Record<string, unknown>;
 };
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, progress }: { status: string; progress?: number | null }) {
   const color =
     status === 'idle' ? '#6b7280' : status === 'syncing' ? '#2563eb' : '#dc2626';
+  const label = status === 'syncing' && progress != null ? `Syncing ${progress}%` : status;
   return (
     <span style={{ color, fontSize: 12, fontWeight: 500, textTransform: 'capitalize' }}>
-      {status}
+      {label}
     </span>
+  );
+}
+
+function ProgressBar({ progress }: { progress: number }) {
+  return (
+    <div style={{ marginTop: 6, height: 4, borderRadius: 2, background: '#e5e7eb', width: '100%', maxWidth: 200 }}>
+      <div style={{ height: 4, borderRadius: 2, background: '#2563eb', width: `${progress}%`, transition: 'width 0.5s ease' }} />
+    </div>
   );
 }
 
@@ -41,35 +52,53 @@ function SourceCard({
   onSync: (id: string) => void;
 }) {
   const [data, setData] = useState<DataPoint[] | null>(null);
+  const [total, setTotal] = useState(0);
   const [loadingData, setLoadingData] = useState(false);
   const [showData, setShowData] = useState(false);
+  const isSyncing = source.syncStatus === 'syncing';
 
-  async function fetchData() {
-    if (showData) { setShowData(false); return; }
-    setLoadingData(true);
+  const doFetchData = useCallback(async () => {
     try {
       const res = await fetch(`${BASE}/health/sources/${source.id}/data`, { credentials: 'include' });
       const json = await res.json();
       setData(json.items ?? json ?? []);
-      setShowData(true);
+      setTotal(json.total ?? 0);
     } catch {
       setData([]);
-      setShowData(true);
-    } finally {
-      setLoadingData(false);
     }
+  }, [source.id]);
+
+  async function fetchData() {
+    if (showData) { setShowData(false); return; }
+    setLoadingData(true);
+    await doFetchData();
+    setShowData(true);
+    setLoadingData(false);
   }
+
+  // Auto-refresh data table every 5s while syncing and panel is open
+  useEffect(() => {
+    if (!showData || !isSyncing) return;
+    const t = setInterval(doFetchData, 5000);
+    return () => clearInterval(t);
+  }, [showData, isSyncing, doFetchData]);
 
   return (
     <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 16, marginBottom: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <div>
+        <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 600 }}>{source.label}</div>
           <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
-            Provider: {source.provider} &nbsp;·&nbsp; Status: <StatusBadge status={source.syncStatus} />
+            Provider: {source.provider} &nbsp;·&nbsp; Status: <StatusBadge status={source.syncStatus} progress={source.syncProgress} />
+            {source.dataPointCount != null && (
+              <span style={{ marginLeft: 8, color: '#9ca3af' }}>{source.dataPointCount.toLocaleString()} records</span>
+            )}
           </div>
+          {isSyncing && source.syncProgress != null && (
+            <ProgressBar progress={source.syncProgress} />
+          )}
           {source.lastSyncAt && (
-            <div style={{ fontSize: 12, color: '#6b7280' }}>
+            <div style={{ fontSize: 12, color: '#6b7280', marginTop: isSyncing ? 4 : 2 }}>
               Last sync: {new Date(source.lastSyncAt).toLocaleString()}
             </div>
           )}
@@ -98,30 +127,36 @@ function SourceCard({
       {showData && data && (
         <div style={{ marginTop: 12, overflowX: 'auto' }}>
           {data.length === 0 ? (
-            <p style={{ color: '#6b7280', fontSize: 13 }}>No data points yet.</p>
+            <p style={{ color: '#6b7280', fontSize: 13 }}>{isSyncing ? 'Waiting for first records…' : 'No data points yet.'}</p>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>
-                  <th style={{ padding: '4px 8px' }}>Date</th>
-                  <th style={{ padding: '4px 8px' }}>Type</th>
-                  <th style={{ padding: '4px 8px' }}>Payload (excerpt)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.slice(0, 20).map((dp) => (
-                  <tr key={dp.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                    <td style={{ padding: '4px 8px', whiteSpace: 'nowrap' }}>
-                      {new Date(dp.occurredAt).toLocaleDateString()}
-                    </td>
-                    <td style={{ padding: '4px 8px' }}>{dp.dataType}</td>
-                    <td style={{ padding: '4px 8px', color: '#6b7280', maxWidth: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {JSON.stringify(dp.payload).slice(0, 120)}
-                    </td>
+            <>
+              <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 6 }}>
+                Showing latest {data.length} of {total.toLocaleString()} records
+                {isSyncing && <span style={{ color: '#2563eb', marginLeft: 6 }}>· live</span>}
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>
+                    <th style={{ padding: '4px 8px' }}>Date</th>
+                    <th style={{ padding: '4px 8px' }}>Type</th>
+                    <th style={{ padding: '4px 8px' }}>Payload (excerpt)</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {data.map((dp) => (
+                    <tr key={dp.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                      <td style={{ padding: '4px 8px', whiteSpace: 'nowrap' }}>
+                        {new Date(dp.occurredAt).toLocaleDateString()}
+                      </td>
+                      <td style={{ padding: '4px 8px' }}>{dp.dataType}</td>
+                      <td style={{ padding: '4px 8px', color: '#6b7280', maxWidth: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {JSON.stringify(dp.payload).slice(0, 120)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
           )}
         </div>
       )}
@@ -167,6 +202,14 @@ export default function SourcesPage() {
       loadAll();
     }
   }, [searchParams, loadAll]);
+
+  // Auto-poll every 3s while any source is actively syncing
+  useEffect(() => {
+    const isSyncing = sources.some((s) => s.syncStatus === 'syncing');
+    if (!isSyncing) return;
+    const t = setInterval(loadAll, 3000);
+    return () => clearInterval(t);
+  }, [sources, loadAll]);
 
   async function handleConnect(providerId: string) {
     setConnecting(true);
