@@ -88,6 +88,8 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
   // per-record tag drafts
   const [tagDrafts, setTagDrafts] = useState<Record<string, string>>({});
+  // id of event whose tag input is focused (for suggestion popup)
+  const [tagSuggestId, setTagSuggestId] = useState<string | null>(null);
 
   // per-column tag draft
   const [colTagDrafts, setColTagDrafts] = useState<Record<string, string>>({});
@@ -1133,40 +1135,80 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                                   {tg} ×
                                 </span>
                               ))}
-                              <input
-                                value={tagDrafts[it.id] || ''}
-                                list={`tags-dl-${it.id}`}
-                                onChange={(e) => setTagDrafts((m) => ({ ...m, [it.id]: e.target.value }))}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    const val = (tagDrafts[it.id] || '').trim().toLowerCase();
-                                    if (!val) return;
-                                    addTagToEvent(it.id, val)
-                                      .then(() => runBoard())
-                                      .then(() => setTagDrafts((m) => ({ ...m, [it.id]: '' })))
-                                      .catch((e) => setError(String(e)));
-                                  }
-                                }}
-                                onBlur={() => {
-                                  const val = (tagDrafts[it.id] || '').trim().toLowerCase();
-                                  if (!val) return;
-                                  addTagToEvent(it.id, val)
-                                    .then(() => runBoard())
-                                    .then(() => setTagDrafts((m) => ({ ...m, [it.id]: '' })))
-                                    .catch((e) => setError(String(e)));
-                                }}
-                                style={{
-                                  border: 'none', outline: 'none', background: 'transparent',
-                                  fontSize: 12, color: '#6b7280', padding: '2px 0',
-                                  width: tagDrafts[it.id] ? `${(tagDrafts[it.id] || '').length + 2}ch` : '6ch',
-                                  minWidth: '6ch', maxWidth: '20ch',
-                                }}
-                                placeholder="+ tag"
-                              />
-                              <datalist id={`tags-dl-${it.id}`}>
-                                {tags.map((t) => <option key={t.id} value={t.name} />)}
-                              </datalist>
+                              {/* Inline ghost tag input with custom filtered suggestions */}
+                              <div style={{ position: 'relative' }}>
+                                <input
+                                  value={tagDrafts[it.id] || ''}
+                                  onChange={(e) => setTagDrafts((m) => ({ ...m, [it.id]: e.target.value }))}
+                                  onFocus={() => setTagSuggestId(it.id)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      const val = (tagDrafts[it.id] || '').trim().toLowerCase();
+                                      if (!val) return;
+                                      setTagSuggestId(null);
+                                      addTagToEvent(it.id, val)
+                                        .then(() => runBoard())
+                                        .then(() => setTagDrafts((m) => ({ ...m, [it.id]: '' })))
+                                        .catch((e) => setError(String(e)));
+                                    } else if (e.key === 'Escape') {
+                                      setTagSuggestId(null);
+                                      setTagDrafts((m) => ({ ...m, [it.id]: '' }));
+                                    }
+                                  }}
+                                  onBlur={() => {
+                                    // Delay so suggestion click can fire first
+                                    setTimeout(() => {
+                                      setTagSuggestId(null);
+                                      const val = (tagDrafts[it.id] || '').trim().toLowerCase();
+                                      if (!val) return;
+                                      addTagToEvent(it.id, val)
+                                        .then(() => runBoard())
+                                        .then(() => setTagDrafts((m) => ({ ...m, [it.id]: '' })))
+                                        .catch((e) => setError(String(e)));
+                                    }, 150);
+                                  }}
+                                  style={{
+                                    border: 'none', outline: 'none', background: 'transparent',
+                                    fontSize: 12, color: '#6b7280', padding: '2px 0',
+                                    width: tagDrafts[it.id] ? `${Math.min((tagDrafts[it.id] || '').length + 3, 20)}ch` : '8ch',
+                                    minWidth: '8ch',
+                                  }}
+                                  placeholder="+ tag"
+                                />
+                                {/* Suggestion popup — only when focused + query has matches */}
+                                {tagSuggestId === it.id && (tagDrafts[it.id] || '').trim().length > 0 && (() => {
+                                  const q = (tagDrafts[it.id] || '').toLowerCase();
+                                  const matches = tags.filter((t) => t.name.toLowerCase().includes(q) && !(it.tags || []).includes(t.name)).slice(0, 8);
+                                  if (matches.length === 0) return null;
+                                  return (
+                                    <div style={{
+                                      position: 'absolute', top: '100%', left: 0, zIndex: 999,
+                                      background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8,
+                                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)', minWidth: 140, marginTop: 2,
+                                    }}>
+                                      {matches.map((t) => (
+                                        <div
+                                          key={t.id}
+                                          onMouseDown={(e) => {
+                                            e.preventDefault(); // prevent blur firing first
+                                            setTagSuggestId(null);
+                                            addTagToEvent(it.id, t.name)
+                                              .then(() => runBoard())
+                                              .then(() => setTagDrafts((m) => ({ ...m, [it.id]: '' })))
+                                              .catch((e) => setError(String(e)));
+                                          }}
+                                          style={{ padding: '6px 10px', fontSize: 12, cursor: 'pointer', borderRadius: 6 }}
+                                          onMouseEnter={(e) => (e.currentTarget.style.background = '#f3f4f6')}
+                                          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                        >
+                                          {t.name}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  );
+                                })()}
+                              </div>
                             </div>
                           </div>
                         </div>
