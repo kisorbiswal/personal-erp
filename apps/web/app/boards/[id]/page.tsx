@@ -92,6 +92,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
   // column drag-and-drop
   const colDragIdRef = useRef<string | null>(null);
+  const [dragOverColId, setDragOverColId] = useState<string | null>(null);
 
   function moveColumn(fromId: string, toId: string) {
     if (!board || fromId === toId) return;
@@ -812,51 +813,100 @@ export default function BoardPage({ params }: { params: { id: string } }) {
             const hasMore = !!colCursors[s.id];
             const isLoadingMore = !!colLoadingMore[s.id];
 
+            const isDragOver = dragOverColId === s.id && colDragIdRef.current !== s.id;
+
             return (
               <div
                 key={s.id}
                 className="col"
-                style={{ border: '1px solid #eee', borderRadius: 10, padding: 12 }}
-                draggable
-                onDragStart={() => { colDragIdRef.current = s.id; }}
-                onDragOver={(e) => e.preventDefault()}
+                style={{
+                  border: isDragOver ? '2px dashed #6366f1' : '1px solid #eee',
+                  borderRadius: 10,
+                  padding: 12,
+                  transition: 'border 0.15s',
+                }}
+                onDragOver={(e) => { e.preventDefault(); setDragOverColId(s.id); }}
+                onDragLeave={() => setDragOverColId(null)}
                 onDrop={(e) => {
                   e.preventDefault();
                   const from = colDragIdRef.current;
                   colDragIdRef.current = null;
+                  setDragOverColId(null);
                   if (from) moveColumn(from, s.id);
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>
-                      <input
-                        type="checkbox"
-                        checked={tagsMatch === 'all'}
-                        onChange={(e) => setColumnQuery(s.id, { tagsMatch: e.target.checked ? 'all' : 'any' })}
-                      />
-                      Require ALL
-                    </label>
+                {/* ── Column header (only draggable zone) ── */}
+                <div
+                  draggable
+                  onDragStart={(e) => {
+                    colDragIdRef.current = s.id;
+                    e.dataTransfer.effectAllowed = 'move';
+                  }}
+                  onDragEnd={() => { colDragIdRef.current = null; setDragOverColId(null); }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '6px 8px',
+                    marginBottom: 8,
+                    borderRadius: 8,
+                    background: '#f9fafb',
+                    border: '1px solid #e5e7eb',
+                    cursor: 'grab',
+                    userSelect: 'none',
+                  }}
+                >
+                  <span style={{ color: '#9ca3af', fontSize: 14, letterSpacing: 1 }}>⠿</span>
 
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <button
-                      className="tab"
-                      onClick={() => addColumn()}
-                      title="Add column"
-                      style={{ padding: '4px 10px', cursor: 'pointer' }}
-                    >
-                      +
-                    </button>
-                    <button
-                      className="tab"
-                      onClick={() => removeColumn(s.id)}
-                      title="Remove column"
-                      style={{ padding: '4px 10px', cursor: 'pointer', borderColor: '#fecaca', background: '#fef2f2', color: '#991b1b' }}
-                    >
-                      ×
-                    </button>
-                  </div>
+                  {/* inline-editable title */}
+                  <span
+                    contentEditable
+                    suppressContentEditableWarning
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); (e.target as HTMLElement).blur(); } }}
+                    onBlur={(e) => {
+                      const newTitle = (e.target as HTMLElement).innerText.trim();
+                      if (!board || !newTitle) return;
+                      const current = board.config.columns ?? board.config.sections ?? [];
+                      const next: BoardConfigV1 = { ...board.config, columns: current.map((c) => c.id === s.id ? { ...c, title: newTitle } : c) };
+                      setBoard({ ...board, config: next });
+                      saveBoardConfig(next).catch((err) => setError(String(err)));
+                    }}
+                    style={{ flex: 1, fontWeight: 600, fontSize: 14, color: '#111', outline: 'none', cursor: 'text', minWidth: 0 }}
+                  >
+                    {s.title}
+                  </span>
+
+                  <label
+                    style={{ display: 'flex', gap: 4, alignItems: 'center', fontSize: 11, color: '#666', whiteSpace: 'nowrap', cursor: 'pointer' }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={tagsMatch === 'all'}
+                      onChange={(e) => setColumnQuery(s.id, { tagsMatch: e.target.checked ? 'all' : 'any' })}
+                    />
+                    ALL
+                  </label>
+
+                  <button
+                    className="tab"
+                    onClick={(e) => { e.stopPropagation(); addColumn(); }}
+                    title="Add column"
+                    style={{ padding: '3px 9px', cursor: 'pointer', flexShrink: 0 }}
+                  >
+                    +
+                  </button>
+                  <button
+                    className="tab tabDanger"
+                    onClick={(e) => { e.stopPropagation(); removeColumn(s.id); }}
+                    title="Remove column"
+                    style={{ padding: '3px 9px', cursor: 'pointer', flexShrink: 0 }}
+                  >
+                    ×
+                  </button>
                 </div>
 
                 <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
