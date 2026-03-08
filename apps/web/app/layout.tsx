@@ -21,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }
           .col {
             min-width: 0; /* allows flex/grid children to shrink and wrap */
+            overflow: hidden; /* hard-contain any content that would escape the column */
           }
 
           /* Simple "tabs" / pill styling */

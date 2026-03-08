@@ -862,6 +862,8 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                   borderRadius: 10,
                   padding: 12,
                   transition: 'border 0.15s',
+                  minWidth: 0,
+                  overflow: 'hidden',
                 }}
                 onDragOver={(e) => { e.preventDefault(); setDragOverColId(s.id); }}
                 onDragLeave={() => setDragOverColId(null)}
