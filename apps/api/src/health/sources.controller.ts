@@ -96,7 +96,7 @@ export class SourcesController {
       // Trigger sync in background (don't await)
       this.sync.syncSource(source.id).catch(() => {});
 
-      return res.redirect(`${uiOrigin}/health/sources`);
+      return res.redirect(`${uiOrigin}/health/sources?connected=fitbit`);
     } catch (err: any) {
       return res.redirect(`${uiOrigin}/health/sources?error=oauth_failed`);
     }

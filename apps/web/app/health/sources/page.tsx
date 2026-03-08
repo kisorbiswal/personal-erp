@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
@@ -135,18 +136,15 @@ export default function SourcesPage() {
   const [error, setError] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [syncingId, setSyncingId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    loadAll();
-  }, []);
-
-  async function loadAll() {
+  const loadAll = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const [provRes, srcRes] = await Promise.all([
-        fetch(`${BASE}/health/sources/providers`, { credentials: 'include' }),
-        fetch(`${BASE}/health/sources`, { credentials: 'include' }),
+        fetch(`${BASE}/health/sources/providers`, { credentials: 'include', cache: 'no-store' }),
+        fetch(`${BASE}/health/sources`, { credentials: 'include', cache: 'no-store' }),
       ]);
       if (!provRes.ok) throw new Error(`Providers fetch failed: ${provRes.status}`);
       if (!srcRes.ok) throw new Error(`Sources fetch failed: ${srcRes.status}`);
@@ -157,7 +155,18 @@ export default function SourcesPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    loadAll();
+  }, [loadAll]);
+
+  // Re-fetch when returning from OAuth (Fitbit callback adds ?connected=fitbit)
+  useEffect(() => {
+    if (searchParams.get('connected')) {
+      loadAll();
+    }
+  }, [searchParams, loadAll]);
 
   async function handleConnect(providerId: string) {
     setConnecting(true);
