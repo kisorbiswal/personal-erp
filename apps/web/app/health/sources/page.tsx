@@ -25,15 +25,21 @@ type DataPoint = {
   payload: Record<string, unknown>;
 };
 
-function StatusBadge({ status, progress }: { status: string; progress?: number | null }) {
-  const color =
-    status === 'idle' ? '#6b7280' : status === 'syncing' ? '#2563eb' : '#dc2626';
-  const label = status === 'syncing' && progress != null ? `Syncing ${progress}%` : status;
-  return (
-    <span style={{ color, fontSize: 12, fontWeight: 500, textTransform: 'capitalize' }}>
-      {label}
-    </span>
-  );
+function StatusBadge({ status, progress, hasData }: { status: string; progress?: number | null; hasData?: boolean }) {
+  if (status === 'syncing') {
+    const label = progress != null ? `Syncing ${progress}%` : 'Syncing…';
+    return <span style={{ color: '#2563eb', fontSize: 12, fontWeight: 500 }}>{label}</span>;
+  }
+  if (status === 'idle' && hasData) {
+    return <span style={{ color: '#16a34a', fontSize: 12, fontWeight: 500 }}>✓ Up to date</span>;
+  }
+  if (status === 'idle') {
+    return <span style={{ color: '#6b7280', fontSize: 12, fontWeight: 500 }}>Idle</span>;
+  }
+  if (status === 'error') {
+    return <span style={{ color: '#dc2626', fontSize: 12, fontWeight: 500 }}>Error</span>;
+  }
+  return <span style={{ color: '#6b7280', fontSize: 12, fontWeight: 500, textTransform: 'capitalize' }}>{status}</span>;
 }
 
 function ProgressBar({ progress }: { progress: number }) {
@@ -89,7 +95,7 @@ function SourceCard({
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 600 }}>{source.label}</div>
           <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
-            Provider: {source.provider} &nbsp;·&nbsp; Status: <StatusBadge status={source.syncStatus} progress={source.syncProgress} />
+            Provider: {source.provider} &nbsp;·&nbsp; Status: <StatusBadge status={source.syncStatus} progress={source.syncProgress} hasData={(source.dataPointCount ?? 0) > 0} />
             {source.dataPointCount != null && (
               <span style={{ marginLeft: 8, color: '#9ca3af' }}>{source.dataPointCount.toLocaleString()} records</span>
             )}
