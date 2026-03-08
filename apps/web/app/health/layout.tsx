@@ -16,11 +16,19 @@ function getCachedAuth() {
   } catch { return null; }
 }
 
+function getBoardsLink() {
+  try { const id = localStorage.getItem('lastBoardId'); if (id) return `/boards/${id}`; } catch {}
+  return '/';
+}
+
 export default function HealthLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [boardsLink, setBoardsLink] = useState('/');
   const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+
+  useEffect(() => { setBoardsLink(getBoardsLink()); }, []);
 
   useEffect(() => {
     // Use cached auth first, then verify with API if needed
@@ -48,7 +56,7 @@ export default function HealthLayout({ children }: { children: React.ReactNode }
     <div>
       <div style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb', display: 'flex', gap: 8, alignItems: 'center' }}>
         <a
-          href="/boards"
+          href={boardsLink}
           style={{ color: '#6b7280', textDecoration: 'none', fontSize: 13, marginRight: 8 }}
         >
           ← Boards

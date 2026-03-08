@@ -71,6 +71,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               Personal ERP
             </a>
             <span style={{ color: '#666' }}>Boards</span>
+            <a href="/health/dashboard" style={{ textDecoration: 'none', color: '#6366f1', fontSize: 13 }}>
+              Health ↗
+            </a>
           </div>
 
           <a
