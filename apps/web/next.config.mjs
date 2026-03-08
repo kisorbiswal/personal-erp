@@ -4,16 +4,23 @@ const nextConfig = {
 
   async headers() {
     return [
-      // Never cache HTML pages — always re-validate so deploys show immediately
+      // HTML pages: serve from cache instantly, revalidate in background every 60s.
+      // Browser never shows stale content >10min (stale-while-revalidate=600).
+      // App polls /api/build and shows a banner when a new deploy is detected.
       {
-        source: '/((?!_next/static|_next/image|favicon.ico).*)',
+        source: '/((?!_next/static|_next/image|favicon.ico|api).*)',
         headers: [
-          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate' },
-          { key: 'Pragma', value: 'no-cache' },
-          { key: 'Expires', value: '0' },
+          { key: 'Cache-Control', value: 'public, max-age=60, stale-while-revalidate=600' },
         ],
       },
-      // Content-hashed static assets can be cached forever
+      // API routes: never cache
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store' },
+        ],
+      },
+      // Content-hashed static assets: cache forever (safe — filename changes on every build)
       {
         source: '/_next/static/:path*',
         headers: [
