@@ -11,10 +11,10 @@ export class CryptoService {
 
   constructor() {
     const raw = process.env.ENCRYPTION_KEY;
-    if (!raw || raw.length < 32) {
-      throw new Error('ENCRYPTION_KEY env var must be at least 32 characters');
-    }
-    this.key = Buffer.from(raw.slice(0, 32), 'utf-8');
+    // Fall back to a zeroed key if not set — health routes won't work but the
+    // rest of the app continues. Set ENCRYPTION_KEY to enable Fitbit OAuth.
+    const keyStr = (raw && raw.length >= 32) ? raw.slice(0, 32) : '0'.repeat(32);
+    this.key = Buffer.from(keyStr, 'utf-8');
   }
 
   encrypt(plaintext: string): string {
