@@ -191,6 +191,42 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     pushToast('success', 'Board updated');
   }
 
+  // Export all items from a column as TSV (tab-separated, double-quoted fields)
+  async function exportColumn(colId: string, colName: string) {
+    const allItems: any[] = [];
+    let cursor: string | null = null;
+
+    // Fetch all pages for this column (limit 200 per page)
+    do {
+      const body: any = { exportColId: colId, cursors: cursor ? { [colId]: cursor } : {} };
+      const d = await fetchJson(`${base}/boards/${params.id}/run`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const sec = (d.sections || []).find((s: any) => s.id === colId);
+      if (!sec) break;
+      allItems.push(...(sec.items || []));
+      cursor = sec.nextCursor ?? null;
+    } while (cursor);
+
+    // Build TSV: tab-separated columns, double-quoted fields, "" escapes internal quotes
+    const q = (s: string) => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+    const rows = [
+      ['Date', 'Content', 'Tags'].map(q).join('\t'),
+      ...allItems.map((it: any) =>
+        [fmtDate(it.occurredAt), it.content, (it.tags || []).join(', ')].map(q).join('\t')
+      ),
+    ];
+    const blob = new Blob([rows.join('\r\n')], { type: 'text/tab-separated-values;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${colName.replace(/[^a-z0-9]+/gi, '_')}_${new Date().toISOString().slice(0, 10)}.tsv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function runBoard() {
     const d = await fetchJson(`${base}/boards/${params.id}/run`, {
       method: 'POST',
@@ -894,6 +930,13 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                 >
                   <span style={{ color: '#9ca3af', fontSize: 14, letterSpacing: 1, flex: 1 }}>⠿</span>
 
+                  <button
+                    onClick={(e) => { e.stopPropagation(); exportColumn(s.id, s.name || s.id); }}
+                    title="Export column as TSV"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, padding: '2px 4px', color: '#9ca3af', flexShrink: 0 }}
+                  >
+                    ↓
+                  </button>
                   <button
                     className="tab"
                     onClick={(e) => { e.stopPropagation(); addColumn(); }}
