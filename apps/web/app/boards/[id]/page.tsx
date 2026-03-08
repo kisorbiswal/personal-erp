@@ -716,7 +716,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                     <div style={{ flex: 1 }}>
                       {editingId === it.id ? (
                         <>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                             <textarea
                               value={editingText}
                               onChange={(e) => setEditingText(e.target.value)}
@@ -724,7 +724,8 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                               style={{ width: '100%', padding: 8, fontFamily: 'ui-monospace, monospace', fontSize: 13, borderRadius: 6, border: '1px solid #d1d5db', resize: 'vertical' }}
                               placeholder="Markdown supported…"
                             />
-                            <div style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 6, background: '#fafafa', overflowY: 'auto', maxHeight: 300 }}>
+                            <div style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 6, background: '#fafafa', overflowY: 'auto', maxHeight: 240 }}>
+                              <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Preview</div>
                               <MarkdownContent content={editingText || '_preview_'} />
                             </div>
                           </div>
@@ -1041,7 +1042,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                           <div style={{ flex: 1 }}>
                             {editingId === it.id ? (
                               <>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                                   <textarea
                                     value={editingText}
                                     onChange={(e) => setEditingText(e.target.value)}
@@ -1049,7 +1050,8 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                                     style={{ width: '100%', padding: 8, fontFamily: 'ui-monospace, monospace', fontSize: 13, borderRadius: 6, border: '1px solid #d1d5db', resize: 'vertical' }}
                                     placeholder="Markdown supported…"
                                   />
-                                  <div style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 6, background: '#fafafa', overflowY: 'auto', maxHeight: 300 }}>
+                                  <div style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 6, background: '#fafafa', overflowY: 'auto', maxHeight: 240 }}>
+                                    <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Preview</div>
                                     <MarkdownContent content={editingText || '_preview_'} />
                                   </div>
                                 </div>
