@@ -105,15 +105,19 @@ export class ReportsController {
       this.reportEngine.getChartData(req.user.userId, report.template, { start, end }),
     ]);
 
-    // Build charts keyed by chart id from template
+    // Build charts keyed by chart id from template definition
     const charts: Record<string, any> = {};
-    const chartDefs = (report.template.definition as any)?.charts || [];
+    const templateDef = (report.template.definition as any) ?? {};
+    const chartDefs: any[] = templateDef.charts || [];
     for (const def of chartDefs) {
       charts[def.id] = chartData;
     }
 
+    // Merge definition fields (charts, requires, etc.) into top-level report object
+    // so the frontend can access report.charts, report.name, etc. uniformly
+    const { definition, ...templateBase } = report.template as any;
     return {
-      report: report.template,
+      report: { ...templateBase, ...templateDef },
       slots,
       charts,
     };

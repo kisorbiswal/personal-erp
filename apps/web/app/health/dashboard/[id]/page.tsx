@@ -62,11 +62,22 @@ function SlotBadge({ slot, status }: { slot: string; status: SlotStatus }) {
   );
 }
 
-function buildChartRows(chartData: ChartData): Array<Record<string, string | number | null>> {
+type SeriesDef = { slot: string; label: string; color: string; unit: string; axis: string; transform?: string };
+
+function applyTransform(value: number | null, transform?: string): number | null {
+  if (value == null) return null;
+  if (transform === 'div60') return Math.round((value / 60) * 10) / 10;
+  return value;
+}
+
+function buildChartRows(chartData: ChartData, seriesDefs: SeriesDef[]): Array<Record<string, string | number | null>> {
+  const transformMap: Record<string, string | undefined> = {};
+  for (const s of seriesDefs) transformMap[s.slot] = s.transform;
+
   return chartData.labels.map((date, i) => {
     const row: Record<string, string | number | null> = { date };
     for (const [slot, values] of Object.entries(chartData.series)) {
-      row[slot] = values[i] ?? null;
+      row[slot] = applyTransform(values[i] ?? null, transformMap[slot]);
     }
     return row;
   });
@@ -111,7 +122,7 @@ export default function ReportPage({ params }: { params: { id: string } }) {
 
   const firstChart = data.report.charts?.[0];
   const firstChartData = firstChart ? data.charts?.[firstChart.id] : null;
-  const chartRows = firstChartData ? buildChartRows(firstChartData) : [];
+  const chartRows = firstChartData ? buildChartRows(firstChartData, firstChart?.series ?? []) : [];
 
   // Determine left/right series from template definition
   const leftSeries = firstChart?.series.filter((s) => s.axis === 'left') ?? [];
