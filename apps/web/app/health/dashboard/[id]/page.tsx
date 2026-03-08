@@ -167,7 +167,7 @@ export default function ReportPage({ params }: { params: { id: string } }) {
                 <XAxis
                   dataKey="date"
                   tick={{ fontSize: 11 }}
-                  tickFormatter={(v: string) => v.slice(5)} // show MM-DD
+                  tickFormatter={(v: string) => v.startsWith('20') && v.includes('-W') ? v.slice(2) : v.slice(5)}
                 />
                 <YAxis
                   yAxisId="left"

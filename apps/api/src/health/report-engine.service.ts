@@ -59,61 +59,65 @@ export class ReportEngineService {
   }
 
   /**
-   * Query MetricValues grouped by date for chart rendering.
+   * Query MetricValues grouped by date or week for chart rendering.
+   * aggregation modes: daily | daily_latest | weekly_avg | weekly_latest
    */
   async getChartData(
     userId: string,
     template: { definition: any },
-    dateRange: { start: Date; end: Date },
+    dateRange: { start: Date | null; end: Date },
   ): Promise<{ labels: string[]; series: Record<string, (number | null)[]> }> {
     const slots: ReportSlot[] = template.definition.requires || [];
+    const useWeekly = slots.some((s) => s.aggregation?.startsWith('weekly'));
 
-    // Collect all dates and series data
-    const dateMap = new Map<string, Record<string, number | null>>();
+    // Bucket key: ISO week "YYYY-Www" or calendar date "YYYY-MM-DD"
+    const bucketKey = (date: Date): string => {
+      if (!useWeekly) return date.toISOString().split('T')[0];
+      // ISO week: Monday-anchored
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7)); // nearest Thursday
+      const week1 = new Date(d.getFullYear(), 0, 4);
+      const weekNum = 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+      return `${d.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+    };
+
+    const bucketMap = new Map<string, Record<string, number[]>>();
 
     for (const slot of slots) {
       const field = slot.fields[0]; // primary field for chart
-      const aggregation = slot.aggregation;
+      const whereDate: any = { lte: dateRange.end };
+      if (dateRange.start) whereDate.gte = dateRange.start;
 
       const metrics = await this.prisma.metricValue.findMany({
-        where: {
-          userId,
-          dataType: slot.dataType,
-          field,
-          occurredAt: { gte: dateRange.start, lte: dateRange.end },
-        },
+        where: { userId, dataType: slot.dataType, field, occurredAt: whereDate },
         orderBy: { occurredAt: 'asc' },
       });
 
-      // Group by date
-      const byDate = new Map<string, number[]>();
       for (const m of metrics) {
         if (m.valueNum == null) continue;
-        const dateKey = m.occurredAt.toISOString().split('T')[0];
-        if (!byDate.has(dateKey)) byDate.set(dateKey, []);
-        byDate.get(dateKey)!.push(m.valueNum);
-      }
-
-      // Aggregate
-      for (const [dateKey, values] of byDate) {
-        if (!dateMap.has(dateKey)) dateMap.set(dateKey, {});
-        const entry = dateMap.get(dateKey)!;
-
-        if (aggregation === 'daily_latest') {
-          entry[slot.slot] = values[values.length - 1];
-        } else {
-          // daily: sum or first value (for sleep duration, it's the value itself per day)
-          entry[slot.slot] = values[0];
-        }
+        const key = bucketKey(m.occurredAt);
+        if (!bucketMap.has(key)) bucketMap.set(key, {});
+        const entry = bucketMap.get(key)!;
+        if (!entry[slot.slot]) entry[slot.slot] = [];
+        entry[slot.slot].push(m.valueNum);
       }
     }
 
-    // Sort dates and build output
-    const labels = Array.from(dateMap.keys()).sort();
+    // Sort bucket keys (ISO week strings sort lexicographically correctly)
+    const labels = Array.from(bucketMap.keys()).sort();
     const series: Record<string, (number | null)[]> = {};
 
     for (const slot of slots) {
-      series[slot.slot] = labels.map((d) => dateMap.get(d)?.[slot.slot] ?? null);
+      const agg = slot.aggregation ?? 'daily';
+      series[slot.slot] = labels.map((key) => {
+        const values = bucketMap.get(key)?.[slot.slot];
+        if (!values || values.length === 0) return null;
+        if (agg === 'daily_latest' || agg === 'weekly_latest') return values[values.length - 1];
+        // avg (default for weekly_avg and daily)
+        const sum = values.reduce((a, b) => a + b, 0);
+        return Math.round((sum / values.length) * 10) / 10;
+      });
     }
 
     return { labels, series };

@@ -96,9 +96,9 @@ export class ReportsController {
     if (!report) throw new NotFoundException();
     if (report.userId !== req.user.userId) throw new ForbiddenException();
 
-    const days = parseInt(daysStr || '90', 10) || 90;
+    const days = parseInt(daysStr || '90', 10);
     const end = new Date();
-    const start = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    const start = days > 0 ? new Date(Date.now() - days * 24 * 60 * 60 * 1000) : null;
 
     const [slots, chartData] = await Promise.all([
       this.reportEngine.resolveSlots(req.user.userId, report.template),
