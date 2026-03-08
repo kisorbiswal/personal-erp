@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
-type Provider = { id: string; name: string; connected: boolean };
+type Provider = { provider: string; label: string; connected: boolean; lastSyncAt?: string | null };
 
 type DataSource = {
   id: string;
@@ -203,8 +203,8 @@ export default function SourcesPage() {
     </div>
   );
 
-  const fitbitProvider = providers.find((p) => p.id === 'fitbit');
   const fitbitSource = sources.find((s) => s.provider === 'fitbit');
+  const fitbitProvider = providers.find((p) => p.provider === 'fitbit') ?? (fitbitSource ? { provider: 'fitbit', connected: true } : undefined);
 
   return (
     <div>
