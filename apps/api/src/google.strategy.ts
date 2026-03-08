@@ -18,6 +18,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const email = profile.emails?.[0]?.value;
     if (!email) throw new Error('Google profile missing email');
 
+    // Email allowlist — only approved addresses can sign in
+    const allowed = (process.env.ALLOWED_EMAILS || '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    if (allowed.length > 0 && !allowed.includes(email.toLowerCase())) {
+      throw new Error(`Access denied: ${email} is not an authorised account`);
+    }
+
     const name = profile.displayName;
 
     const user = await this.prisma.user.upsert({

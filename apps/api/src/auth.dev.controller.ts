@@ -1,5 +1,7 @@
 import { Controller, Post, Req } from '@nestjs/common';
+import { Public } from './public.decorator';
 
+@Public()
 @Controller('/auth')
 export class AuthDevController {
   @Post('/dev-login')

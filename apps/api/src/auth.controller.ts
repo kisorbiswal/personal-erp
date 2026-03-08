@@ -1,6 +1,8 @@
 import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Public } from './public.decorator';
 
+@Public()   // All auth routes are public — they establish the session
 @Controller('/auth')
 export class AuthController {
   @Get('/google')
