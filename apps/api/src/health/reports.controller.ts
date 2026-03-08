@@ -107,7 +107,7 @@ export class ReportsController {
 
     // Build charts keyed by chart id from template
     const charts: Record<string, any> = {};
-    const chartDefs = report.template.definition?.charts || [];
+    const chartDefs = (report.template.definition as any)?.charts || [];
     for (const def of chartDefs) {
       charts[def.id] = chartData;
     }
