@@ -7,27 +7,32 @@ const FITBIT_API_BASE = 'https://api.fitbit.com';
 const CALLBACK_URL = 'https://life-api.kisorbiswal.com/health/sources/fitbit/callback';
 const SCOPES = 'sleep weight';
 
+// Fitbit personal app: 150 requests/hour
+const INTER_PAGE_DELAY_MS = 800; // ~75 req/min → well under 150/hour
+const RATE_LIMIT_BUFFER = 10;   // slow down when < 10 calls remaining
+
 // In-memory PKCE store keyed by state param
 const pkceStore = new Map<string, { codeVerifier: string; userId: string }>();
+
+export interface FitbitPageResult {
+  items: any[];
+  nextUrl: string | null;
+  rateLimitRemaining: number;
+  rateLimitResetSecs: number;
+}
 
 @Injectable()
 export class FitbitProvider {
   private readonly log = new Logger(FitbitProvider.name);
 
-  private get clientId(): string {
-    return process.env.FITBIT_CLIENT_ID || '';
-  }
-  private get clientSecret(): string {
-    return process.env.FITBIT_CLIENT_SECRET || '';
-  }
+  private get clientId(): string { return process.env.FITBIT_CLIENT_ID || ''; }
+  private get clientSecret(): string { return process.env.FITBIT_CLIENT_SECRET || ''; }
 
   generateAuthUrl(userId: string): string {
     const state = randomBytes(16).toString('hex');
     const codeVerifier = randomBytes(32).toString('base64url');
     const codeChallenge = createHash('sha256').update(codeVerifier).digest('base64url');
-
     pkceStore.set(state, { codeVerifier, userId });
-    // Clean up after 10 minutes
     setTimeout(() => pkceStore.delete(state), 10 * 60 * 1000);
 
     const params = new URLSearchParams({
@@ -39,7 +44,6 @@ export class FitbitProvider {
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
     });
-
     return `${FITBIT_AUTH_URL}?${params.toString()}`;
   }
 
@@ -49,10 +53,7 @@ export class FitbitProvider {
     return data;
   }
 
-  async handleCallback(
-    code: string,
-    codeVerifier: string,
-  ): Promise<{ accessToken: string; refreshToken: string; expiresAt: Date }> {
+  async handleCallback(code: string, codeVerifier: string) {
     const body = new URLSearchParams({
       grant_type: 'authorization_code',
       code,
@@ -60,7 +61,6 @@ export class FitbitProvider {
       client_id: this.clientId,
       code_verifier: codeVerifier,
     });
-
     const res = await fetch(FITBIT_TOKEN_URL, {
       method: 'POST',
       headers: {
@@ -69,13 +69,7 @@ export class FitbitProvider {
       },
       body: body.toString(),
     });
-
-    if (!res.ok) {
-      const text = await res.text();
-      this.log.error(`Fitbit token exchange failed: ${res.status} ${text}`);
-      throw new Error(`Fitbit token exchange failed: ${res.status}`);
-    }
-
+    if (!res.ok) throw new Error(`Fitbit token exchange failed: ${res.status} ${await res.text()}`);
     const data = await res.json();
     return {
       accessToken: data.access_token,
@@ -84,15 +78,12 @@ export class FitbitProvider {
     };
   }
 
-  async refreshAccessToken(
-    refreshToken: string,
-  ): Promise<{ accessToken: string; refreshToken: string; expiresAt: Date }> {
+  async refreshAccessToken(refreshToken: string) {
     const body = new URLSearchParams({
       grant_type: 'refresh_token',
       refresh_token: refreshToken,
       client_id: this.clientId,
     });
-
     const res = await fetch(FITBIT_TOKEN_URL, {
       method: 'POST',
       headers: {
@@ -101,13 +92,7 @@ export class FitbitProvider {
       },
       body: body.toString(),
     });
-
-    if (!res.ok) {
-      const text = await res.text();
-      this.log.error(`Fitbit token refresh failed: ${res.status} ${text}`);
-      throw new Error(`Fitbit token refresh failed: ${res.status}`);
-    }
-
+    if (!res.ok) throw new Error(`Fitbit token refresh failed: ${res.status} ${await res.text()}`);
     const data = await res.json();
     return {
       accessToken: data.access_token,
@@ -116,63 +101,83 @@ export class FitbitProvider {
     };
   }
 
-  async fetchSleepData(accessToken: string, afterDate: string): Promise<any[]> {
-    const url = `${FITBIT_API_BASE}/1.2/user/-/sleep/list.json?afterDate=${afterDate}&sort=asc&offset=0&limit=100`;
+  /** Fetch a single page of sleep data. Returns items + next URL for cursor-based pagination. */
+  async fetchSleepPage(accessToken: string, url?: string, afterDate?: string): Promise<FitbitPageResult> {
+    const reqUrl = url ?? `${FITBIT_API_BASE}/1.2/user/-/sleep/list.json?afterDate=${afterDate}&sort=asc&offset=0&limit=100`;
+    return this.fetchPage(accessToken, reqUrl, (data) => data.sleep || [], (data) => data.pagination?.next ?? null);
+  }
+
+  /** Fetch a single page of weight data. */
+  async fetchWeightPage(accessToken: string, url?: string, afterDate?: string): Promise<FitbitPageResult> {
+    const reqUrl = url ?? `${FITBIT_API_BASE}/1/user/-/body/log/weight/list.json?afterDate=${afterDate}&sort=asc&offset=0&limit=100`;
+    return this.fetchPage(accessToken, reqUrl, (data) => data.weight || [], (data) => data.pagination?.next ?? null);
+  }
+
+  private async fetchPage(
+    accessToken: string,
+    url: string,
+    extractItems: (d: any) => any[],
+    extractNext: (d: any) => string | null,
+  ): Promise<FitbitPageResult> {
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Fitbit sleep fetch failed: ${res.status} ${text}`);
+
+    const remaining = parseInt(res.headers.get('fitbit-rate-limit-remaining') ?? '999', 10);
+    const resetSecs = parseInt(res.headers.get('fitbit-rate-limit-reset') ?? '0', 10);
+
+    if (res.status === 429) {
+      const waitSecs = resetSecs + 5;
+      this.log.warn(`Fitbit rate limited. Waiting ${waitSecs}s...`);
+      await this.sleep(waitSecs * 1000);
+      return this.fetchPage(accessToken, url, extractItems, extractNext); // retry after wait
     }
+
+    if (!res.ok) throw new Error(`Fitbit API error: ${res.status} ${await res.text()}`);
+
     const data = await res.json();
-    return data.sleep || [];
+    return {
+      items: extractItems(data),
+      nextUrl: extractNext(data),
+      rateLimitRemaining: remaining,
+      rateLimitResetSecs: resetSecs,
+    };
   }
 
-  async fetchWeightData(accessToken: string, afterDate: string): Promise<any[]> {
-    const url = `${FITBIT_API_BASE}/1/user/-/body/log/weight/list.json?afterDate=${afterDate}&sort=asc&offset=0&limit=100`;
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Fitbit weight fetch failed: ${res.status} ${text}`);
+  /** Delay between paginated requests, respecting rate limit headers. */
+  async interPageDelay(rateLimitRemaining: number, rateLimitResetSecs: number): Promise<void> {
+    if (rateLimitRemaining < RATE_LIMIT_BUFFER) {
+      const waitMs = (rateLimitResetSecs + 5) * 1000;
+      this.log.warn(`Rate limit low (${rateLimitRemaining} remaining). Waiting ${waitMs / 1000}s until reset.`);
+      await this.sleep(waitMs);
+    } else {
+      await this.sleep(INTER_PAGE_DELAY_MS);
     }
-    const data = await res.json();
-    return data.weight || [];
   }
 
-  extractMetricValues(
-    dataPoint: { dataType: string; payload: any; id: string; userId: string; occurredAt: Date },
-  ): Array<{
-    userId: string;
-    dataPointId: string;
-    dataType: string;
-    field: string;
-    valueNum?: number | null;
-    valueStr?: string | null;
-    valueDt?: Date | null;
-    unit?: string | null;
-    occurredAt: Date;
-  }> {
+  extractMetricValues(dataPoint: {
+    dataType: string; payload: any; id: string; userId: string; occurredAt: Date;
+  }) {
     const { dataType, payload, id: dataPointId, userId, occurredAt } = dataPoint;
     const base = { userId, dataPointId, dataType, occurredAt };
 
     if (dataType === 'sleep-tracker') {
       return [
-        { ...base, field: 'duration_min', valueNum: payload.minutesAsleep, unit: 'min' },
-        { ...base, field: 'start_time', valueDt: new Date(payload.startTime), unit: null },
-        { ...base, field: 'end_time', valueDt: new Date(payload.endTime), unit: null },
-        { ...base, field: 'efficiency', valueNum: payload.efficiency, unit: '%' },
-      ];
+        { ...base, field: 'duration_min', valueNum: payload.minutesAsleep ?? null, unit: 'min' },
+        { ...base, field: 'start_time', valueDt: payload.startTime ? new Date(payload.startTime) : null },
+        { ...base, field: 'end_time', valueDt: payload.endTime ? new Date(payload.endTime) : null },
+        { ...base, field: 'efficiency', valueNum: payload.efficiency ?? null, unit: '%' },
+      ].filter(m => (m as any).valueNum != null || (m as any).valueDt != null);
     }
 
     if (dataType === 'weight-scale') {
       return [
-        { ...base, field: 'value_kg', valueNum: payload.weight, unit: 'kg' },
-      ];
+        { ...base, field: 'value_kg', valueNum: payload.weight ?? null, unit: 'kg' },
+      ].filter(m => (m as any).valueNum != null);
     }
 
     return [];
   }
+
+  private sleep(ms: number) { return new Promise(r => setTimeout(r, ms)); }
 }
