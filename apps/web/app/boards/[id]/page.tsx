@@ -920,16 +920,17 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                   </button>
                 </div>
 
-                {/* Tags + ALL checkbox */}
+                {/* Tags + match radio */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
-                  <label style={{ display: 'flex', gap: 4, alignItems: 'center', fontSize: 11, color: '#666', whiteSpace: 'nowrap', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={tagsMatch === 'all'}
-                      onChange={(e) => setColumnQuery(s.id, { tagsMatch: e.target.checked ? 'all' : 'any' })}
-                    />
-                    ALL
+                  <label style={{ display: 'flex', gap: 3, alignItems: 'center', fontSize: 11, color: tagsMatch === 'any' ? '#111' : '#999', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    <input type="radio" name={`match-${s.id}`} checked={tagsMatch === 'any'} onChange={() => setColumnQuery(s.id, { tagsMatch: 'any' })} />
+                    Any
                   </label>
+                  <label style={{ display: 'flex', gap: 3, alignItems: 'center', fontSize: 11, color: tagsMatch === 'all' ? '#111' : '#999', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    <input type="radio" name={`match-${s.id}`} checked={tagsMatch === 'all'} onChange={() => setColumnQuery(s.id, { tagsMatch: 'all' })} />
+                    All
+                  </label>
+                  <span style={{ color: '#d1d5db', fontSize: 11 }}>|</span>
                   {columnTags.length ? (
                     columnTags.map((tg) => (
                       <span
