@@ -2,6 +2,8 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
+import { createClient } from 'redis';
+import RedisStore from 'connect-redis';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -22,12 +24,19 @@ async function bootstrap() {
   // Needed when running behind nginx/HTTPS termination so secure cookies work correctly
   (app as any).set('trust proxy', 1);
 
+  // Use Redis session store so sessions survive API restarts
+  const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+  const redisClient = createClient({ url: redisUrl });
+  redisClient.on('error', (err) => console.warn('Redis session error:', err));
+  await redisClient.connect();
+
   app.use(
     session({
       name: 'life_session',
       secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
+      store: new RedisStore({ client: redisClient }),
       cookie: {
         httpOnly: true,
         // UI is on a different site (life.kisorbiswal.com) than API (life-api.kisorbiswal.com),

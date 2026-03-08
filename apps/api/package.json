@@ -22,11 +22,13 @@
     "@nestjs/platform-express": "^10.4.8",
     "@prisma/client": "^6.5.0",
     "@types/node-telegram-bot-api": "^0.64.14",
+    "connect-redis": "^9.0.0",
     "cookie-parser": "^1.4.7",
     "express-session": "^1.19.0",
     "node-telegram-bot-api": "^0.67.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "redis": "^5.11.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },

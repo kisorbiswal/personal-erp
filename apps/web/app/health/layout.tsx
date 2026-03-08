@@ -29,9 +29,15 @@ export default function HealthLayout({ children }: { children: React.ReactNode }
       .then((r) => r.json())
       .then((d) => {
         if (d?.user) { setAuthed(true); }
-        else { router.replace('/'); }
+        else {
+          try { sessionStorage.removeItem('life_auth_user'); localStorage.removeItem('lastBoardId'); } catch {}
+          router.replace('/');
+        }
       })
-      .catch(() => router.replace('/'));
+      .catch(() => {
+        try { sessionStorage.removeItem('life_auth_user'); localStorage.removeItem('lastBoardId'); } catch {}
+        router.replace('/');
+      });
   }, [base, router]);
 
   if (authed === null) return (

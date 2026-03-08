@@ -144,8 +144,9 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   async function fetchJson(url: string, init?: RequestInit) {
     const res = await fetch(url, { ...(init || {}), credentials: 'include' });
 
-    // session expired / forbidden
+    // session expired / forbidden — clear auth cache so home page doesn't loop
     if (res.status === 401 || res.status === 403) {
+      try { sessionStorage.removeItem('life_auth_user'); localStorage.removeItem('lastBoardId'); } catch {}
       window.location.replace('/');
       throw new Error('not_authenticated');
     }
