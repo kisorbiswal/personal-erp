@@ -720,9 +720,25 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                             <textarea
                               value={editingText}
                               onChange={(e) => setEditingText(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Escape') {
+                                  e.preventDefault();
+                                  if (editAutosaveTimer.current) clearTimeout(editAutosaveTimer.current);
+                                  const next = editingText.trim();
+                                  const prev = (lastSavedById.current[it.id] || '').trim();
+                                  if (next && next !== prev) {
+                                    saveContent(it.id, editingText, { silent: true })
+                                      .then(() => loadFeedPage(true))
+                                      .catch((e) => setError(String(e)));
+                                  } else {
+                                    setEditingId(null);
+                                    setEditingText('');
+                                  }
+                                }
+                              }}
                               rows={8}
                               style={{ width: '100%', padding: 8, fontFamily: 'ui-monospace, monospace', fontSize: 13, borderRadius: 6, border: '1px solid #d1d5db', resize: 'vertical' }}
-                              placeholder="Markdown supported…"
+                              placeholder="Markdown supported… (Esc to save & close)"
                             />
                             <div style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 6, background: '#fafafa', overflowY: 'auto', maxHeight: 240 }}>
                               <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Preview</div>
@@ -741,11 +757,20 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                             </button>
                             <button className="tab"
                               onClick={() => {
-                                setEditingId(null);
-                                setEditingText('');
+                                if (editAutosaveTimer.current) clearTimeout(editAutosaveTimer.current);
+                                const next = editingText.trim();
+                                const prev = (lastSavedById.current[it.id] || '').trim();
+                                if (next && next !== prev) {
+                                  saveContent(it.id, editingText, { silent: true })
+                                    .then(() => loadFeedPage(true))
+                                    .catch((e) => setError(String(e)));
+                                } else {
+                                  setEditingId(null);
+                                  setEditingText('');
+                                }
                               }}
                             >
-                              Cancel
+                              Close
                             </button>
                           </div>
                         </>
@@ -1046,9 +1071,25 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                                   <textarea
                                     value={editingText}
                                     onChange={(e) => setEditingText(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Escape') {
+                                        e.preventDefault();
+                                        if (editAutosaveTimer.current) clearTimeout(editAutosaveTimer.current);
+                                        const next = editingText.trim();
+                                        const prev = (lastSavedById.current[it.id] || '').trim();
+                                        if (next && next !== prev) {
+                                          saveContent(it.id, editingText, { silent: true })
+                                            .then(() => runBoard())
+                                            .catch((e) => setError(String(e)));
+                                        } else {
+                                          setEditingId(null);
+                                          setEditingText('');
+                                        }
+                                      }
+                                    }}
                                     rows={8}
                                     style={{ width: '100%', padding: 8, fontFamily: 'ui-monospace, monospace', fontSize: 13, borderRadius: 6, border: '1px solid #d1d5db', resize: 'vertical' }}
-                                    placeholder="Markdown supported…"
+                                    placeholder="Markdown supported… (Esc to save & close)"
                                   />
                                   <div style={{ padding: 8, border: '1px solid #e5e7eb', borderRadius: 6, background: '#fafafa', overflowY: 'auto', maxHeight: 240 }}>
                                     <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Preview</div>
@@ -1067,11 +1108,20 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                                   </button>
                                   <button className="tab"
                                     onClick={() => {
-                                      setEditingId(null);
-                                      setEditingText('');
+                                      if (editAutosaveTimer.current) clearTimeout(editAutosaveTimer.current);
+                                      const next = editingText.trim();
+                                      const prev = (lastSavedById.current[it.id] || '').trim();
+                                      if (next && next !== prev) {
+                                        saveContent(it.id, editingText, { silent: true })
+                                          .then(() => runBoard())
+                                          .catch((e) => setError(String(e)));
+                                      } else {
+                                        setEditingId(null);
+                                        setEditingText('');
+                                      }
                                     }}
                                   >
-                                    Cancel
+                                    Close
                                   </button>
                                 </div>
                               </>
