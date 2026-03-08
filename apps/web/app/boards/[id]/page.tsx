@@ -6,6 +6,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type TagItem = { id: string; name: string; count: number };
 
+function fmtDate(iso: string) {
+  const d = new Date(iso);
+  const p = (n: number) => String(n).padStart(2, '0');
+  const Y = d.getFullYear(), M = p(d.getMonth() + 1), D = p(d.getDate());
+  const h = d.getHours(), m = p(d.getMinutes()), s = p(d.getSeconds());
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return `${Y}/${M}/${D}, ${h12}:${m}:${s} ${ampm}`;
+}
+
 type BoardConfigV1 = {
   version: 1;
   // Preferred
@@ -764,7 +774,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                         <MarkdownContent content={it.content} />
                       )}
 
-                      <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>{new Date(it.occurredAt).toLocaleString()} • {it.tags.join(', ') || '(no tags)'}</div>
+                      <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>{fmtDate(it.occurredAt)} • {it.tags.join(', ') || '(no tags)'}</div>
 
                       <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                         {it.tags.map((tg) => (
@@ -1119,7 +1129,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                             )}
 
                             <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>
-                              {new Date(it.occurredAt).toLocaleString()} • {it.tags.join(', ') || '(no tags)'}
+                              {fmtDate(it.occurredAt)} • {it.tags.join(', ') || '(no tags)'}
                               {it.pinned ? ' • pinned' : ''}
                             </div>
 
