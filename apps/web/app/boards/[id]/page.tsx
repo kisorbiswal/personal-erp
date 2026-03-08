@@ -63,6 +63,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   // Infinite scroll per-column state
   const [colItems, setColItems] = useState<Record<string, any[]>>({});
   const [colCursors, setColCursors] = useState<Record<string, string | null>>({});
+  const [colTotalCounts, setColTotalCounts] = useState<Record<string, number | null>>({});
   const [colLoadingMore, setColLoadingMore] = useState<Record<string, boolean>>({});
   // Refs for latest state (used in observer callbacks)
   const colCursorsRef = useRef<Record<string, string | null>>({});
@@ -187,12 +188,15 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     // Initialize per-column items and cursors from fresh response
     const newColItems: Record<string, any[]> = {};
     const newColCursors: Record<string, string | null> = {};
+    const newColTotals: Record<string, number | null> = {};
     for (const sec of d.sections || []) {
       newColItems[sec.id] = sec.items || [];
       newColCursors[sec.id] = sec.nextCursor ?? null;
+      newColTotals[sec.id] = sec.totalCount ?? null;
     }
     setColItems(newColItems);
     setColCursors(newColCursors);
+    setColTotalCounts(newColTotals);
     setColLoadingMore({});
   }
 
@@ -1029,7 +1033,10 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                 <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <span style={{ color: '#666', fontSize: 12 }}>
-                      {visibleItems.length} shown{!includeDone && s.hiddenDoneCount ? ` • ${s.hiddenDoneCount} hidden(done)` : ''}
+                      {colTotalCounts[s.id] != null
+                        ? `${visibleItems.length} of ${colTotalCounts[s.id]}`
+                        : `${visibleItems.length} shown`}
+                      {!includeDone && s.hiddenDoneCount ? ` • ${s.hiddenDoneCount} done hidden` : ''}
                     </span>
                     {(includeDone || s.hiddenDoneCount > 0) && (
                       <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#444' }}>

@@ -343,6 +343,14 @@ export class BoardsController {
         }
       }
 
+      // Total count of matching non-done items (without cursor/pagination)
+      // Only run on initial load (no cursor) to avoid extra query on "load more"
+      let totalCount: number | null = null;
+      if (!cursorStr) {
+        // Build a where clause without cursor filters for the count
+        totalCount = await this.prisma.event.count({ where });
+      }
+
       const items = await this.prisma.event.findMany({
         where,
         orderBy,
@@ -365,6 +373,7 @@ export class BoardsController {
         title: section.title,
         render: section.render,
         hiddenDoneCount,
+        totalCount,
         nextCursor,
         items: items.map((e: any) => ({
           id: e.id,
