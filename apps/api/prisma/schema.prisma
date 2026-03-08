@@ -20,6 +20,8 @@ model User {
   events  Event[]
   tags   Tag[]
   boards Board[]
+  dataSources      DataSource[]
+  installedReports InstalledReport[]
 }
 
 model Tag {
@@ -100,4 +102,80 @@ model BoardPin {
 
   @@unique([boardId, eventId])
   @@index([eventId])
+}
+
+// ── Health Reports ──────────────────────────────────────────────────────
+
+model DataSource {
+  id           String      @id @default(uuid())
+  userId       String
+  provider     String
+  label        String
+  credentials  Json
+  config       Json        @default("{}")
+  lastSyncAt   DateTime?
+  syncStatus   String      @default("idle")
+  syncError    String?
+  createdAt    DateTime    @default(now())
+  user         User        @relation(fields: [userId], references: [id])
+  dataPoints   DataPoint[]
+
+  @@unique([userId, provider])
+}
+
+model DataPoint {
+  id           String        @id @default(uuid())
+  sourceId     String
+  userId       String
+  occurredAt   DateTime
+  dataType     String
+  payload      Json
+  createdAt    DateTime      @default(now())
+  source       DataSource    @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  metricValues MetricValue[]
+
+  @@index([userId, dataType, occurredAt])
+  @@index([sourceId, occurredAt])
+}
+
+model MetricValue {
+  id           String    @id @default(uuid())
+  userId       String
+  dataPointId  String
+  dataType     String
+  field        String
+  valueNum     Float?
+  valueStr     String?
+  valueDt      DateTime?
+  unit         String?
+  occurredAt   DateTime
+  createdAt    DateTime  @default(now())
+  dataPoint    DataPoint @relation(fields: [dataPointId], references: [id], onDelete: Cascade)
+
+  @@index([userId, dataType, field, occurredAt])
+}
+
+model ReportTemplate {
+  id          String            @id
+  name        String
+  description String            @default("")
+  author      String            @default("system")
+  version     String            @default("1.0.0")
+  extendsId   String?
+  definition  Json
+  isBuiltIn   Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  installs    InstalledReport[]
+}
+
+model InstalledReport {
+  id         String         @id @default(uuid())
+  userId     String
+  templateId String
+  config     Json           @default("{}")
+  createdAt  DateTime       @default(now())
+  user       User           @relation(fields: [userId], references: [id])
+  template   ReportTemplate @relation(fields: [templateId], references: [id])
+
+  @@unique([userId, templateId])
 }
