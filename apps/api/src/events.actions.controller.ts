@@ -90,6 +90,28 @@ export class EventsActionsController {
     return { ok: true, restored: res.count };
   }
 
+  @Post('/bulk/hard-delete')
+  async bulkHardDelete(@Req() req: any, @Body() body: { eventIds: string[] }) {
+    const userId = req.user.userId as string;
+    const ids = body.eventIds || [];
+    if (!ids.length) return { ok: true, deleted: 0 };
+
+    // Verify all events belong to this user before hard deleting
+    const owned = await this.prisma.event.findMany({
+      where: { userId, id: { in: ids } },
+      select: { id: true },
+    });
+    const ownedIds = owned.map((e) => e.id);
+
+    // Delete EventTags first (FK constraint)
+    await this.prisma.eventTag.deleteMany({ where: { eventId: { in: ownedIds } } });
+
+    // Hard delete
+    const res = await this.prisma.event.deleteMany({ where: { id: { in: ownedIds } } });
+
+    return { ok: true, deleted: res.count };
+  }
+
   @Post('/bulk/tags/add')
   async bulkAddTag(@Req() req: any, @Body() body: { eventIds: string[]; tag: string }) {
     const userId = req.user.userId as string;

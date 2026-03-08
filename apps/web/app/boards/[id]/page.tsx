@@ -327,6 +327,21 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     clearSelection();
   }
 
+  async function bulkHardDelete() {
+    if (!selectedIds.length) return;
+    if (!confirm(`⚠️ PERMANENTLY delete ${selectedIds.length} items? This cannot be undone.`)) return;
+    if (!confirm(`Are you sure? ${selectedIds.length} items will be gone forever (compliance hard delete).`)) return;
+    const res = await fetch(`${base}/events/bulk/hard-delete`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ eventIds: selectedIds }),
+    });
+    if (!res.ok) throw new Error(`Hard delete failed: HTTP ${res.status}`);
+    pushToast('success', `Permanently deleted ${selectedIds.length} items`);
+    clearSelection();
+  }
+
   async function bulkRestore() {
     if (!selectedIds.length) return;
     if (!confirm(`Restore ${selectedIds.length} items?`)) return;
@@ -654,6 +669,18 @@ export default function BoardPage({ params }: { params: { id: string } }) {
               }
             >
               Delete
+            </button>
+            <button
+              className="tab tabDanger"
+              onClick={() =>
+                bulkHardDelete()
+                  .then(() => (isAll ? loadFeedPage(true) : runBoard()))
+                  .catch((e) => setError(String(e)))
+              }
+              title="Permanently delete — cannot be undone"
+              style={{ borderColor: '#dc2626', background: '#7f1d1d', color: 'white' }}
+            >
+              Hard Delete ☠️
             </button>
             <button
               className="tab"
