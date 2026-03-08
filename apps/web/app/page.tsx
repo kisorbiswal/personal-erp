@@ -3,158 +3,137 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-type MeResponse = { user: null | { email: string; name?: string | null } };
+const SESSION_CACHE_KEY = 'life_auth_user';
+const SESSION_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-type BoardItem = { id: string; name: string; updatedAt: string };
-
-type BoardsResponse = { items: BoardItem[] };
-
-async function fetchJsonWithTimeout(url: string, init?: RequestInit, timeoutMs = 8000) {
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), timeoutMs);
+function getCachedAuth(): { email: string; name?: string | null } | null {
   try {
-    const res = await fetch(url, {
-      ...(init || {}),
-      credentials: 'include',
-      signal: controller.signal,
-    });
+    const raw = sessionStorage.getItem(SESSION_CACHE_KEY);
+    if (!raw) return null;
+    const { user, expiresAt } = JSON.parse(raw);
+    if (Date.now() > expiresAt) { sessionStorage.removeItem(SESSION_CACHE_KEY); return null; }
+    return user;
+  } catch { return null; }
+}
 
-    if (res.status === 401 || res.status === 403) {
-      return { __auth: 'expired' } as any;
+function setCachedAuth(user: { email: string; name?: string | null } | null) {
+  try {
+    if (user) {
+      sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify({ user, expiresAt: Date.now() + SESSION_CACHE_TTL_MS }));
+    } else {
+      sessionStorage.removeItem(SESSION_CACHE_KEY);
     }
+  } catch {}
+}
 
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw new Error(`HTTP ${res.status} ${text}`);
-    }
-
-    return res.json();
-  } catch (e: any) {
-    if (e?.name === 'AbortError') {
-      throw new Error(`Request timed out after ${timeoutMs}ms: ${url}`);
-    }
-    throw e;
-  } finally {
-    clearTimeout(t);
-  }
+function getLastBoardId(): string | null {
+  try { return localStorage.getItem('lastBoardId'); } catch { return null; }
 }
 
 export default function HomePage() {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
   const router = useRouter();
-
-  const [me, setMe] = useState<MeResponse | null>(null);
-  const [boards, setBoards] = useState<BoardItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function load() {
-    setError(null);
-    setMe(null);
-    setBoards(null);
-
-    try {
-      const meJson: any = await fetchJsonWithTimeout(`${base}/auth/me`);
-      if (meJson?.__auth === 'expired') {
-        setMe({ user: null });
-        return;
-      }
-
-      setMe(meJson as MeResponse);
-
-      if (!meJson.user) {
-        setBoards(null);
-        return;
-      }
-
-      const bJson = (await fetchJsonWithTimeout(`${base}/boards`)) as BoardsResponse;
-      setBoards(bJson.items);
-    } catch (e: any) {
-      setError(e?.message || String(e));
-      setMe({ user: null });
-    }
-  }
-
   useEffect(() => {
+    async function load() {
+      // 1. Try last-opened board with cached auth — fastest path, no API call
+      const cachedUser = getCachedAuth();
+      const lastBoardId = getLastBoardId();
+      if (cachedUser && lastBoardId) {
+        router.replace(`/boards/${lastBoardId}`);
+        return;
+      }
+
+      // 2. Check auth via network (but short-cache the result)
+      try {
+        const res = await fetch(`${base}/auth/me`, {
+          credentials: 'include',
+          cache: 'no-store',
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          setCachedAuth(null);
+          setError('not_authenticated');
+          return;
+        }
+
+        const meJson = await res.json();
+        if (!meJson?.user) {
+          setCachedAuth(null);
+          setError('not_authenticated');
+          return;
+        }
+
+        setCachedAuth(meJson.user);
+
+        // 3. Go to last board if known, else fetch board list
+        if (lastBoardId) {
+          router.replace(`/boards/${lastBoardId}`);
+          return;
+        }
+
+        const bRes = await fetch(`${base}/boards`, { credentials: 'include', cache: 'no-store' });
+        const bJson = await bRes.json();
+        const firstBoard = (bJson.items || [])[0];
+        if (firstBoard) {
+          try { localStorage.setItem('lastBoardId', firstBoard.id); } catch {}
+          router.replace(`/boards/${firstBoard.id}`);
+        } else {
+          setError('no_boards');
+        }
+      } catch (e: any) {
+        setError(e?.message || String(e));
+      }
+    }
+
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [base]);
+  }, []);
 
-  // Redirect to first board (position=0 in DB = default board).
-  useEffect(() => {
-    if (!me?.user) return;
-    if (!boards || boards.length === 0) return;
-    router.replace(`/boards/${boards[0]!.id}`);
-  }, [boards, me?.user, router]);
+  if (error === 'not_authenticated') {
+    return (
+      <div>
+        <h1 style={{ marginTop: 0 }}>Personal ERP</h1>
+        <p>You are not signed in.</p>
+        <a href={`${base}/auth/google`} className="tab" style={{ textDecoration: 'none' }}>
+          Sign in with Google
+        </a>
+      </div>
+    );
+  }
+
+  if (error === 'no_boards') {
+    return (
+      <div>
+        <h1 style={{ marginTop: 0 }}>Personal ERP</h1>
+        <p>No boards yet. Open the app and create one.</p>
+      </div>
+    );
+  }
 
   if (error) {
     return (
       <div>
         <h1 style={{ marginTop: 0 }}>Personal ERP</h1>
         <div style={{ color: '#b91c1c', marginBottom: 12 }}>Error: {error}</div>
-
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <a href={`${base}/auth/google`} className="tab" style={{ textDecoration: 'none' }}>
-            Sign in with Google
-          </a>
-          <button className="tab" onClick={load}>
-            Retry
-          </button>
-          <a className="tab" href={`${base}/auth/me`} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
-            Open /auth/me
-          </a>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <a href={`${base}/auth/google`} className="tab" style={{ textDecoration: 'none' }}>Sign in with Google</a>
+          <button className="tab" onClick={() => { setError(null); window.location.reload(); }}>Retry</button>
         </div>
       </div>
     );
   }
 
-  if (!me) {
-    return (
-      <div>
-        <h1 style={{ marginTop: 0 }}>Personal ERP</h1>
-        <div>Loading… (checking session)</div>
-      </div>
-    );
-  }
-
-  if (!me.user) {
-    return (
-      <div>
-        <h1 style={{ marginTop: 0 }}>Personal ERP</h1>
-        <p>You are not signed in.</p>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <a href={`${base}/auth/google`} className="tab" style={{ textDecoration: 'none' }}>
-            Sign in with Google
-          </a>
-          <button className="tab" onClick={load}>
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!boards) return <div>Loading…</div>;
-
-  if (boards.length === 0) {
-    return (
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <h1 style={{ marginTop: 0 }}>Boards</h1>
-          <a href={`${base}/auth/logout`} style={{ color: '#666' }}>
-            Logout
-          </a>
-        </div>
-
-        <p>No boards yet.</p>
-        <p>Create one from any existing board page UI (or tell me and I’ll add a “Create board” button here too).</p>
-      </div>
-    );
-  }
-
+  // Show minimal loading — usually resolves in <100ms from cache
   return (
-    <div>
-      <h1 style={{ marginTop: 0 }}>Personal ERP</h1>
-      <div>Redirecting…</div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#666', fontSize: 14 }}>
+      <div style={{
+        width: 16, height: 16, border: '2px solid #e5e7eb', borderTopColor: '#6366f1',
+        borderRadius: '50%', animation: 'spin 0.7s linear infinite',
+      }} />
+      Opening…
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

@@ -48,7 +48,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
   const [board, setBoard] = useState<{ id: string; name: string; config: BoardConfigV1 } | null>(null);
-  const [defaultBoardId, setDefaultBoardId] = useState<string | null>(null); // first board in position order
+  const [defaultBoardId, setDefaultBoardId] = useState<string | null>(null); // unused, kept for compat
   const [data, setData] = useState<any>(null);
   const [tags, setTags] = useState<TagItem[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -152,14 +152,12 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   }
 
   async function fetchBoardAndTags() {
-    // Critical path: board config + board list only — needed to render
-    const [b, allBoards] = await Promise.all([
-      fetchJson(`${base}/boards/${params.id}`),
-      fetchJson(`${base}/boards`).catch(() => ({ items: [] })),
-    ]);
+    // Critical path: board config only — no redundant board list fetch
+    const b = await fetchJson(`${base}/boards/${params.id}`);
     setBoard({ id: b.id, name: b.name, config: b.config });
-    const firstBoard = (allBoards.items || [])[0];
-    if (firstBoard) setDefaultBoardId(firstBoard.id);
+
+    // Remember last opened board for fast redirect on next visit
+    try { localStorage.setItem('lastBoardId', b.id); } catch {}
 
     // Tags are only needed for autocomplete — load in background after render
     fetchJson(`${base}/tags?limit=2000`)
@@ -572,55 +570,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
       <TabsBar activeBoardId={params.id} />
 
-      <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <label className="tab" style={{ cursor: 'pointer' }} title="Opening / will go to this board">
-            <input
-              type="checkbox"
-              checked={defaultBoardId === params.id}
-              onChange={async (e) => {
-                if (!e.target.checked) return;
-                try {
-                  setDefaultBoardId(params.id);
-                  // Persist to DB: put this board first (position=0) so it's the default on any device
-                  const allBoards = await fetchJson(`${base}/boards`);
-                  const ids: string[] = (allBoards.items || []).map((b: any) => b.id);
-                  const reordered = [params.id, ...ids.filter((id) => id !== params.id)];
-                  await fetchJson(`${base}/boards/reorder`, {
-                    method: 'POST',
-                    headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ ids: reordered }),
-                  });
-                  pushToast('success', 'Default board saved');
-                } catch {
-                  pushToast('error', 'Could not save default board');
-                }
-              }}
-            />
-            Make it default
-          </label>
-
-          <button
-            className="tab"
-            onClick={() => {
-              const next = prompt('Rename board to?', board.name);
-              if (!next) return;
-              fetchJson(`${base}/boards/${params.id}`, {
-                method: 'PATCH',
-                headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({ name: next.trim() }),
-              })
-                .then(() => fetchBoardAndTags())
-                .then(() => pushToast('success', 'Renamed'))
-                .catch((e) => setError(String(e)));
-            }}
-            style={{ cursor: 'pointer' }}
-            title="Rename board"
-          >
-            Rename
-          </button>
-        </div>
-
+      <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
         <button className="tab" onClick={addColumn} style={{ cursor: 'pointer' }} title="Add a new column">
           + Column
         </button>
