@@ -1022,13 +1022,20 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                   </label>
                 </div>
 
-                <ul style={{ paddingLeft: 18, marginTop: 10 }}>
+                <ul style={{ listStyle: 'none', padding: 0, marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {visibleItems.map((it: any) => {
                     const isSelected = !!selected[it.id];
                     return (
-                      <li key={it.id} style={{ margin: '10px 0' }}>
+                      <li key={it.id} style={{
+                        background: '#fff',
+                        border: isSelected ? '1.5px solid #6366f1' : '1px solid #e5e7eb',
+                        borderRadius: 10,
+                        padding: '10px 12px',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                        transition: 'border-color 0.1s',
+                      }}>
                         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                          <input type="checkbox" checked={isSelected} onChange={(e) => setSelected((prev) => ({ ...prev, [it.id]: e.target.checked }))} style={{ marginTop: 4 }} />
+                          <input type="checkbox" checked={isSelected} onChange={(e) => setSelected((prev) => ({ ...prev, [it.id]: e.target.checked }))} style={{ marginTop: 3, flexShrink: 0 }} />
 
                           <div style={{ flex: 1, minWidth: 0 }}>
                             {editingId === it.id ? (
@@ -1114,10 +1121,22 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                             </div>
 
                             <div style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                              <span style={{ fontSize: 12, color: '#444' }}>Add tag</span>
-                              <input value={tagDrafts[it.id] || ''} onChange={(e) => setTagDrafts((m) => ({ ...m, [it.id]: e.target.value }))} style={{ padding: 6, minWidth: 160 }} placeholder="type tag" />
-                              <button className="tab"
-                                onClick={() => {
+                              <input
+                                value={tagDrafts[it.id] || ''}
+                                list={`tags-dl-${it.id}`}
+                                onChange={(e) => setTagDrafts((m) => ({ ...m, [it.id]: e.target.value }))}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    const val = (tagDrafts[it.id] || '').trim().toLowerCase();
+                                    if (!val) return;
+                                    addTagToEvent(it.id, val)
+                                      .then(() => runBoard())
+                                      .then(() => setTagDrafts((m) => ({ ...m, [it.id]: '' })))
+                                      .catch((e) => setError(String(e)));
+                                  }
+                                }}
+                                onBlur={() => {
                                   const val = (tagDrafts[it.id] || '').trim().toLowerCase();
                                   if (!val) return;
                                   addTagToEvent(it.id, val)
@@ -1125,17 +1144,22 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                                     .then(() => setTagDrafts((m) => ({ ...m, [it.id]: '' })))
                                     .catch((e) => setError(String(e)));
                                 }}
-                              >
-                                Add
-                              </button>
-                              <button className="tab"
+                                style={{ padding: '4px 8px', fontSize: 12, borderRadius: 6, border: '1px solid #d1d5db', minWidth: 120, flex: 1 }}
+                                placeholder="add tag…"
+                              />
+                              <datalist id={`tags-dl-${it.id}`}>
+                                {tags.map((t) => <option key={t.id} value={t.name} />)}
+                              </datalist>
+                              <button
+                                title="Edit content"
                                 onClick={() => {
                                   setEditingId(it.id);
                                   setEditingText(it.content);
                                   lastSavedById.current[it.id] = it.content;
                                 }}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, padding: '2px 4px', color: '#9ca3af', lineHeight: 1 }}
                               >
-                                Edit text
+                                ✏️
                               </button>
                             </div>
                           </div>
