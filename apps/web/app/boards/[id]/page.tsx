@@ -152,16 +152,19 @@ export default function BoardPage({ params }: { params: { id: string } }) {
   }
 
   async function fetchBoardAndTags() {
-    const [b, allBoards, tj] = await Promise.all([
+    // Critical path: board config + board list only — needed to render
+    const [b, allBoards] = await Promise.all([
       fetchJson(`${base}/boards/${params.id}`),
       fetchJson(`${base}/boards`).catch(() => ({ items: [] })),
-      fetchJson(`${base}/tags?limit=2000`).catch(() => ({ items: [] })),
     ]);
     setBoard({ id: b.id, name: b.name, config: b.config });
-    // Default board = first in position-ordered list (position=0)
     const firstBoard = (allBoards.items || [])[0];
     if (firstBoard) setDefaultBoardId(firstBoard.id);
-    setTags(tj.items || []);
+
+    // Tags are only needed for autocomplete — load in background after render
+    fetchJson(`${base}/tags?limit=2000`)
+      .then((tj) => setTags(tj.items || []))
+      .catch(() => {});
   }
 
   async function saveBoardConfig(next: BoardConfigV1) {
