@@ -4,7 +4,7 @@ import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import { createClient } from 'redis';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const RedisStore = require('connect-redis').default ?? require('connect-redis');
+const { RedisStore } = require('connect-redis');
 import { AppModule } from './app.module';
 
 async function bootstrap() {
