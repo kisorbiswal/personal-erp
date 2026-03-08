@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
@@ -19,9 +20,17 @@ export default function DevPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [installing, setInstalling] = useState(false);
+  const [installed, setInstalled] = useState<Set<string>>(new Set());
+  const router = useRouter();
 
   useEffect(() => {
     loadTemplates();
+    // Load installed set to show correct button state
+    fetch(`${BASE}/health/reports/installed`, { credentials: 'include' })
+      .then((r) => r.json())
+      .then((list: any[]) => setInstalled(new Set(list.map((r) => r.templateId))))
+      .catch(() => {});
   }, []);
 
   async function loadTemplates() {
@@ -50,6 +59,26 @@ export default function DevPage() {
     } catch {
       // Fall back to list data if single-template endpoint unavailable
       setSelected(template);
+    }
+  }
+
+  async function handleInstall() {
+    if (!selected) return;
+    setInstalling(true);
+    try {
+      const res = await fetch(`${BASE}/health/reports/install`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ templateId: selected.id }),
+      });
+      if (!res.ok) throw new Error(`Install failed: ${res.status}`);
+      setInstalled((prev) => { const s = new Set(prev); s.add(selected.id); return s; });
+      router.push('/health/dashboard');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Install failed');
+    } finally {
+      setInstalling(false);
     }
   }
 
@@ -122,11 +151,11 @@ export default function DevPage() {
                 </button>
                 <button
                   className="tab"
-                  style={{ cursor: 'not-allowed', opacity: 0.5 }}
-                  title="Fork & edit coming in a future phase"
-                  disabled
+                  onClick={handleInstall}
+                  disabled={installing || installed.has(selected.id)}
+                  style={{ cursor: installing || installed.has(selected.id) ? 'default' : 'pointer', opacity: installing ? 0.7 : 1 }}
                 >
-                  Fork & edit
+                  {installing ? 'Installing…' : installed.has(selected.id) ? '✓ Installed' : 'Use template'}
                 </button>
               </div>
             </div>
@@ -148,7 +177,7 @@ export default function DevPage() {
               }}
             />
             <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>
-              Read-only view. Fork &amp; edit flow coming in a future phase.
+              Read-only view. Click &ldquo;Use template&rdquo; to install it and view on the dashboard.
             </p>
           </div>
         ) : (
