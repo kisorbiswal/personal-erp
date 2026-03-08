@@ -879,7 +879,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                   if (from) moveColumn(from, s.id);
                 }}
               >
-                {/* ── Column header (only draggable zone) ── */}
+                {/* ── Column header (drag handle only) ── */}
                 <div
                   draggable
                   onDragStart={(e) => {
@@ -891,49 +891,16 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
-                    padding: '6px 8px',
+                    padding: '4px 6px',
                     marginBottom: 8,
-                    borderRadius: 8,
+                    borderRadius: 6,
                     background: '#f9fafb',
                     border: '1px solid #e5e7eb',
                     cursor: 'grab',
                     userSelect: 'none',
                   }}
                 >
-                  <span style={{ color: '#9ca3af', fontSize: 14, letterSpacing: 1 }}>⠿</span>
-
-                  {/* inline-editable title */}
-                  <span
-                    contentEditable
-                    suppressContentEditableWarning
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); (e.target as HTMLElement).blur(); } }}
-                    onBlur={(e) => {
-                      const newTitle = (e.target as HTMLElement).innerText.trim();
-                      if (!board || !newTitle) return;
-                      const current = board.config.columns ?? board.config.sections ?? [];
-                      const next: BoardConfigV1 = { ...board.config, columns: current.map((c) => c.id === s.id ? { ...c, title: newTitle } : c) };
-                      setBoard({ ...board, config: next });
-                      saveBoardConfig(next).catch((err) => setError(String(err)));
-                    }}
-                    style={{ flex: 1, fontWeight: 600, fontSize: 14, color: '#111', outline: 'none', cursor: 'text', minWidth: 0 }}
-                  >
-                    {s.title}
-                  </span>
-
-                  <label
-                    style={{ display: 'flex', gap: 4, alignItems: 'center', fontSize: 11, color: '#666', whiteSpace: 'nowrap', cursor: 'pointer' }}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onPointerDown={(e) => e.stopPropagation()}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={tagsMatch === 'all'}
-                      onChange={(e) => setColumnQuery(s.id, { tagsMatch: e.target.checked ? 'all' : 'any' })}
-                    />
-                    ALL
-                  </label>
+                  <span style={{ color: '#9ca3af', fontSize: 14, letterSpacing: 1, flex: 1 }}>⠿</span>
 
                   <button
                     className="tab"
@@ -953,7 +920,16 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                   </button>
                 </div>
 
-                <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {/* Tags + ALL checkbox */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
+                  <label style={{ display: 'flex', gap: 4, alignItems: 'center', fontSize: 11, color: '#666', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={tagsMatch === 'all'}
+                      onChange={(e) => setColumnQuery(s.id, { tagsMatch: e.target.checked ? 'all' : 'any' })}
+                    />
+                    ALL
+                  </label>
                   {columnTags.length ? (
                     columnTags.map((tg) => (
                       <span
@@ -966,7 +942,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                       </span>
                     ))
                   ) : (
-                    <span style={{ color: '#666', fontSize: 12 }}>(no tags — column will show everything)</span>
+                    <span style={{ color: '#aaa', fontSize: 11 }}>no tags</span>
                   )}
                 </div>
 
