@@ -35,6 +35,15 @@ export default function HomePage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
+  // Check for OAuth denial from server redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') === 'access_denied') {
+      setError('access_denied');
+      window.history.replaceState({}, '', '/'); // clean URL
+    }
+  }, []);
+
   useEffect(() => {
     async function load() {
       // 1. Try last-opened board with cached auth — fastest path, no API call
@@ -90,6 +99,23 @@ export default function HomePage() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (error === 'access_denied') {
+    return (
+      <div style={{ maxWidth: 420 }}>
+        <h1 style={{ marginTop: 0 }}>Personal ERP</h1>
+        <div style={{ background: '#fef3c7', border: '1px solid #f59e0b', borderRadius: 10, padding: '16px 20px', marginBottom: 16 }}>
+          <div style={{ fontWeight: 600, marginBottom: 6 }}>🔒 Private Beta</div>
+          <div style={{ fontSize: 14, color: '#78350f' }}>
+            This app is currently invite-only. If you think you should have access, please contact the owner.
+          </div>
+        </div>
+        <a href={`${base}/auth/google`} className="tab" style={{ textDecoration: 'none', fontSize: 13 }}>
+          Try a different account
+        </a>
+      </div>
+    );
+  }
 
   if (error === 'not_authenticated') {
     return (
