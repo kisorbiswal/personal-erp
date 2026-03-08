@@ -7,10 +7,18 @@ interface Props {
   content: string;
 }
 
+function normalizeContent(raw: string): string {
+  return raw
+    // literal \n → real newline
+    .replace(/\\n/g, '\n')
+    // lone backslash lines (used as section dividers) → hr
+    .replace(/^\s*\\\s*$/gm, '\n---\n');
+}
+
 export function MarkdownContent({ content }: Props) {
   return (
     <div className="md-content">
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{normalizeContent(content)}</ReactMarkdown>
     </div>
   );
 }
