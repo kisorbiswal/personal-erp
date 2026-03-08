@@ -3,7 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import { createClient } from 'redis';
-import RedisStore from 'connect-redis';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const RedisStore = require('connect-redis').default ?? require('connect-redis');
 import { AppModule } from './app.module';
 
 async function bootstrap() {
