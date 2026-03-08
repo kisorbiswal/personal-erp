@@ -713,7 +713,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                 <div key={it.id} style={{ border: '1px solid #eee', borderRadius: 10, padding: 12 }}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                     <input type="checkbox" checked={isSelected} onChange={(e) => setSelected((prev) => ({ ...prev, [it.id]: e.target.checked }))} style={{ marginTop: 4 }} />
-                    <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       {editingId === it.id ? (
                         <>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1064,7 +1064,7 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                           <input type="checkbox" checked={isSelected} onChange={(e) => setSelected((prev) => ({ ...prev, [it.id]: e.target.checked }))} style={{ marginTop: 4 }} />
 
-                          <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
                             {editingId === it.id ? (
                               <>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

@@ -25,7 +25,7 @@ export function MarkdownContent({ content }: Props) {
 
 // Inline styles injected once via layout — added to layout.tsx global styles
 export const markdownCss = `
-  .md-content { font-size: 14px; line-height: 1.6; color: #111; overflow-wrap: anywhere; word-break: break-word; min-width: 0; overflow: hidden; }
+  .md-content { font-size: 14px; line-height: 1.6; color: #111; overflow-wrap: anywhere; word-break: break-all; min-width: 0; }
   .md-content a { word-break: break-all; overflow-wrap: anywhere; }
   .md-content p { margin: 0 0 6px; }
   .md-content p:last-child { margin-bottom: 0; }
