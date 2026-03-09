@@ -28,11 +28,11 @@ type ReportData = {
 };
 
 const DATE_RANGES = [
-  { label: '3m',  days: 90 },
-  { label: '6m',  days: 180 },
-  { label: '1y',  days: 365 },
-  { label: '2y',  days: 730 },
-  { label: 'All', days: 0   },
+  { label: '3 months', days: 90 },
+  { label: '6 months', days: 180 },
+  { label: '1 year',   days: 365 },
+  { label: '2 years',  days: 730 },
+  { label: 'All',      days: 0   },
 ];
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
