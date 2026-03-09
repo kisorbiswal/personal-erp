@@ -148,7 +148,7 @@ export class SourcesController {
     if (existing) return { sourceId: existing.id, alreadyConnected: true };
 
     const source = await this.prisma.dataSource.create({
-      data: { userId, provider: 'mylogger', credentials: '', syncStatus: 'idle' },
+      data: { userId, provider: 'mylogger', label: 'MyLogger', credentials: {}, syncStatus: 'idle' },
     });
 
     // Kick off initial sync immediately
