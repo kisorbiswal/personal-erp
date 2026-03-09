@@ -28,10 +28,11 @@ type ReportData = {
 };
 
 const DATE_RANGES = [
-  { label: '3 months', days: 90 },
-  { label: '6 months', days: 180 },
-  { label: '1 year',   days: 365 },
-  { label: 'All',      days: 0   },
+  { label: '3m',  days: 90 },
+  { label: '6m',  days: 180 },
+  { label: '1y',  days: 365 },
+  { label: '2y',  days: 730 },
+  { label: 'All', days: 0   },
 ];
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
@@ -316,9 +317,12 @@ export default function ReportPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [days, setDays] = useState(365);
+  const [customFrom, setCustomFrom] = useState('');
+  const [customTo, setCustomTo] = useState('');
+  const [usingCustom, setUsingCustom] = useState(false);
 
   useEffect(() => {
-    loadData();
+    if (!usingCustom) loadData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, days]);
 
@@ -326,8 +330,13 @@ export default function ReportPage({ params }: { params: { id: string } }) {
     setLoading(true);
     setError(null);
     try {
-      // Always send ?days= so API knows "0" means all-time (not missing → default 90)
-      const res = await fetch(`${BASE}/health/reports/installed/${params.id}/data?days=${days}`, { credentials: 'include' });
+      let url: string;
+      if (usingCustom && customFrom && customTo) {
+        url = `${BASE}/health/reports/installed/${params.id}/data?from=${customFrom}&to=${customTo}`;
+      } else {
+        url = `${BASE}/health/reports/installed/${params.id}/data?days=${days}`;
+      }
+      const res = await fetch(url, { credentials: 'include' });
       if (!res.ok) throw new Error(`Failed: ${res.status}`);
       setData(await res.json());
     } catch (e: unknown) {
@@ -378,13 +387,37 @@ export default function ReportPage({ params }: { params: { id: string } }) {
       </div>
 
       {/* Date range */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 24, flexWrap: 'wrap' }}>
         {DATE_RANGES.map(({ label, days: d }) => (
-          <button key={label} className={days === d ? 'tab tabActive' : 'tab'}
-            onClick={() => setDays(d)} style={{ cursor: 'pointer' }}>
+          <button key={label}
+            className={!usingCustom && days === d ? 'tab tabActive' : 'tab'}
+            onClick={() => { setUsingCustom(false); setDays(d); }}
+            style={{ cursor: 'pointer' }}>
             {label}
           </button>
         ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 6, borderLeft: '1px solid #e5e7eb', paddingLeft: 10 }}>
+          <input
+            type="date"
+            value={customFrom}
+            onChange={e => setCustomFrom(e.target.value)}
+            style={{ fontSize: 12, padding: '3px 6px', border: '1px solid #d1d5db', borderRadius: 6, cursor: 'pointer' }}
+          />
+          <span style={{ fontSize: 12, color: '#9ca3af' }}>→</span>
+          <input
+            type="date"
+            value={customTo}
+            onChange={e => setCustomTo(e.target.value)}
+            style={{ fontSize: 12, padding: '3px 6px', border: '1px solid #d1d5db', borderRadius: 6, cursor: 'pointer' }}
+          />
+          <button
+            className={usingCustom ? 'tab tabActive' : 'tab'}
+            disabled={!customFrom || !customTo}
+            onClick={() => { setUsingCustom(true); loadData(); }}
+            style={{ cursor: customFrom && customTo ? 'pointer' : 'default', opacity: customFrom && customTo ? 1 : 0.5 }}>
+            Apply
+          </button>
+        </div>
       </div>
 
       {/* 3 panels */}

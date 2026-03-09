@@ -88,6 +88,8 @@ export class ReportsController {
     @Req() req: any,
     @Param('id') id: string,
     @Query('days') daysStr?: string,
+    @Query('from') fromStr?: string,
+    @Query('to')   toStr?: string,
   ) {
     const report = await this.prisma.installedReport.findUnique({
       where: { id },
@@ -96,9 +98,16 @@ export class ReportsController {
     if (!report) throw new NotFoundException();
     if (report.userId !== req.user.userId) throw new ForbiddenException();
 
-    const days = parseInt(daysStr || '90', 10);
-    const end = new Date();
-    const start = days > 0 ? new Date(Date.now() - days * 24 * 60 * 60 * 1000) : null;
+    let start: Date | null;
+    let end: Date;
+    if (fromStr && toStr) {
+      start = new Date(fromStr + 'T00:00:00Z');
+      end   = new Date(toStr   + 'T23:59:59Z');
+    } else {
+      const days = parseInt(daysStr || '90', 10);
+      end   = new Date();
+      start = days > 0 ? new Date(Date.now() - days * 24 * 60 * 60 * 1000) : null;
+    }
 
     const [slots, chartData] = await Promise.all([
       this.reportEngine.resolveSlots(req.user.userId, report.template),
