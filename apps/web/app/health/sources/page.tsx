@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
-type Provider = { provider: string; label: string; connected: boolean; lastSyncAt?: string | null };
+type Provider = { provider: string; label: string; description?: string; connected: boolean; lastSyncAt?: string | null; authType?: string };
 
 type DataSource = {
   id: string;
@@ -252,41 +252,42 @@ export default function SourcesPage() {
     </div>
   );
 
-  const fitbitSource = sources.find((s) => s.provider === 'fitbit');
-  const fitbitProvider = providers.find((p) => p.provider === 'fitbit') ?? (fitbitSource ? { provider: 'fitbit', connected: true } : undefined);
-
   return (
     <div>
       <h2 style={{ fontWeight: 700, fontSize: 18, marginBottom: 16, marginTop: 0 }}>Data Sources</h2>
 
-      {/* Fitbit provider card */}
-      <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 16, marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: 16 }}>Fitbit</div>
-            <div style={{ fontSize: 13, color: '#6b7280', marginTop: 2 }}>
-              Sleep tracking, weight logging
+      {/* Provider cards — dynamic from API */}
+      {providers.map((p) => (
+        <div key={p.provider} style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 16, marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 15 }}>{p.label}</div>
+              {p.description && <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>{p.description}</div>}
+              <div style={{ marginTop: 6 }}>
+                {p.connected
+                  ? <span style={{ color: '#16a34a', fontSize: 13, fontWeight: 500 }}>● Connected</span>
+                  : <span style={{ color: '#9ca3af', fontSize: 13 }}>● Not connected</span>}
+              </div>
             </div>
-            <div style={{ marginTop: 6 }}>
-              {fitbitProvider?.connected ? (
-                <span style={{ color: '#16a34a', fontSize: 13, fontWeight: 500 }}>● Connected</span>
+            {!p.connected && (
+              p.authType === 'internal' ? (
+                <button className="tab" style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  onClick={async () => {
+                    await fetch(`${BASE}/health/sources/mylogger/connect`, { method: 'POST', credentials: 'include' });
+                    loadAll();
+                  }}>
+                  Connect
+                </button>
               ) : (
-                <span style={{ color: '#dc2626', fontSize: 13, fontWeight: 500 }}>● Not connected</span>
-              )}
-            </div>
+                <button className="tab" onClick={() => handleConnect(p.provider)}
+                  disabled={connecting} style={{ cursor: connecting ? 'default' : 'pointer', whiteSpace: 'nowrap' }}>
+                  {connecting ? 'Redirecting…' : `Connect ${p.label}`}
+                </button>
+              )
+            )}
           </div>
-          {!fitbitProvider?.connected && (
-            <button
-              className="tab"
-              onClick={() => handleConnect('fitbit')}
-              disabled={connecting}
-              style={{ cursor: connecting ? 'default' : 'pointer' }}
-            >
-              {connecting ? 'Redirecting…' : 'Connect Fitbit'}
-            </button>
-          )}
         </div>
-      </div>
+      ))}
 
       {/* Connected sources */}
       {sources.length > 0 && (
@@ -302,7 +303,7 @@ export default function SourcesPage() {
         </div>
       )}
 
-      {sources.length === 0 && fitbitProvider?.connected && (
+      {sources.length === 0 && providers.some(p => p.connected) && (
         <p style={{ color: '#6b7280', fontSize: 13 }}>Connected but no sources yet — try syncing.</p>
       )}
     </div>

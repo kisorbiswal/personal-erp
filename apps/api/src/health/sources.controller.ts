@@ -15,6 +15,7 @@ import { SessionAuthGuard } from '../auth.guard';
 import { PrismaService } from '../prisma.service';
 import { FitbitProvider } from './providers/fitbit.provider';
 import { SyncService } from './sync.service';
+import { Public } from '../public.decorator';
 
 @Controller('health/sources')
 @UseGuards(SessionAuthGuard)
@@ -68,12 +69,23 @@ export class SourcesController {
       where: { userId: req.user.userId },
     });
     const fitbitSource = sources.find((s) => s.provider === 'fitbit');
+    const myloggerSource = sources.find((s) => s.provider === 'mylogger');
     return [
       {
         provider: 'fitbit',
         label: 'Fitbit',
+        description: 'Sync sleep, weight, and activity via Fitbit OAuth',
         connected: !!fitbitSource,
         lastSyncAt: fitbitSource?.lastSyncAt ?? null,
+        authType: 'oauth',
+      },
+      {
+        provider: 'mylogger',
+        label: 'MyLogger (this app)',
+        description: 'Import weight entries you\'ve logged in the boards with the "weight" tag',
+        connected: !!myloggerSource,
+        lastSyncAt: myloggerSource?.lastSyncAt ?? null,
+        authType: 'internal',
       },
     ];
   }
@@ -126,6 +138,22 @@ export class SourcesController {
     } catch (err: any) {
       return res.redirect(`${uiOrigin}/health/sources?error=oauth_failed`);
     }
+  }
+
+  /** Connect MyLogger (internal — no OAuth, just creates/upserts a DataSource) */
+  @Post('mylogger/connect')
+  async connectMyLogger(@Req() req: any) {
+    const userId = req.user.userId;
+    const existing = await this.prisma.dataSource.findFirst({ where: { userId, provider: 'mylogger' } });
+    if (existing) return { sourceId: existing.id, alreadyConnected: true };
+
+    const source = await this.prisma.dataSource.create({
+      data: { userId, provider: 'mylogger', credentials: '', syncStatus: 'idle' },
+    });
+
+    // Kick off initial sync immediately
+    this.sync.syncSource(source.id).catch(() => {});
+    return { sourceId: source.id, alreadyConnected: false };
   }
 
   /** Manual sync trigger */

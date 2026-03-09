@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CryptoService } from './crypto.service';
 import { FitbitProvider } from './providers/fitbit.provider';
+import { MyLoggerProvider } from './providers/mylogger.provider';
 
 // Fitbit's earliest supported date for history
 const FITBIT_HISTORY_START = '2010-01-01';
@@ -27,6 +28,7 @@ export class SyncService implements OnModuleInit {
     private prisma: PrismaService,
     private crypto: CryptoService,
     private fitbit: FitbitProvider,
+    private mylogger: MyLoggerProvider,
   ) {}
 
   async onModuleInit() {
@@ -77,6 +79,34 @@ export class SyncService implements OnModuleInit {
     });
 
     try {
+      // ── MyLogger: internal sync from events ─────────────────────────────
+      if (source.provider === 'mylogger') {
+        const records = await this.mylogger.fetchWeightRecords(source.userId);
+        for (const rec of records) {
+          const payload = { value_kg: rec.value };
+          const existing = await this.prisma.dataPoint.findFirst({
+            where: { sourceId: source.id, occurredAt: rec.occurredAt, dataType: 'weight-scale' },
+          });
+          let dp: any;
+          if (existing) {
+            dp = await this.prisma.dataPoint.update({ where: { id: existing.id }, data: { payload } });
+          } else {
+            dp = await this.prisma.dataPoint.create({
+              data: { sourceId: source.id, userId: source.userId, occurredAt: rec.occurredAt, dataType: 'weight-scale', payload },
+            });
+          }
+          await this.prisma.metricValue.deleteMany({ where: { dataPointId: dp.id } });
+          const metrics = this.mylogger.extractMetricValues({ id: dp.id, userId: source.userId, occurredAt: rec.occurredAt, payload });
+          if (metrics.length > 0) await this.prisma.metricValue.createMany({ data: metrics });
+        }
+        await this.prisma.dataSource.update({
+          where: { id: sourceId },
+          data: { lastSyncAt: new Date(), syncStatus: 'idle' },
+        });
+        this.log.log(`MyLogger sync complete: ${records.length} weight records`);
+        return;
+      }
+
       let { accessToken, refreshToken, expiresAt } = this.decryptCredentials(source.credentials as any);
 
       // Refresh token if expired

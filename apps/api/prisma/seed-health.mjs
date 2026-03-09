@@ -61,21 +61,61 @@ const template = {
   },
 };
 
+const weightTimelineTemplate = {
+  id: 'weight-timeline-v1',
+  name: 'Weight Timeline (MyLogger + Fitbit)',
+  description: 'Your full weight history from 2014 to today — MyLogger boards data combined with Fitbit. See long-term trends across both sources.',
+  version: '1.0.0',
+  author: 'system',
+  definition: {
+    id: 'weight-timeline-v1',
+    name: 'Weight Timeline (MyLogger + Fitbit)',
+    author: 'system',
+    version: '1.0.0',
+    description: 'Full weight history combining MyLogger board entries (2014–2021) and Fitbit (2024–2025)',
+    charts: [
+      {
+        id: 'weight-combined-timeline',
+        type: 'multi-line',
+        title: 'Weight History — All Sources',
+        series: [
+          { slot: 'mylogger_weight', label: 'MyLogger (kg)', color: '#6366f1', type: 'line' },
+          { slot: 'fitbit_weight',   label: 'Fitbit (kg)',   color: '#f59e0b', type: 'line' },
+        ],
+      },
+    ],
+    requires: [
+      {
+        slot: 'mylogger_weight',
+        dataType: 'weight-scale',
+        provider: 'mylogger',
+        fields: ['value_kg'],
+        aggregation: 'weekly_avg',
+        optional: true,
+      },
+      {
+        slot: 'fitbit_weight',
+        dataType: 'weight-scale',
+        provider: 'fitbit',
+        fields: ['value_kg'],
+        aggregation: 'weekly_avg',
+        optional: true,
+      },
+    ],
+  },
+};
+
 async function main() {
-  console.log('Seeding health report template...');
+  console.log('Seeding health report templates...');
 
-  await prisma.reportTemplate.upsert({
-    where: { id: template.id },
-    create: template,
-    update: {
-      name: template.name,
-      description: template.description,
-      definition: template.definition,
-      version: template.version,
-    },
-  });
-
-  console.log(`Upserted template: ${template.id}`);
+  for (const tmpl of [template, weightTimelineTemplate]) {
+    await prisma.reportTemplate.upsert({
+      where: { id: tmpl.id },
+      create: tmpl,
+      update: { name: tmpl.name, description: tmpl.description, definition: tmpl.definition, version: tmpl.version },
+    });
+    console.log(`Upserted template: ${tmpl.id}`);
+  }
 }
 
 main()

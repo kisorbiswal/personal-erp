@@ -258,6 +258,36 @@ function SleepWeightScatterPanel({ chartData }: { chartData: ChartData }) {
   );
 }
 
+// ── Panel 4: Multi-line (any number of line series on a single Y axis) ────────
+function MultiLinePanel({ chartData, seriesDefs }: { chartData: ChartData; seriesDefs: SeriesDef[] }) {
+  const transforms: Record<string, string | undefined> = {};
+  for (const s of seriesDefs) transforms[s.slot] = s.transform;
+  const rows = buildRows(chartData, transforms);
+  const hasAny = rows.some(r => seriesDefs.some(s => r[s.slot] != null));
+
+  if (!hasAny) return <p style={{ color: '#6b7280', fontSize: 13 }}>No data for this period. Try "All".</p>;
+
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <ComposedChart data={rows} margin={{ top: 4, right: 30, left: 0, bottom: 4 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+        <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={fmtWeek} />
+        <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10 }}
+          label={{ value: 'kg', angle: -90, position: 'insideLeft', fontSize: 10 }} />
+        <Tooltip formatter={(v: unknown, name: string) => {
+          const def = seriesDefs.find(s => s.slot === name);
+          return [`${v} kg`, def?.label ?? name];
+        }} />
+        <Legend formatter={(v: string) => seriesDefs.find(s => s.slot === v)?.label ?? v} />
+        {seriesDefs.map(s => (
+          <Line key={s.slot} type="monotone" dataKey={s.slot} name={s.slot}
+            stroke={s.color} strokeWidth={2} dot={false} connectNulls />
+        ))}
+      </ComposedChart>
+    </ResponsiveContainer>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function ReportPage({ params }: { params: { id: string } }) {
   const [data, setData] = useState<ReportData | null>(null);
@@ -305,6 +335,7 @@ export default function ReportPage({ params }: { params: { id: string } }) {
     if (chart.type === 'bar-line-combo')  panels.push({ id: chart.id, title: chart.title, node: <SleepQualityPanel chartData={cd} /> });
     if (chart.type === 'line-rolling')    panels.push({ id: chart.id, title: chart.title, node: <WeightTrendPanel chartData={cd} /> });
     if (chart.type === 'scatter')         panels.push({ id: chart.id, title: chart.title, node: <SleepWeightScatterPanel chartData={cd} /> });
+    if (chart.type === 'multi-line')      panels.push({ id: chart.id, title: chart.title, node: <MultiLinePanel chartData={cd} seriesDefs={chart.series ?? []} /> });
   }
 
   return (
