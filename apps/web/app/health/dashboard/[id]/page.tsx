@@ -154,6 +154,10 @@ function WeightTrendPanel({ chartData }: { chartData: ChartData }) {
   const rolling = rollingAvg(rows, 'weight', 4);
   const rowsR = rows.map((r, i) => ({ ...r, weight_rolling: rolling[i] }));
 
+  const weightVals = rows.map(r => r.weight as number | null).filter((v): v is number => v != null);
+  const wMin = weightVals.length ? Math.floor(Math.min(...weightVals) - 1) : 'auto';
+  const wMax = weightVals.length ? Math.ceil(Math.max(...weightVals) + 1) : 'auto';
+
   return (
     <div>
       <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>
@@ -163,7 +167,7 @@ function WeightTrendPanel({ chartData }: { chartData: ChartData }) {
         <ComposedChart data={rowsR} margin={{ top: 4, right: 30, left: 0, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
           <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={fmtWeek} />
-          <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10 }}
+          <YAxis domain={[wMin, wMax]} tick={{ fontSize: 10 }}
             label={{ value: 'kg', angle: -90, position: 'insideLeft', fontSize: 10 }} />
           <Tooltip formatter={(v: unknown, name: string) =>
             name === 'weight' ? [`${v} kg`, 'Weekly avg'] : [`${v} kg`, '4-week avg']
@@ -267,12 +271,17 @@ function MultiLinePanel({ chartData, seriesDefs }: { chartData: ChartData; serie
 
   if (!hasAny) return <p style={{ color: '#6b7280', fontSize: 13 }}>No data for this period. Try "All".</p>;
 
+  // Compute Y domain from actual values so it never shows 0 as baseline
+  const allVals = rows.flatMap(r => seriesDefs.map(s => r[s.slot] as number | null).filter((v): v is number => v != null));
+  const minVal = allVals.length ? Math.floor(Math.min(...allVals) - 1) : 'auto';
+  const maxVal = allVals.length ? Math.ceil(Math.max(...allVals) + 1) : 'auto';
+
   return (
     <ResponsiveContainer width="100%" height={300}>
       <ComposedChart data={rows} margin={{ top: 4, right: 30, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
         <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={fmtWeek} />
-        <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10 }}
+        <YAxis domain={[minVal, maxVal]} tick={{ fontSize: 10 }}
           label={{ value: 'kg', angle: -90, position: 'insideLeft', fontSize: 10 }} />
         <Tooltip formatter={(v: unknown, name: string) => {
           const def = seriesDefs.find(s => s.slot === name);
@@ -304,8 +313,8 @@ export default function ReportPage({ params }: { params: { id: string } }) {
     setLoading(true);
     setError(null);
     try {
-      const qs = days > 0 ? `?days=${days}` : '';
-      const res = await fetch(`${BASE}/health/reports/installed/${params.id}/data${qs}`, { credentials: 'include' });
+      // Always send ?days= so API knows "0" means all-time (not missing → default 90)
+      const res = await fetch(`${BASE}/health/reports/installed/${params.id}/data?days=${days}`, { credentials: 'include' });
       if (!res.ok) throw new Error(`Failed: ${res.status}`);
       setData(await res.json());
     } catch (e: unknown) {
@@ -340,8 +349,13 @@ export default function ReportPage({ params }: { params: { id: string } }) {
 
   return (
     <div>
-      <h2 style={{ fontWeight: 700, fontSize: 18, marginBottom: 4, marginTop: 0 }}>{data.report.name}</h2>
-      <p style={{ color: '#6b7280', fontSize: 13, marginBottom: 12, marginTop: 0 }}>{data.report.description}</p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 4 }}>
+        <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{data.report.name}</h2>
+        <button className="tab" onClick={loadData} style={{ cursor: 'pointer', fontSize: 12, whiteSpace: 'nowrap' }}>
+          ↻ Refresh data
+        </button>
+      </div>
+      <p style={{ color: '#6b7280', fontSize: 13, marginBottom: 12, marginTop: 4 }}>{data.report.description}</p>
 
       {/* Slot badges */}
       <div style={{ marginBottom: 12 }}>
