@@ -81,8 +81,21 @@ function linearRegression(pts: { x: number; y: number }[]) {
   return { slope, intercept, r2 };
 }
 
+/** Format a YYYY-MM-DD week key as "Apr '16" */
 function fmtWeek(v: string) {
-  return v.includes('-W') ? v.slice(2) : v.slice(5);
+  try {
+    const d = new Date(v + 'T00:00:00Z');
+    return d.toLocaleDateString('en', { month: 'short', year: '2-digit', timeZone: 'UTC' });
+  } catch { return v; }
+}
+
+/** Pick a tick interval so we show ~12-20 labels regardless of data span */
+function xInterval(rowCount: number): number {
+  if (rowCount <= 20) return 0;           // show every tick
+  if (rowCount <= 52) return 3;           // ~monthly for 1 year
+  if (rowCount <= 156) return 8;          // ~2-monthly for 3 years
+  if (rowCount <= 520) return 13;         // quarterly for ~10 years
+  return Math.floor(rowCount / 20);
 }
 
 // ── SlotBadge ─────────────────────────────────────────────────────────────────
@@ -117,7 +130,7 @@ function SleepQualityPanel({ chartData }: { chartData: ChartData }) {
       <ResponsiveContainer width="100%" height={280}>
         <ComposedChart data={rows} margin={{ top: 4, right: 44, left: 0, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-          <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={fmtWeek} />
+          <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={fmtWeek} interval={xInterval(rows.length)} />
           <YAxis yAxisId="left" domain={[0, 10]} tick={{ fontSize: 10 }}
             label={{ value: 'h', angle: -90, position: 'insideLeft', fontSize: 10 }} />
           <YAxis yAxisId="right" orientation="right" domain={[60, 100]} tick={{ fontSize: 10 }}
@@ -166,7 +179,7 @@ function WeightTrendPanel({ chartData }: { chartData: ChartData }) {
       <ResponsiveContainer width="100%" height={280}>
         <ComposedChart data={rowsR} margin={{ top: 4, right: 30, left: 0, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-          <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={fmtWeek} />
+          <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={fmtWeek} interval={xInterval(rowsR.length)} />
           <YAxis domain={[wMin, wMax]} tick={{ fontSize: 10 }}
             label={{ value: 'kg', angle: -90, position: 'insideLeft', fontSize: 10 }} />
           <Tooltip formatter={(v: unknown, name: string) =>
@@ -280,7 +293,7 @@ function MultiLinePanel({ chartData, seriesDefs }: { chartData: ChartData; serie
     <ResponsiveContainer width="100%" height={300}>
       <ComposedChart data={rows} margin={{ top: 4, right: 30, left: 0, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-        <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={fmtWeek} />
+        <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={fmtWeek} interval={xInterval(rows.length)} />
         <YAxis domain={[minVal, maxVal]} tick={{ fontSize: 10 }}
           label={{ value: 'kg', angle: -90, position: 'insideLeft', fontSize: 10 }} />
         <Tooltip formatter={(v: unknown, name: string) => {

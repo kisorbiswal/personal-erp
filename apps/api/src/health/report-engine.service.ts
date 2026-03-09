@@ -78,14 +78,24 @@ export class ReportEngineService {
     const sourceByProvider: Record<string, string> = {};
     for (const src of sources) sourceByProvider[src.provider] = src.id;
 
+    // Weekly bucket key = Monday's date (YYYY-MM-DD) — human readable, sorts correctly
     const bucketKey = (date: Date): string => {
       if (!useWeekly) return date.toISOString().split('T')[0];
       const d = new Date(date);
-      d.setHours(0, 0, 0, 0);
-      d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
-      const week1 = new Date(d.getFullYear(), 0, 4);
-      const weekNum = 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
-      return `${d.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+      d.setUTCHours(0, 0, 0, 0);
+      const day = d.getUTCDay(); // 0=Sun
+      d.setUTCDate(d.getUTCDate() - ((day + 6) % 7)); // roll back to Monday
+      return d.toISOString().split('T')[0];
+    };
+
+    // IQR outlier bounds: rejects values outside Q1−k·IQR … Q3+k·IQR
+    const iqrBounds = (values: number[], k = 2.5): [number, number] => {
+      if (values.length < 4) return [-Infinity, Infinity];
+      const s = [...values].sort((a, b) => a - b);
+      const q1 = s[Math.floor(s.length * 0.25)];
+      const q3 = s[Math.floor(s.length * 0.75)];
+      const iqr = q3 - q1;
+      return [q1 - k * iqr, q3 + k * iqr];
     };
 
     const bucketMap = new Map<string, Record<string, number[]>>();
@@ -95,11 +105,10 @@ export class ReportEngineService {
       const whereDate: any = { lte: dateRange.end };
       if (dateRange.start) whereDate.gte = dateRange.start;
 
-      // Build MetricValue filter — optionally restrict to a specific source
       const where: any = { userId, dataType: slot.dataType, field, occurredAt: whereDate };
       if (slot.provider) {
         const srcId = sourceByProvider[slot.provider];
-        if (!srcId) continue; // provider not connected, skip
+        if (!srcId) continue;
         where.dataPoint = { sourceId: srcId };
       }
 
@@ -108,8 +117,14 @@ export class ReportEngineService {
         orderBy: { occurredAt: 'asc' },
       });
 
+      // Compute IQR bounds from the full dataset for this slot
+      const allVals = metrics.map((m) => m.valueNum).filter((v): v is number => v != null);
+      const [lo, hi] = iqrBounds(allVals);
+
       for (const m of metrics) {
         if (m.valueNum == null) continue;
+        // Skip statistical outliers (e.g. 132kg when normal range is 65-80kg)
+        if (m.valueNum < lo || m.valueNum > hi) continue;
         const key = bucketKey(m.occurredAt);
         if (!bucketMap.has(key)) bucketMap.set(key, {});
         const entry = bucketMap.get(key)!;
