@@ -7,22 +7,31 @@ import {
   Query,
   Req,
   Res,
+  Body,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { SessionAuthGuard } from '../auth.guard';
 import { PrismaService } from '../prisma.service';
 import { FitbitProvider } from './providers/fitbit.provider';
+import { AppleHealthProvider } from './providers/apple-health.provider';
 import { SyncService } from './sync.service';
 import { Public } from '../public.decorator';
 
 @Controller('health/sources')
 @UseGuards(SessionAuthGuard)
 export class SourcesController {
+  private readonly log = new (require('@nestjs/common').Logger)(SourcesController.name);
+
   constructor(
     private prisma: PrismaService,
     private fitbit: FitbitProvider,
+    private appleHealth: AppleHealthProvider,
     private sync: SyncService,
   ) {}
 
@@ -69,7 +78,8 @@ export class SourcesController {
       where: { userId: req.user.userId },
     });
     const fitbitSource = sources.find((s) => s.provider === 'fitbit');
-    const myloggerSource = sources.find((s) => s.provider === 'mylogger');
+    const myloggerSource     = sources.find((s) => s.provider === 'mylogger');
+    const appleHealthSource  = sources.find((s) => s.provider === 'apple-health');
     return [
       {
         provider: 'fitbit',
@@ -86,6 +96,14 @@ export class SourcesController {
         connected: !!myloggerSource,
         lastSyncAt: myloggerSource?.lastSyncAt ?? null,
         authType: 'internal',
+      },
+      {
+        provider: 'apple-health',
+        label: 'Apple Health',
+        description: 'Upload your Apple Health export.xml to import weight history',
+        connected: !!appleHealthSource,
+        lastSyncAt: appleHealthSource?.lastSyncAt ?? null,
+        authType: 'file-upload',
       },
     ];
   }
@@ -154,6 +172,71 @@ export class SourcesController {
     // Kick off initial sync immediately
     this.sync.syncSource(source.id).catch(() => {});
     return { sourceId: source.id, alreadyConnected: false };
+  }
+
+  /** Connect Apple Health (creates DataSource, no OAuth) */
+  @Post('apple-health/connect')
+  async connectAppleHealth(@Req() req: any) {
+    const userId = req.user.userId;
+    const existing = await this.prisma.dataSource.findFirst({ where: { userId, provider: 'apple-health' } });
+    if (existing) return { sourceId: existing.id, alreadyConnected: true };
+    const source = await this.prisma.dataSource.create({
+      data: { userId, provider: 'apple-health', label: 'Apple Health', credentials: {}, syncStatus: 'idle' },
+    });
+    return { sourceId: source.id, alreadyConnected: false };
+  }
+
+  /** Upload Apple Health export.xml — parses and upserts all weight records */
+  @Post(':id/upload-apple-health')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 512 * 1024 * 1024 } })) // 512MB max
+  async uploadAppleHealth(
+    @Req() req: any,
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('No file uploaded');
+
+    const source = await this.prisma.dataSource.findUnique({ where: { id } });
+    if (!source) throw new NotFoundException();
+    if (source.userId !== req.user.userId) throw new ForbiddenException();
+    if (source.provider !== 'apple-health') throw new BadRequestException('Not an Apple Health source');
+
+    await this.prisma.dataSource.update({ where: { id }, data: { syncStatus: 'syncing', syncError: null } });
+
+    try {
+      const xml = file.buffer.toString('utf8');
+      const records = this.appleHealth.parseWeightFromXml(xml);
+
+      let inserted = 0;
+      for (const rec of records) {
+        const payload = { value_kg: rec.value_kg };
+        const existing = await this.prisma.dataPoint.findFirst({
+          where: { sourceId: id, occurredAt: rec.occurredAt, dataType: 'weight-scale' },
+        });
+        let dp: any;
+        if (existing) {
+          dp = await this.prisma.dataPoint.update({ where: { id: existing.id }, data: { payload } });
+        } else {
+          dp = await this.prisma.dataPoint.create({
+            data: { sourceId: id, userId: source.userId, occurredAt: rec.occurredAt, dataType: 'weight-scale', payload },
+          });
+          inserted++;
+        }
+        await this.prisma.metricValue.deleteMany({ where: { dataPointId: dp.id } });
+        const metrics = this.appleHealth.extractMetricValues({ id: dp.id, userId: source.userId, occurredAt: rec.occurredAt, payload });
+        if (metrics.length > 0) await this.prisma.metricValue.createMany({ data: metrics });
+      }
+
+      await this.prisma.dataSource.update({
+        where: { id },
+        data: { syncStatus: 'idle', lastSyncAt: new Date(), syncError: null },
+      });
+
+      return { ok: true, total: records.length, inserted, updated: records.length - inserted };
+    } catch (err: any) {
+      await this.prisma.dataSource.update({ where: { id }, data: { syncStatus: 'error', syncError: err.message } });
+      throw err;
+    }
   }
 
   /** Manual sync trigger */

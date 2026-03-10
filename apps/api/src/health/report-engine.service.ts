@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 
 const providerCapabilities: Record<string, string[]> = {
-  fitbit:    ['sleep-tracker', 'weight-scale'],
-  mylogger:  ['weight-scale'],
+  fitbit:         ['sleep-tracker', 'weight-scale'],
+  mylogger:       ['weight-scale'],
+  'apple-health': ['weight-scale'],
 };
 
 interface ReportSlot {

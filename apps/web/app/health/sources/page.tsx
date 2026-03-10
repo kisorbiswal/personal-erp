@@ -62,6 +62,33 @@ function SourceCard({
   const [loadingData, setLoadingData] = useState(false);
   const [showData, setShowData] = useState(false);
   const isSyncing = source.syncStatus === 'syncing';
+  const [uploading, setUploading] = useState(false);
+  const [uploadResult, setUploadResult] = useState<string | null>(null);
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setUploadResult(null);
+    const form = new FormData();
+    form.append('file', file);
+    try {
+      const res = await fetch(`${BASE}/health/sources/${source.id}/upload-apple-health`, {
+        method: 'POST',
+        credentials: 'include',
+        body: form,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message ?? 'Upload failed');
+      setUploadResult(`✓ Imported ${json.total} records (${json.inserted} new)`);
+      onSync(source.id); // refresh parent
+    } catch (err: any) {
+      setUploadResult(`✗ ${err.message}`);
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  }
 
   const doFetchData = useCallback(async () => {
     try {
@@ -112,19 +139,27 @@ function SourceCard({
             <div style={{ fontSize: 12, color: '#dc2626', marginTop: 4 }}>{source.syncError}</div>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            className="tab"
-            onClick={() => onSync(source.id)}
-            style={{ cursor: 'pointer' }}
-          >
-            Sync now
-          </button>
-          <button
-            className="tab"
-            onClick={fetchData}
-            style={{ cursor: 'pointer' }}
-          >
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {source.provider === 'apple-health' ? (
+            <>
+              <label style={{ cursor: uploading ? 'default' : 'pointer' }}>
+                <input type="file" accept=".xml" style={{ display: 'none' }} onChange={handleFileUpload} disabled={uploading} />
+                <span className="tab" style={{ cursor: uploading ? 'default' : 'pointer' }}>
+                  {uploading ? 'Uploading…' : '↑ Upload export.xml'}
+                </span>
+              </label>
+              {uploadResult && (
+                <span style={{ fontSize: 12, alignSelf: 'center', color: uploadResult.startsWith('✓') ? '#16a34a' : '#dc2626' }}>
+                  {uploadResult}
+                </span>
+              )}
+            </>
+          ) : (
+            <button className="tab" onClick={() => onSync(source.id)} style={{ cursor: 'pointer' }}>
+              Sync now
+            </button>
+          )}
+          <button className="tab" onClick={fetchData} style={{ cursor: 'pointer' }}>
             {loadingData ? 'Loading…' : showData ? 'Hide data' : 'View data'}
           </button>
         </div>
@@ -274,6 +309,15 @@ export default function SourcesPage() {
                 <button className="tab" style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
                   onClick={async () => {
                     await fetch(`${BASE}/health/sources/mylogger/connect`, { method: 'POST', credentials: 'include' });
+                    loadAll();
+                  }}>
+                  Connect
+                </button>
+              ) : p.authType === 'file-upload' ? (
+                <button className="tab" style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  onClick={async () => {
+                    const res = await fetch(`${BASE}/health/sources/apple-health/connect`, { method: 'POST', credentials: 'include' });
+                    await res.json();
                     loadAll();
                   }}>
                   Connect
