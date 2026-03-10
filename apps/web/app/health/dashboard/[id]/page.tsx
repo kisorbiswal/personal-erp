@@ -278,7 +278,7 @@ function SleepWeightScatterPanel({ chartData }: { chartData: ChartData }) {
 }
 
 // ── Panel 4: Multi-line (any number of line series on a single Y axis) ────────
-function MultiLinePanel({ chartData, seriesDefs }: { chartData: ChartData; seriesDefs: SeriesDef[] }) {
+function MultiLinePanel({ chartData, seriesDefs, allTimeMedian }: { chartData: ChartData; seriesDefs: SeriesDef[]; allTimeMedian?: number | null }) {
   const transforms: Record<string, string | undefined> = {};
   for (const s of seriesDefs) transforms[s.slot] = s.transform;
   const rows = buildRows(chartData, transforms);
@@ -301,8 +301,8 @@ function MultiLinePanel({ chartData, seriesDefs }: { chartData: ChartData; serie
 
   return (
     <div>
-      {/* Stats row — no overlap with chart */}
-      <div style={{ display: 'flex', gap: 20, fontSize: 12, color: '#64748b', marginBottom: 8 }}>
+      {/* Stats row — period stats left, all-time reference right */}
+      <div style={{ display: 'flex', gap: 20, fontSize: 12, color: '#64748b', marginBottom: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         {median !== null && (
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <span style={{ display: 'inline-block', width: 20, borderBottom: '2px dashed #64748b', verticalAlign: 'middle' }} />
@@ -315,7 +315,16 @@ function MultiLinePanel({ chartData, seriesDefs }: { chartData: ChartData; serie
             Mean <b>{mean} kg</b>
           </span>
         )}
-        <span style={{ color: '#9ca3af', marginLeft: 'auto' }}>Drag handles below chart to zoom</span>
+        {allTimeMedian != null && allTimeMedian !== median && (
+          <>
+            <span style={{ color: '#e5e7eb' }}>|</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#cbd5e1' }}>
+              <span style={{ display: 'inline-block', width: 20, borderBottom: '1px dashed #cbd5e1', verticalAlign: 'middle' }} />
+              All-time <b>{allTimeMedian} kg</b>
+            </span>
+          </>
+        )}
+        <span style={{ color: '#9ca3af', marginLeft: 'auto', fontSize: 11 }}>Drag handles below to zoom</span>
       </div>
 
       <ResponsiveContainer width="100%" height={320}>
@@ -340,6 +349,9 @@ function MultiLinePanel({ chartData, seriesDefs }: { chartData: ChartData; serie
           {mean !== null && mean !== median && (
             <ReferenceLine y={mean} stroke="#94a3b8" strokeDasharray="2 4" strokeWidth={1} />
           )}
+          {allTimeMedian != null && allTimeMedian !== median && (
+            <ReferenceLine y={allTimeMedian} stroke="#e2e8f0" strokeDasharray="4 4" strokeWidth={1} />
+          )}
           <Brush dataKey="date" height={24} stroke="#e5e7eb" fill="#f9fafb"
             startIndex={brushStart} tickFormatter={fmtWeek}
             travellerWidth={8} />
@@ -358,11 +370,29 @@ export default function ReportPage({ params }: { params: { id: string } }) {
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
   const [usingCustom, setUsingCustom] = useState(false);
+  const [allTimeMedian, setAllTimeMedian] = useState<number | null>(null);
 
   useEffect(() => {
     if (!usingCustom) loadData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, days]);
+
+  // Fetch all-time median once — used as a faint background reference line
+  useEffect(() => {
+    fetch(`${BASE}/health/reports/installed/${params.id}/data?days=0`, { credentials: 'include' })
+      .then(r => r.json())
+      .then((d: ReportData) => {
+        const firstChart = d.charts ? Object.values(d.charts)[0] : null;
+        if (!firstChart) return;
+        const vals = Object.values(firstChart.series).flatMap(s => s).filter((v): v is number => v != null);
+        if (!vals.length) return;
+        const s = [...vals].sort((a, b) => a - b);
+        const m = Math.floor(s.length / 2);
+        setAllTimeMedian(s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2 * 10) / 10);
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.id]);
 
   async function loadData() {
     setLoading(true);
@@ -404,7 +434,7 @@ export default function ReportPage({ params }: { params: { id: string } }) {
     if (chart.type === 'bar-line-combo')  panels.push({ id: chart.id, title: chart.title, node: <SleepQualityPanel chartData={cd} /> });
     if (chart.type === 'line-rolling')    panels.push({ id: chart.id, title: chart.title, node: <WeightTrendPanel chartData={cd} /> });
     if (chart.type === 'scatter')         panels.push({ id: chart.id, title: chart.title, node: <SleepWeightScatterPanel chartData={cd} /> });
-    if (chart.type === 'multi-line')      panels.push({ id: chart.id, title: chart.title, node: <MultiLinePanel chartData={cd} seriesDefs={chart.series ?? []} /> });
+    if (chart.type === 'multi-line')      panels.push({ id: chart.id, title: chart.title, node: <MultiLinePanel chartData={cd} seriesDefs={chart.series ?? []} allTimeMedian={allTimeMedian} /> });
   }
 
   return (
