@@ -289,7 +289,10 @@ function MultiLinePanel({ chartData, seriesDefs }: { chartData: ChartData; serie
   const allVals = rows.flatMap(r => seriesDefs.map(s => r[s.slot] as number | null).filter((v): v is number => v != null));
   const minVal = allVals.length ? Math.floor(Math.min(...allVals) - 1) : 'auto';
   const maxVal = allVals.length ? Math.ceil(Math.max(...allVals) + 1) : 'auto';
-  const avg = allVals.length ? Math.round(allVals.reduce((s, v) => s + v, 0) / allVals.length * 10) / 10 : null;
+  const mean = allVals.length ? Math.round(allVals.reduce((s, v) => s + v, 0) / allVals.length * 10) / 10 : null;
+  const median = allVals.length
+    ? (() => { const s = [...allVals].sort((a, b) => a - b); const m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2 * 10) / 10; })()
+    : null;
 
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -307,9 +310,13 @@ function MultiLinePanel({ chartData, seriesDefs }: { chartData: ChartData; serie
           <Line key={s.slot} type="monotone" dataKey={s.slot} name={s.slot}
             stroke={s.color} strokeWidth={2} dot={false} connectNulls />
         ))}
-        {avg !== null && (
-          <ReferenceLine y={avg} stroke="#94a3b8" strokeDasharray="6 3" strokeWidth={1.5}
-            label={{ value: `avg ${avg} kg`, position: 'insideTopRight', fontSize: 11, fill: '#94a3b8' }} />
+        {median !== null && (
+          <ReferenceLine y={median} stroke="#64748b" strokeDasharray="6 3" strokeWidth={1.5}
+            label={{ value: `median ${median} kg`, position: 'insideTopRight', fontSize: 11, fill: '#64748b' }} />
+        )}
+        {mean !== null && mean !== median && (
+          <ReferenceLine y={mean} stroke="#94a3b8" strokeDasharray="2 4" strokeWidth={1}
+            label={{ value: `mean ${mean} kg`, position: 'insideBottomRight', fontSize: 10, fill: '#94a3b8' }} />
         )}
       </ComposedChart>
     </ResponsiveContainer>
