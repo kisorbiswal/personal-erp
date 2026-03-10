@@ -20,7 +20,7 @@ export class OllamaService {
       take: 40,
     });
 
-    if (!tags.length) return ['inbox'];
+    if (!tags.length) return ['now'];
 
     const tagList = tags.map(t => t.name).join(', ');
 
@@ -55,7 +55,8 @@ New entry: "${content.replace(/\n/g, ' ').slice(0, 300)}"
 
 Rules:
 - Reply with ONLY tag names, comma-separated (e.g. "food, expense, bill")
-- Prefer existing tags when they fit; suggest a new short tag if nothing fits
+- Prefer existing tags when they fit; suggest a new short tag if nothing fits well
+- If truly unsure, reply with: now
 - Assign ALL that apply — a receipt is both "att" AND "bill" AND "expense"
 - Max 5 tags, min 1
 - Do not explain or add any other text`;
@@ -87,7 +88,7 @@ Rules:
 
       if (returned.length > 0) return [...new Set(returned)].slice(0, 5);
 
-      this.logger.warn(`Ollama returned no valid tags for: "${content.slice(0, 50)}"`);
+      this.logger.warn(`Ollama returned no valid tags for: "${content.slice(0, 50)}", falling back`);
       return this.ruleBasedTag(content);
     } catch (err: any) {
       this.logger.warn(`Ollama unavailable (${err.message}), using rule-based fallback`);
@@ -105,6 +106,6 @@ Rules:
     if (/\bmeeting\b|\bcall\b|\bwork\b|\boffice\b|\bproject\b|\bstandup\b/.test(lower)) tags.push('work');
     if (/https?:\/\//.test(lower)) tags.push('link');
     if (/\bsleep\b|\bslept\b|\bwoke\b|\bnap\b/.test(lower)) tags.push('sleep');
-    return tags.length > 0 ? tags : ['inbox'];
+    return tags.length > 0 ? tags : ['now'];
   }
 }
