@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
 import { PrismaService } from './prisma.service';
+import { OllamaService } from './ollama.service';
 
 const MEDIA_DIR = process.env.MEDIA_DIR || path.join(__dirname, '..', '..', '..', 'media');
 
@@ -42,7 +43,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   // Per-user last list state
   private userListState = new Map<string, ListState>();
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ollama: OllamaService,
+  ) {}
 
   onModuleInit() {
     const token = getBotToken();
@@ -97,7 +101,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     if (/^\/?(help|start)$/i.test(raw)) {
       await this.reply(
         chatId,
-        `<b>MyLoggerBot commands:</b>\n• <code>tag: info text</code> — add event with tag\n• <code>L tag</code> or <code>/l tag</code> — list last 10 events with tag\n• <code>L</code> — list last 10 events (any tag)\n• <code>/moreN</code> — next page from offset N (e.g. /more10)\n• <code>tags</code> — list all tags with counts\n• <code>done 1,2</code> — mark items 1,2 from last list as done\n• <code>delete 1,2</code> — soft-delete items 1,2 from last list\n• <code>undo</code> — delete most recently created event`,
+        `<b>MyLoggerBot commands:</b>\n• Just type anything — tags auto-assigned by local AI\n• <code>tag: text</code> — force a specific tag\n• <code>L tag</code> or <code>/l tag</code> — list last 10 events with tag\n• <code>L</code> — list last 10 events (any tag)\n• <code>/moreN</code> — next page from offset N (e.g. /more10)\n• <code>tags</code> — list all tags with counts\n• <code>done 1,2</code> — mark items 1,2 from last list as done\n• <code>delete 1,2</code> — soft-delete items 1,2 from last list\n• <code>undo</code> — delete most recently created event`,
         true,
       );
       return;
@@ -158,8 +162,41 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    // Unrecognized — show hint
-    await this.reply(chatId, 'Unknown command. Send /help for usage.');
+    // No explicit tag format — auto-tag via local model
+    await this.autoTagAndSave(chatId, userId, raw);
+  }
+
+  private async autoTagAndSave(chatId: number, userId: string, content: string) {
+    // Show a thinking indicator for the short AI delay
+    await this.reply(chatId, '🤔 tagging…');
+    try {
+      const tags = await this.ollama.autoTag(content);
+      // Create event with all returned tags
+      const tagRecords = await Promise.all(
+        tags.map(name =>
+          this.prisma.tag.upsert({
+            where: { userId_name: { userId: APP_USER_ID, name } },
+            create: { userId: APP_USER_ID, name },
+            update: {},
+          }),
+        ),
+      );
+      await this.prisma.event.create({
+        data: {
+          userId: APP_USER_ID,
+          content,
+          occurredAt: new Date(),
+          source: 'telegram',
+          sourceRef: String(userId),
+          tags: { create: tagRecords.map(t => ({ tagId: t.id })) },
+        },
+      });
+      const tagStr = tags.map(t => `#${t}`).join(' ');
+      await this.reply(chatId, `Saved · ${tagStr}\n_Fix tags in web UI if needed_`, true);
+    } catch (err: any) {
+      this.logger.error('autoTagAndSave failed', err.message);
+      await this.reply(chatId, `Failed to save: ${err.message}`);
+    }
   }
 
   private async createEvent(chatId: number, userId: string, tag: string, content: string) {
