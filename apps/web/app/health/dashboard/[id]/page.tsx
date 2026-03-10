@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer, Cell, ReferenceLine,
+  Tooltip, Legend, ResponsiveContainer, Cell, ReferenceLine, Brush,
   ScatterChart, Scatter, ZAxis,
 } from 'recharts';
 
@@ -296,32 +296,56 @@ function MultiLinePanel({ chartData, seriesDefs }: { chartData: ChartData; serie
     ? (() => { const s = [...allVals].sort((a, b) => a - b); const m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2 * 10) / 10; })()
     : null;
 
+  // Default brush window: last 52 weeks or full range if shorter
+  const brushStart = Math.max(0, rows.length - 52);
+
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <ComposedChart data={rows} margin={{ top: 4, right: 30, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-        <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={fmtWeek} interval={xInterval(rows.length)} />
-        <YAxis domain={[minVal, maxVal]} tick={{ fontSize: 10 }}
-          label={{ value: 'kg', angle: -90, position: 'insideLeft', fontSize: 10 }} />
-        <Tooltip formatter={(v: unknown, name: string) => {
-          const def = seriesDefs.find(s => s.slot === name);
-          return [`${v} kg`, def?.label ?? name];
-        }} />
-        <Legend formatter={(v: string) => seriesDefs.find(s => s.slot === v)?.label ?? v} />
-        {seriesDefs.map(s => (
-          <Line key={s.slot} type="monotone" dataKey={s.slot} name={s.slot}
-            stroke={s.color} strokeWidth={2} dot={false} connectNulls />
-        ))}
+    <div>
+      {/* Stats row — no overlap with chart */}
+      <div style={{ display: 'flex', gap: 20, fontSize: 12, color: '#64748b', marginBottom: 8 }}>
         {median !== null && (
-          <ReferenceLine y={median} stroke="#64748b" strokeDasharray="6 3" strokeWidth={1.5}
-            label={{ value: `median ${median} kg`, position: 'insideTopRight', fontSize: 11, fill: '#64748b' }} />
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ display: 'inline-block', width: 20, borderBottom: '2px dashed #64748b', verticalAlign: 'middle' }} />
+            Median <b>{median} kg</b>
+          </span>
         )}
         {mean !== null && mean !== median && (
-          <ReferenceLine y={mean} stroke="#94a3b8" strokeDasharray="2 4" strokeWidth={1}
-            label={{ value: `mean ${mean} kg`, position: 'insideBottomRight', fontSize: 10, fill: '#94a3b8' }} />
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ display: 'inline-block', width: 20, borderBottom: '1.5px dotted #94a3b8', verticalAlign: 'middle' }} />
+            Mean <b>{mean} kg</b>
+          </span>
         )}
-      </ComposedChart>
-    </ResponsiveContainer>
+        <span style={{ color: '#9ca3af', marginLeft: 'auto' }}>Drag handles below chart to zoom</span>
+      </div>
+
+      <ResponsiveContainer width="100%" height={320}>
+        <ComposedChart data={rows} margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+          <XAxis dataKey="date" tick={{ fontSize: 10, angle: -35, textAnchor: 'end' }}
+            tickFormatter={fmtWeek} interval={xInterval(rows.length)} height={44} />
+          <YAxis domain={[minVal, maxVal]} tick={{ fontSize: 10 }} width={40}
+            tickFormatter={(v: number) => `${v}`} />
+          <Tooltip formatter={(v: unknown, name: string) => {
+            const def = seriesDefs.find(s => s.slot === name);
+            return [`${v} kg`, def?.label ?? name];
+          }} labelFormatter={(label: string) => fmtWeek(label)} />
+          <Legend formatter={(v: string) => seriesDefs.find(s => s.slot === v)?.label ?? v} />
+          {seriesDefs.map(s => (
+            <Line key={s.slot} type="monotone" dataKey={s.slot} name={s.slot}
+              stroke={s.color} strokeWidth={2} dot={false} connectNulls />
+          ))}
+          {median !== null && (
+            <ReferenceLine y={median} stroke="#64748b" strokeDasharray="6 3" strokeWidth={1.5} />
+          )}
+          {mean !== null && mean !== median && (
+            <ReferenceLine y={mean} stroke="#94a3b8" strokeDasharray="2 4" strokeWidth={1} />
+          )}
+          <Brush dataKey="date" height={24} stroke="#e5e7eb" fill="#f9fafb"
+            startIndex={brushStart} tickFormatter={fmtWeek}
+            travellerWidth={8} />
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
 
