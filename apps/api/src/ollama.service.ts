@@ -71,7 +71,7 @@ Rules:
           stream: false,
           options: { temperature: 0.1, num_predict: 20 },
         }),
-        signal: AbortSignal.timeout(20000),
+        signal: AbortSignal.timeout(60000),
       });
 
       if (!res.ok) throw new Error(`Ollama HTTP ${res.status}`);
@@ -97,7 +97,7 @@ Rules:
   }
 
   /** Fast rule-based fallback when Ollama is down */
-  private ruleBasedTag(content: string): string[] {
+  ruleBasedTag(content: string): string[] {
     const lower = content.toLowerCase();
     const tags: string[] = [];
     if (/[₹$€£]|\brs\b|\brunee|\binr\b|\bpaid\b|\bbought\b|\bprice\b|\bspent\b/.test(lower)) tags.push('expense');

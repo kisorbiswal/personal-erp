@@ -58,6 +58,16 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     this.bot = new TelegramBot(token, { polling: true });
     this.logger.log('Telegram bot started (long-polling)');
 
+    // Pre-warm Ollama so first message isn't slow
+    setTimeout(() => {
+      fetch('http://localhost:11434/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: process.env.OLLAMA_MODEL || 'llama3.2:3b', prompt: 'hi', stream: false, options: { num_predict: 1 } }),
+      }).then(() => this.logger.log('Ollama model warmed up'))
+        .catch(() => this.logger.warn('Ollama warm-up skipped (not running?)'));
+    }, 5000);
+
     this.bot!.on('message', (msg: TelegramBot.Message) => {
       this.handleMessage(msg).catch((err: unknown) => {
         this.logger.error('Error handling Telegram message', err);
@@ -173,13 +183,23 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   private async autoTagAndSave(chatId: number, userId: string, content: string) {
     await this.reply(chatId, '🤔 tagging…');
+
+    // Get existing tag names before calling Ollama
+    const existingTags = await this.prisma.tag.findMany({ where: { userId: APP_USER_ID } });
+    const existingNames = new Set(existingTags.map(t => t.name));
+
+    // Try Ollama — fall back to rule-based on any failure; event is ALWAYS saved
+    let suggestedTags: string[];
+    let usedFallback = false;
     try {
-      const suggestedTags = await this.ollama.autoTag(content);
+      suggestedTags = await this.ollama.autoTag(content);
+    } catch (err: any) {
+      this.logger.warn(`Ollama failed (${err.message}), using rule-based fallback`);
+      suggestedTags = this.ollama.ruleBasedTag(content);
+      usedFallback = true;
+    }
 
-      // Find which are new vs existing
-      const existingTags = await this.prisma.tag.findMany({ where: { userId: APP_USER_ID } });
-      const existingNames = new Set(existingTags.map(t => t.name));
-
+    try {
       const tagRecords = await Promise.all(
         suggestedTags.map(name =>
           this.prisma.tag.upsert({
@@ -203,9 +223,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       const tagStr = suggestedTags
         .map(t => existingNames.has(t) ? `#${t}` : `#${t} ✨`)
         .join(' ');
-      await this.reply(chatId, `Saved · ${tagStr}\n✨ = new tag`, true);
+      const suffix = usedFallback ? ' _(quick-tagged, AI was warming up)_' : '\n✨ = new tag';
+      await this.reply(chatId, `Saved · ${tagStr}${suffix}`, true);
     } catch (err: any) {
-      this.logger.error('autoTagAndSave failed', err.message);
+      this.logger.error('autoTagAndSave DB write failed', err.message);
       await this.reply(chatId, `Failed to save: ${err.message}`);
     }
   }
