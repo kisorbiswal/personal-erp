@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer, Cell,
+  Tooltip, Legend, ResponsiveContainer, Cell, ReferenceLine,
   ScatterChart, Scatter, ZAxis,
 } from 'recharts';
 
@@ -285,10 +285,11 @@ function MultiLinePanel({ chartData, seriesDefs }: { chartData: ChartData; serie
 
   if (!hasAny) return <p style={{ color: '#6b7280', fontSize: 13 }}>No data for this period. Try "All".</p>;
 
-  // Compute Y domain from actual values so it never shows 0 as baseline
+  // Compute Y domain and overall average from actual values
   const allVals = rows.flatMap(r => seriesDefs.map(s => r[s.slot] as number | null).filter((v): v is number => v != null));
   const minVal = allVals.length ? Math.floor(Math.min(...allVals) - 1) : 'auto';
   const maxVal = allVals.length ? Math.ceil(Math.max(...allVals) + 1) : 'auto';
+  const avg = allVals.length ? Math.round(allVals.reduce((s, v) => s + v, 0) / allVals.length * 10) / 10 : null;
 
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -306,6 +307,10 @@ function MultiLinePanel({ chartData, seriesDefs }: { chartData: ChartData; serie
           <Line key={s.slot} type="monotone" dataKey={s.slot} name={s.slot}
             stroke={s.color} strokeWidth={2} dot={false} connectNulls />
         ))}
+        {avg !== null && (
+          <ReferenceLine y={avg} stroke="#94a3b8" strokeDasharray="6 3" strokeWidth={1.5}
+            label={{ value: `avg ${avg} kg`, position: 'insideTopRight', fontSize: 11, fill: '#94a3b8' }} />
+        )}
       </ComposedChart>
     </ResponsiveContainer>
   );
