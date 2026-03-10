@@ -2,7 +2,10 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import TelegramBot = require('node-telegram-bot-api');
 import * as fs from 'fs';
 import * as path from 'path';
+import * as https from 'https';
 import { PrismaService } from './prisma.service';
+
+const MEDIA_DIR = process.env.MEDIA_DIR || path.join(__dirname, '..', '..', '..', 'media');
 
 const APP_USER_ID = 'ebab9ce0-ce1a-4718-aecf-8111abbb4a3b';
 
@@ -80,8 +83,14 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   private async handleMessage(msg: TelegramBot.Message) {
     const chatId = msg.chat.id;
     const userId = String(msg.from?.id ?? chatId);
-    const raw = (msg.text || '').trim();
 
+    // ── Photo / document (image) ────────────────────────────────────────────
+    if (msg.photo || (msg.document && msg.document.mime_type?.startsWith('image/'))) {
+      await this.handlePhoto(msg);
+      return;
+    }
+
+    const raw = (msg.text || '').trim();
     if (!raw) return;
 
     // /help or /start
@@ -288,6 +297,53 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     }
 
     await this.reply(chatId, `Deleted ${count} item(s).`);
+  }
+
+  private async handlePhoto(msg: TelegramBot.Message) {
+    const chatId = msg.chat.id;
+    const caption = (msg.caption || '').trim();
+
+    // Get largest available photo
+    const fileId = msg.photo
+      ? msg.photo[msg.photo.length - 1].file_id
+      : msg.document!.file_id;
+
+    try {
+      // Parse tag + content from caption (same format as text: "tag: content")
+      const captionMatch = caption.match(/^([^:]+):\s*(.*)$/s);
+      const tag = captionMatch ? captionMatch[1].trim().toLowerCase() : 'att';
+      const captionText = captionMatch ? captionMatch[2].trim() : caption;
+
+      // Download file from Telegram
+      const fileUrl = await this.bot!.getFileLink(fileId);
+      const ext = fileUrl.split('?')[0].split('.').pop() || 'jpg';
+      const filename = `tg_${Date.now()}_${fileId.slice(-8)}.${ext}`;
+      fs.mkdirSync(MEDIA_DIR, { recursive: true });
+      const localPath = path.join(MEDIA_DIR, filename);
+      await this.downloadFile(fileUrl, localPath);
+
+      // Build event content
+      const relPath = `media/${filename}`;
+      const content = [captionText, `[img:${relPath}]`].filter(Boolean).join('\n');
+
+      await this.createEvent(chatId, String(msg.from?.id ?? chatId), tag, content);
+    } catch (err: any) {
+      this.logger.error('Photo handling failed', err.message);
+      await this.reply(chatId, `Could not save image: ${err.message}`);
+    }
+  }
+
+  private downloadFile(url: string, dest: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const file = fs.createWriteStream(dest);
+      https.get(url, (res) => {
+        res.pipe(file);
+        file.on('finish', () => file.close(() => resolve()));
+      }).on('error', (err) => {
+        fs.unlink(dest, () => {});
+        reject(err);
+      });
+    });
   }
 
   private async undo(chatId: number, userId: string) {
