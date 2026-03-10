@@ -169,8 +169,9 @@ function WeightTrendPanel({ chartData }: { chartData: ChartData }) {
   const rowsR = rows.map((r, i) => ({ ...r, weight_rolling: rolling[i] }));
 
   const weightVals = rows.map(r => r.weight as number | null).filter((v): v is number => v != null);
-  const wMin = weightVals.length ? Math.floor(Math.min(...weightVals) - 1) : 'auto';
-  const wMax = weightVals.length ? Math.ceil(Math.max(...weightVals) + 1) : 'auto';
+  const wPad = weightVals.length ? Math.max(0.5, (Math.max(...weightVals) - Math.min(...weightVals)) * 0.12) : 1;
+  const wMin = weightVals.length ? Math.round((Math.min(...weightVals) - wPad) * 10) / 10 : 'auto';
+  const wMax = weightVals.length ? Math.round((Math.max(...weightVals) + wPad) * 10) / 10 : 'auto';
 
   return (
     <div>
@@ -285,10 +286,11 @@ function MultiLinePanel({ chartData, seriesDefs }: { chartData: ChartData; serie
 
   if (!hasAny) return <p style={{ color: '#6b7280', fontSize: 13 }}>No data for this period. Try "All".</p>;
 
-  // Compute Y domain and overall average from actual values
+  // Compute Y domain — tight padding so close-range data (e.g. 74–78 kg) fills the chart
   const allVals = rows.flatMap(r => seriesDefs.map(s => r[s.slot] as number | null).filter((v): v is number => v != null));
-  const minVal = allVals.length ? Math.floor(Math.min(...allVals) - 1) : 'auto';
-  const maxVal = allVals.length ? Math.ceil(Math.max(...allVals) + 1) : 'auto';
+  const pad = allVals.length ? Math.max(0.5, (Math.max(...allVals) - Math.min(...allVals)) * 0.12) : 1;
+  const minVal = allVals.length ? Math.round((Math.min(...allVals) - pad) * 10) / 10 : 'auto';
+  const maxVal = allVals.length ? Math.round((Math.max(...allVals) + pad) * 10) / 10 : 'auto';
   const mean = allVals.length ? Math.round(allVals.reduce((s, v) => s + v, 0) / allVals.length * 10) / 10 : null;
   const median = allVals.length
     ? (() => { const s = [...allVals].sort((a, b) => a - b); const m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2 * 10) / 10; })()
