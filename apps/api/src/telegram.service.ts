@@ -107,12 +107,17 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    // tag: info text
+    // tag: content  OR  tag1, tag2: content  (explicit multi-tag)
     const addMatch = raw.match(/^([^:]+):\s+(.+)$/s);
     if (addMatch) {
-      const tag = addMatch[1].trim().toLowerCase();
+      const tagsPart = addMatch[1].trim().toLowerCase();
       const content = addMatch[2].trim();
-      await this.createEvent(chatId, userId, tag, content);
+      const tagNames = tagsPart.split(',').map(t => t.trim()).filter(Boolean);
+      if (tagNames.length === 1) {
+        await this.createEvent(chatId, userId, tagNames[0], content);
+      } else {
+        await this.createEventMultiTag(chatId, userId, tagNames, content);
+      }
       return;
     }
 
@@ -167,13 +172,16 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async autoTagAndSave(chatId: number, userId: string, content: string) {
-    // Show a thinking indicator for the short AI delay
     await this.reply(chatId, '🤔 tagging…');
     try {
-      const tags = await this.ollama.autoTag(content);
-      // Create event with all returned tags
+      const suggestedTags = await this.ollama.autoTag(content);
+
+      // Find which are new vs existing
+      const existingTags = await this.prisma.tag.findMany({ where: { userId: APP_USER_ID } });
+      const existingNames = new Set(existingTags.map(t => t.name));
+
       const tagRecords = await Promise.all(
-        tags.map(name =>
+        suggestedTags.map(name =>
           this.prisma.tag.upsert({
             where: { userId_name: { userId: APP_USER_ID, name } },
             create: { userId: APP_USER_ID, name },
@@ -191,12 +199,38 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           tags: { create: tagRecords.map(t => ({ tagId: t.id })) },
         },
       });
-      const tagStr = tags.map(t => `#${t}`).join(' ');
-      await this.reply(chatId, `Saved · ${tagStr}\n_Fix tags in web UI if needed_`, true);
+
+      const tagStr = suggestedTags
+        .map(t => existingNames.has(t) ? `#${t}` : `#${t} ✨`)
+        .join(' ');
+      await this.reply(chatId, `Saved · ${tagStr}\n✨ = new tag`, true);
     } catch (err: any) {
       this.logger.error('autoTagAndSave failed', err.message);
       await this.reply(chatId, `Failed to save: ${err.message}`);
     }
+  }
+
+  private async createEventMultiTag(chatId: number, _userId: string, tagNames: string[], content: string) {
+    const tagRecords = await Promise.all(
+      tagNames.map(name =>
+        this.prisma.tag.upsert({
+          where: { userId_name: { userId: APP_USER_ID, name } },
+          create: { userId: APP_USER_ID, name },
+          update: {},
+        }),
+      ),
+    );
+    await this.prisma.event.create({
+      data: {
+        userId: APP_USER_ID,
+        content,
+        occurredAt: new Date(),
+        source: 'telegram',
+        tags: { create: tagRecords.map(t => ({ tagId: t.id })) },
+      },
+    });
+    const tagStr = tagNames.map(t => `#${t}`).join(' ');
+    await this.reply(chatId, `Saved · ${tagStr}`);
   }
 
   private async createEvent(chatId: number, userId: string, tag: string, content: string) {

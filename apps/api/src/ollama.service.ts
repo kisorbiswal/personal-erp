@@ -54,9 +54,10 @@ ${exampleLines.join('\n')}
 New entry: "${content.replace(/\n/g, ' ').slice(0, 300)}"
 
 Rules:
-- Reply with ONLY tag names, comma-separated (e.g. "food, expense")
-- Choose ONLY from the available tags list
-- If nothing fits, reply with: inbox
+- Reply with ONLY tag names, comma-separated (e.g. "food, expense, bill")
+- Prefer existing tags when they fit; suggest a new short tag if nothing fits
+- Assign ALL that apply — a receipt is both "att" AND "bill" AND "expense"
+- Max 5 tags, min 1
 - Do not explain or add any other text`;
 
     try {
@@ -77,14 +78,14 @@ Rules:
       const data = await res.json() as { response?: string };
       const raw = (data.response || '').trim().toLowerCase();
 
-      // Parse comma-separated tags, validate against known list
-      const tagSet = new Set(tags.map(t => t.name));
+      // Accept known tags OR new tags that look valid (alphanumeric/dash/underscore, 2–20 chars)
+      const isValidTagName = (t: string) => /^[a-z0-9][a-z0-9_-]{0,18}[a-z0-9]$|^[a-z0-9]{1,2}$/.test(t);
       const returned = raw
         .split(/[,\s]+/)
         .map(t => t.trim().replace(/[^a-z0-9_-]/g, ''))
-        .filter(t => t.length > 0 && tagSet.has(t));
+        .filter(t => t.length > 0 && isValidTagName(t));
 
-      if (returned.length > 0) return [...new Set(returned)].slice(0, 3);
+      if (returned.length > 0) return [...new Set(returned)].slice(0, 5);
 
       this.logger.warn(`Ollama returned no valid tags for: "${content.slice(0, 50)}"`);
       return this.ruleBasedTag(content);
