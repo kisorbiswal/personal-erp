@@ -124,7 +124,15 @@ export default function BoardPage({ params }: { params: { id: string } }) {
 
   // per-column quick capture drafts (auto-create events)
   const [captureDrafts, setCaptureDrafts] = useState<Record<string, string>>({});
+  const [captureDates, setCaptureDates] = useState<Record<string, string>>({});  // ISO datetime-local value
   const [captureStatus, setCaptureStatus] = useState<Record<string, 'idle' | 'saving' | 'saved' | 'error'>>({});
+
+  function nowLocal() {
+    // Returns datetime-local string in local time (yyyy-MM-ddTHH:mm)
+    const d = new Date();
+    d.setSeconds(0, 0);
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  }
 
   // toasts
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -487,12 +495,12 @@ export default function BoardPage({ params }: { params: { id: string } }) {
     await runBoard();
   }
 
-  async function createEvent(content: string, tags: string[]) {
+  async function createEvent(content: string, tags: string[], occurredAt?: string) {
     const res = await fetch(`${base}/events`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ content, tags }),
+      body: JSON.stringify({ content, tags, ...(occurredAt ? { occurredAt: new Date(occurredAt).toISOString() } : {}) }),
     });
     if (!res.ok) {
       const text = await res.text().catch(() => '');
@@ -1005,7 +1013,16 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                 </div>
 
                 <div style={{ marginTop: 10 }}>
-                  <div style={{ color: '#666', fontSize: 12, marginBottom: 6 }}>Quick capture</div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <div style={{ color: '#666', fontSize: 12 }}>Quick capture</div>
+                    <input
+                      type="datetime-local"
+                      value={captureDates[s.id] || ''}
+                      placeholder={nowLocal()}
+                      onChange={(e) => setCaptureDates((m) => ({ ...m, [s.id]: e.target.value }))}
+                      style={{ fontSize: 11, color: '#6b7280', border: '1px solid #e5e7eb', borderRadius: 6, padding: '2px 6px', background: 'transparent', cursor: 'pointer' }}
+                    />
+                  </div>
                   <textarea
                     value={captureDrafts[s.id] || ''}
                     onChange={(e) => {
@@ -1016,10 +1033,12 @@ export default function BoardPage({ params }: { params: { id: string } }) {
                       const content = (captureDrafts[s.id] || '').trim();
                       if (!content) return;
 
+                      const occurredAt = captureDates[s.id] || undefined;
                       setCaptureStatus((m) => ({ ...m, [s.id]: 'saving' }));
-                      createEvent(content, columnTags)
+                      createEvent(content, columnTags, occurredAt)
                         .then(() => {
                           setCaptureDrafts((m) => ({ ...m, [s.id]: '' }));
+                          setCaptureDates((m) => ({ ...m, [s.id]: '' })); // reset to now
                           setCaptureStatus((m) => ({ ...m, [s.id]: 'saved' }));
                           return runBoard();
                         })
