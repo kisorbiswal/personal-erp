@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 
 const SESSION_CACHE_KEY = 'life_auth_user';
 
+const SESSION_CACHE_TTL = 1000 * 60 * 10; // re-verify every 10 min
+
 function getCachedAuth() {
   try {
     const raw = sessionStorage.getItem(SESSION_CACHE_KEY);
@@ -14,6 +16,12 @@ function getCachedAuth() {
     if (Date.now() > expiresAt) { sessionStorage.removeItem(SESSION_CACHE_KEY); return null; }
     return user;
   } catch { return null; }
+}
+
+function setCachedAuth(user: unknown) {
+  try {
+    sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify({ user, expiresAt: Date.now() + SESSION_CACHE_TTL }));
+  } catch {}
 }
 
 function getBoardsLink() {
@@ -31,25 +39,37 @@ export default function HealthLayout({ children }: { children: React.ReactNode }
   useEffect(() => { setBoardsLink(getBoardsLink()); }, []);
 
   useEffect(() => {
-    // Use cached auth first, then verify with API if needed
+    // Use sessionStorage cache (10 min TTL) to avoid /auth/me on every render
     if (getCachedAuth()) { setAuthed(true); return; }
     fetch(`${base}/auth/me`, { credentials: 'include', cache: 'no-store' })
-      .then((r) => r.json())
-      .then((d) => {
-        if (d?.user) { setAuthed(true); }
-        else {
-          try { sessionStorage.removeItem('life_auth_user'); localStorage.removeItem('lastBoardId'); } catch {}
+      .then((r) => {
+        // Only logout on explicit auth failures — not network errors
+        if (r.status === 401 || r.status === 403) {
+          try { sessionStorage.removeItem(SESSION_CACHE_KEY); localStorage.removeItem('lastBoardId'); } catch {}
           router.replace('/');
+          return null;
         }
+        return r.json();
+      })
+      .then((d) => {
+        if (!d) return; // already handled above
+        if (d?.user) { setCachedAuth(d.user); setAuthed(true); }
+        else { router.replace('/'); }
       })
       .catch(() => {
-        try { sessionStorage.removeItem('life_auth_user'); localStorage.removeItem('lastBoardId'); } catch {}
-        router.replace('/');
+        // Network error — don't logout, just show a retry state
+        setAuthed(false);
       });
   }, [base, router]);
 
   if (authed === null) return (
     <div style={{ padding: 32, color: '#9ca3af', fontSize: 14 }}>Checking session…</div>
+  );
+  if (authed === false) return (
+    <div style={{ padding: 32, fontSize: 14 }}>
+      <div style={{ color: '#ef4444', marginBottom: 12 }}>Could not reach server. Check your connection.</div>
+      <button className="tab" onClick={() => { setAuthed(null); }}>Retry</button>
+    </div>
   );
 
   return (

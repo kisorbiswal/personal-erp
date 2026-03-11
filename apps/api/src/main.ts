@@ -37,7 +37,8 @@ async function bootstrap() {
       secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
-      store: new RedisStore({ client: redisClient }),
+      rolling: true,  // refresh cookie + Redis TTL on every response → active users never expire
+      store: new RedisStore({ client: redisClient, touchAfter: 24 * 3600 }), // only touch Redis once/day to avoid write flood
       cookie: {
         httpOnly: true,
         // UI is on a different site (life.kisorbiswal.com) than API (life-api.kisorbiswal.com),
